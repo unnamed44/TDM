@@ -17,14 +17,6 @@ who has a problem with reset data upon dying
 - nodejs  [here](https://nodejs.org/en/)
 - tera proxy
 
-## Optional data
-
-[here](https://github.com/neowutran/TeraDpsMeterData )
-
-Class icons and monsters put this under the
-html/class-icons
-html/monsters
-
 ## Install
 
 1. Download the dps via clicking in the button `Clone or Download` and then on `Download Zip`.
@@ -32,6 +24,16 @@ html/monsters
 2. Uncompress dps,
 
    place the resulting folder in `Tera-proxy\bin\node_modules\`
+
+## Optional data
+
+   [download](https://github.com/neowutran/TeraDpsMeterData )
+
+   Class icons and monsters put this under the
+
+   html/class-icons
+
+   html/monsters
 
 ## Usage
 
