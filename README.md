@@ -27,7 +27,7 @@ who has a problem with reset data upon dying
 
 ## Optional data
 
-   [download](https://github.com/neowutran/TeraDpsMeterData )
+   [tera data](https://github.com/neowutran/TeraDpsMeterData )
 
    Class icons and monsters put this under the
 
