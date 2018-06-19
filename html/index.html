@@ -1,0 +1,173 @@
+<html>
+<head>
+	<title> Test ui</title>
+	<link rel="stylesheet" href="main.css" />
+	<script>
+	var x
+	var waitForThis = false;
+	var previousDps = ''
+
+	function xhr(url, cb) {
+		x = new XMLHttpRequest();
+		pending = true;
+		x.open("GET", "api/" + url, true);
+		x.onload = cb;
+		x.send();
+		return;
+	}
+
+	function refreshCB()
+	{
+		if(previousDps.localeCompare(this.responseText) == 0) return
+		var dpsmsg = this.responseText.substring(1, this.responseText.length - 1)
+		document.getElementById("content").innerHTML = dpsmsg.replace(/(\\n|\\)/gm,"");
+		document.getElementById("debug").innerHTML = dpsmsg.replace(/(\\n|\\)/gm,"");
+		previousDps = this.responseText
+	}
+
+	function HistoryCB() {
+		var dpsmsg = '<button type="button" class=btn onclick="refreshDPS()">Return</button><br>' + this.responseText.substring(1, this.responseText.length - 1)
+		document.getElementById("content").innerHTML = dpsmsg.replace(/(\\n|\\)/gm,"");
+	}
+	function History() {
+		waitForThis = true
+		previousDps = ''
+		xhr("H",HistoryCB)
+	}
+
+	function stripOuterHTML(str) {
+		return str.replace(/\'|^<[^>]+>|<\/[^>]+><[^\/][^>]*>|<\/[^>]+>$/g, '')
+	}
+	function WhisperCB() {}
+	function Whisper() {
+		var name = document.getElementById("name").value;
+		xhr("0W"+ name,WhisperCB)
+		//xhr("1W"+ stripOuterHTML(document.getElementById("debug").value),WhisperCB)
+	}
+
+	function NoticeCB() {}
+	function Notice() {
+		xhr("N",NoticeCB)
+	}
+	function BossOnlyCB() {}
+	function BossOnly() {
+		xhr("O", BossOnlyCB)
+	}
+	function CloseDpsCB() {
+		_tera_client_proxy_.close()
+	}
+	function CloseDps() {
+		xhr("P",CloseDpsCB)
+	}
+	function DebugCB() {}
+	function Debug() {
+		xhr("B",DebugCB)
+	}
+	function ToGuildCB() {}
+	function ToGuild() {
+		xhr("2C",ToGuildCB)
+	}
+
+	function ToPartyCB() {}
+	function ToParty() {
+		xhr("1C",ToPartyCB)
+	}
+
+	function LeavePartyCB() {}
+	function LeaveParty() {
+		xhr("L",LeavePartyCB)
+	}
+	function ResetCB() {}
+	function Reset() {
+		xhr("S",ResetCB)
+	}
+
+	function NoticeDamageCB() {
+		//document.getElementById("NDV").value = this.responseText.replace(/(\")/gm,"");
+	}
+
+	function NoticeDamage() {
+		xhr(document.getElementById("NDV").value + "D",NoticeDamageCB)
+	}
+
+	function NoticeDamageAdd() {
+		xhr("A",NoticeDamageCB)
+	}
+
+	function Clipboard() {
+		var copyText = document.getElementById("txt");
+		copyText.select();
+		document.execCommand("copy");
+	}
+
+	function validate(evt) {
+		var theEvent = evt || window.event;
+		var key = theEvent.keyCode || theEvent.which;
+		key = String.fromCharCode( key );
+		var regex = /[0-9]|\./;
+		if( !regex.test(key) ) {
+			theEvent.returnValue = false;
+			if(theEvent.preventDefault) theEvent.preventDefault();
+		}
+	}
+
+	window.addEventListener('error', function(e) {
+		_tera_client_proxy_.alert('Error: ' + e.message)
+	})
+
+	function refreshDPS()
+	{
+		//_tera_client_proxy_.alert('test')
+		waitForThis = false
+		var i = setInterval(function(){
+			if(waitForThis){
+				clearInterval(i);
+				return
+			}
+			xhr("R",refreshCB)
+		}, 1000);
+	}
+
+	window.onload = function() {
+		_tera_client_proxy_.resize_to(300, 250)
+		_tera_client_proxy_.set_title('Tera DPS Monitor')
+		refreshDPS()
+	}
+
+	window.onbeforeunload =  function() {
+		xhr("P",CloseDpsCB)
+		return null;
+	}
+
+	if (document.addEventListener) { // IE >= 9; other browsers
+		document.addEventListener('contextmenu', function(e) {
+			_tera_client_proxy_.alert("You've tried to open context menu"); //here you draw your own menu
+			e.preventDefault();
+		}, false);
+	} else { // IE < 9
+		document.attachEvent('oncontextmenu', function() {
+			_tera_client_proxy_.alert("You've tried to open context menu");
+			window.event.returnValue = false;
+		});
+	}
+
+	</script>
+</head>
+<body>
+	<div  id="content"></div >
+		<input class=ipt type="text" size="1" id="name" value="">
+		<button class=btn type="button" onclick="Whisper()">Whisper</button>
+		<button class=btn type="button" onclick="ToGuild()">ToGuild</button>
+		<button class=btn type="button" onclick="ToParty()">ToParty</button>
+		<button class=btn type="button" onclick="History()">History</button>
+		<button class=btn type="button" onclick="LeaveParty()">LeaveParty</button><br>
+		<button class=btn type="button" onclick="NoticeDamageAdd()">Notice value</button>
+		<button class=btn id="notice" onclick="Notice()">Notice</button>
+		<button class=btn id="bossonly" onclick="BossOnly()">bossOnly</button>
+		<button class=btn type="button" onclick="Debug()">Debug</button>
+		<button class=btn type="button" onclick="Reset()">Reset</button>
+		<button class=btn type="button" onclick="CloseDps()">Close</button><br
+		<br><br><br><br>
+		<textarea id="debug" maxLength="2000" rows="14" cols="50"></textarea>
+</body>
+</html>

@@ -1,0 +1,58 @@
+{
+	"files": {
+		"config.json": {
+			"overwrite": false,
+			"hash": "2dc1f4af9cfe7cb803fc507b77a39b0fc50cf120c96d9969557ebb3c70489d6a"
+		},
+		"README.md": "dc3210cab61b4128a9f5d294b1b066cea6bee11170f053bb85859df673a9986f",
+		"index.js": "e107224b437415203a99ba766a3c4c728a3a9d245eea89beab66d28dc0a7a213",
+		"unzip.exe": "81046f943d26501561612a629d8be95af254bc161011ba8a62d25c34c16d6d2a",
+		"ui.zip": "e7e2c37b57b4248529ba721a9e05e53ac00527e1417664c75aa01c902a559f1e",
+		"html/index.html": "d1f63a9086ec53d339c4946e8f1d59dd1dca83f78b21e52c8b921cb1d484619a",
+		"html/main.css": "6d79aa89caa804d84abcd9f5ca0b7639e9085ca89784629c388211c587f42e95",
+		"monsters/monsters-EU-FR.xml": "94dbdbdb17ef9832a22c3c8fef3390291931c97a91b6403680fb4a5a6ec350e8",
+		"monsters/monsters-EU-GER.xml": "3ceed53e2f2e6e5d2a0d6e33aa4574aabb1854d7347285faf4dc389dcce8d53a",
+		"monsters/monsters-EU.xml": "e1577fd01e6783dfc7b02c84691bb3311200d9608428e9940af6e7d9ab121edc",
+		"monsters/monsters-KR-PTS.xml": "72c7a0e19bbd15f1bb66150d5a53fb7e552b9c93e8715284a48c8860cab9267e",
+		"monsters/monsters-KR.xml": "72c7a0e19bbd15f1bb66150d5a53fb7e552b9c93e8715284a48c8860cab9267e",
+		"monsters/monsters-NA.xml": "b276f6579f589af08ce288f19a80495535fe713b3b85f2c41914a75f7374d648",
+		"monsters/monsters-RU.xml": "4ca3f0f3b086d698b4b7414d07723edc3f1082278f90b46bb798b7113ab7579d",
+		"monsters/monsters-override.xml": "e702ed1b4bc8e7eb09f80386d1c5277c5c1f3190834a014c563ba9505aa11053",
+		"monsters/monsters-THA.xml": "1719de8f1e1a2549bb79fcaaa0939feb7cf39c7ea67c48bef3f5263e7eddc7be",
+		"monsters/monsters-TW.xml": "95243e235bc4eb967b182f9a4f3a9072769a7d6fe0b19255390123d1043b82f9",
+		"monsters/monsters-JP.xml": "864781d9427ec2839c3621c0ec63c41943089ac10d99fe17aca0565f5f6ab04e",
+		"html/class-icons/archer.png": "443e205979276fdb92244175782af8b0dd36289a430da609360999b0b40aba79",
+		"html/class-icons/berserker.png": "6c97e7a09ee329dd6534b5e2f3ed73aa10a9704aa08080dcf9b03740d9fea6c7",
+		"html/class-icons/brawler.png": "3812473d79fe2b0c568eb286123b3ca684651b3ea8d95ee971464100710a3fb5",
+		"html/class-icons/common.png": "f624aa00c9c65c202141b90a416382347279b2a8c86294cbfa855ec23f347d7a",
+		"html/class-icons/gunner.png": "6ab0fa0e5638994329b6cb0ac40fde13459a048c75783ebc3676ca3280ad81fb",
+		"html/class-icons/lancer.png": "1e043992893e76dc481f0891b83234dea2afae0e7c1f18638fa24816ec8c132c",
+		"html/class-icons/mystic.png": "12c35b7037833cdb452d066129746a86b32e58d8f1ce1278245ece983fdea567",
+		"html/class-icons/ninja.png": "74f17a9f8242168fa732e6da3d16b06a8a5ab1f9a510f839ceda480495bd15bf",
+		"html/class-icons/priest.png": "ff3a880b259857396b186eab9bad54e69adfb13534990390b71e1f1134d3bcc5",
+		"html/class-icons/reaper.png": "6a866e1df0d3b160f6fd6a5f704eb539bd8b26c5c9548c9b1463d68249835b6a",
+		"html/class-icons/slayer.png": "ebc18c50c6612a26b2bd3a148c59f118801099cc56f2140e06f9a79b11012ebc",
+		"html/class-icons/sorcerer.png": "1a34895383b01e370015880ff2ff0f3594498a90c9713c97c3f5e481ec529b80",
+		"html/class-icons/valkyrie.png": "db359c9209aed10edd2caa6b0331d36745c7f2088bb6937b7251c2facb9a4248",
+		"html/class-icons/warrior.png": "171efdf56404f82727411e31d4a07b3a2db79b2ba122618dd9d8a1e518967384",
+		"html/icons/enraged.png": "536623e510a164645c70862a594b5a0c949acdea400691590c34e54dfeb6d409",
+		"logger.js": "3488d2c4d7b15a99f054e712b31752e26b3edab54bedfbaec94c981b3e6cf17d",
+		"ui_install.js": "7d1329263f5aa037b94282773dffc796d31fcb310b54e520f699c8a2ba049653",
+		"html/icons/bar.jpg": "3823ccd8ec3b4228271c75e0cca76f10c895af3ec5268cf13358eb5c5ab1a185"
+	},
+	"defs": {
+		"S_LOGIN": 10,
+		"S_SPAWN_ME": 2,
+		"S_LOAD_TOPO": 3,
+		"S_BOSS_GAGE_INFO": 3,
+		"S_SPAWN_NPC": 8,
+		"S_LEAVE_PARTY_MEMBER": 2,
+		"S_LEAVE_PARTY": 1,
+		"S_PARTY_MEMBER_LIST": 6,
+		"S_EACH_SKILL_RESULT": [
+			7,
+			8
+		],
+		"S_DUNGEON_EVENT_MESSAGE": 1
+	}
+}
