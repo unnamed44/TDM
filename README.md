@@ -12,7 +12,7 @@ who has a problem to see dps in RAID
 
 who has a problem with reset data upon dying
 
-[discord](https://discord.gg/JRa7FXd)
+[Discord](https://discord.gg/JRa7FXd)
 
 ## Prerequisite
 

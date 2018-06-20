@@ -56,6 +56,7 @@ module.exports = function DPS(d,ctx) {
 	estatus = '',
 	timeout = 0,
 	timeoutCounter = 0,
+	//CounterId = 0,
 	nextEnrage = 0,
 	hpPer = 0,
 	doc = null,
@@ -184,58 +185,71 @@ module.exports = function DPS(d,ctx) {
 		return data
 	}
 
+	function sendByEachLine(where,msg)
+	{
+		let i = 0,
+			msgs = stripOuterHTML(msg).split('\n'),
+			len = msgs.length,
+			CounterId = setInterval( () => {
+				if (i < len) {
+					if(typeof where === 'string') d.toServer('C_WHISPER', 1, {"target": where,"message": msgs[i]})
+					if(typeof where === 'number') d.toServer('C_CHAT', 1, {"channel":where,"message": msgs[i]})
+					i++
+				} else {
+					clearInterval(CounterId)
+					CounterId = -1
+				}
+			}, 1000)
+	}
+
 	function api(req, res) {
 		const api = getData(req.params[0])
 		var req_value = Number(api[0])
 		switch(api[1]) {
 			case "C":
-			if(req_value == 1 ) d.toServer('C_CHAT', 1, {"channel":1,"message":stripOuterHTML(lastDps)})
-			if(req_value == 2 ) d.toServer('C_CHAT', 1, {"channel":2,"message":stripOuterHTML(lastDps)})
-			return res.status(200).json('ok')
+				sendByEachLine(req_value,lastDps)
+				return res.status(200).json('ok')
 			case "W":
-			var wname = req.params[0].substring(2, req.params[0].length)
-			d.toServer('C_WHISPER', 1, {
-				"target": wname,
-				"message": stripOuterHTML(lastDps)
-			})
-			return res.status(200).json('ok')
+				var wname = req.params[0].substring(2, req.params[0].length)
+				sendByEachLine(wname,lastDps)
+				return res.status(200).json('ok')
 			case "L":
-			leaveParty()
-			return res.status(200).json('ok')
+				leaveParty()
+				return res.status(200).json('ok')
 			case "S":
-			resetPartyDps(currentbossId)
-			return res.status(200).json('ok')
+				resetPartyDps(currentbossId)
+				return res.status(200).json('ok')
 			case "R":
-			return res.status(200).json(statusIcons() + '</br>' +estatus+ '</br>' + membersDps(currentbossId) )
+				return res.status(200).json(statusIcons() + '</br>' +estatus+ '</br>' + membersDps(currentbossId) )
 			case "H":
-			return res.status(200).json(dpsHistory)
+				return res.status(200).json(dpsHistory)
 			case "P":
-			enable = false
-			send(`${enable ? 'Enabled'.clr('56B4E9') : 'Disabled'.clr('E69F00')}`)
-			return res.status(200).json("ok")
+				enable = false
+				send(`${enable ? 'Enabled'.clr('56B4E9') : 'Disabled'.clr('E69F00')}`)
+				return res.status(200).json("ok")
 			case "N":
-			notice = !notice
-			send(`Notice to screen ${notice ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
-			return res.status(200).json("ok")
+				notice = !notice
+				send(`Notice to screen ${notice ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
+				return res.status(200).json("ok")
 			case "O":
-			bossOnly = !bossOnly
-			send(`Boss dps only ${bossOnly ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
-			return res.status(200).json("ok")
+				bossOnly = !bossOnly
+				send(`Boss dps only ${bossOnly ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
+				return res.status(200).json("ok")
 			case "D":
-			notice_damage = req_value
-			send('Notice damage is ' + numberWithCommas(notice_damage.toString()))
-			return res.status(200).json(notice_damage.toString())
+				notice_damage = req_value
+				send('Notice damage is ' + numberWithCommas(notice_damage.toString()))
+				return res.status(200).json(notice_damage.toString())
 			case "A":
-			notice_damage += 1000000
-			if(notice_damage > 20000000) notice_damage = 1000000
-			send('Notice damage is ' + numberWithCommas(notice_damage.toString()))
-			return res.status(200).json(notice_damage.toString())
+				notice_damage += 1000000
+				if(notice_damage > 20000000) notice_damage = 1000000
+				send('Notice damage is ' + numberWithCommas(notice_damage.toString()))
+				return res.status(200).json(notice_damage.toString())
 			case "B":
-			debug = !debug
-			send(`Debug ${debug ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
-			return res.status(200).json("ok")
+				debug = !debug
+				send(`Debug ${debug ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
+				return res.status(200).json("ok")
 			default:
-			return res.status(404).send("404")
+				return res.status(404).send("404")
 		}
 	}
 
@@ -631,7 +645,8 @@ module.exports = function DPS(d,ctx) {
 		var minutes = Math.floor(battleduration / 60)
 		var seconds = Math.floor(battleduration % 60)
 
-		dpsmsg = NPCs[npcIndex].npcName + ':' + NPCs[npcIndex].zoneName  + ' ' + minutes + ':' + seconds + newLine + '</br>'
+		//dpsmsg = NPCs[npcIndex].npcName + ':' + NPCs[npcIndex].zoneName  + ' ' + minutes + ':' + seconds + newLine + '</br>'
+		dpsmsg = NPCs[npcIndex].npcName + ' ' + minutes + ':' + seconds + newLine + '</br>'
 		dpsmsg = dpsmsg.clr('E69F00')
 		if(enraged) dpsmsg = '<img class=enraged />'+dpsmsg
 
@@ -658,7 +673,7 @@ module.exports = function DPS(d,ctx) {
 
 		var fill_size = 0
 
-		dpsmsg += '<table><tr><td>Name</td><td>DPS (dmg)</td><th>DPS (%)</td><td>Crit</td></tr>' + newLine
+		dpsmsg += '<table><tr><td> Name </td><td> DPS (dmg) </td><th> DPS (%) </td><td> Crit </td></tr>' + newLine
 		for(var i in party){
 			//log('totalPartyDamage ' + totalPartyDamage.shr(10).toString() + ' battleduration ' + battleduration + ' damage ')
 			if( totalPartyDamage.divThousand() == '' || battleduration <= 0 || typeof party[i][targetId] == 'undefined') continue
@@ -684,9 +699,9 @@ module.exports = function DPS(d,ctx) {
 			if(party[i][targetId].crit == 0 || party[i][targetId].hit == 0) crit = 0
 			else crit = Math.floor(party[i][targetId].crit * 100 / party[i][targetId].hit)
 
-			dpsmsg +='<tr><td>' + cname + '</td>' + `<td style="background: url('./icons/bar.jpg'); background-repeat: no-repeat; background-size: ${graph_size}% 20%;">` + dps + 'k/s '.clr('E69F00') + '</td>'
-			+ '<td>' + percentage  + '% '.clr('E69F00') + '</td>'
-			+ '<td class=graph>' +  crit  + '% '.clr('E69F00') + '</td></tr>'+ newLine
+			dpsmsg +='<tr><td> ' + cname + ' </td>' + `<td style="background: url('./icons/bar.jpg'); background-repeat: no-repeat; background-size: ${graph_size}% 20%;"> ` + dps + 'k/s '.clr('E69F00') + ' </td>'
+			+ '<td> ' + percentage  + '%'.clr('E69F00') + ' </td>'
+			+ '<td class=graph> ' +  crit  + '%'.clr('E69F00') + ' </td></tr>'+ newLine
 			//log(dpsmsg)
 		}
 		dpsmsg += '</table>'
@@ -746,6 +761,8 @@ module.exports = function DPS(d,ctx) {
 			}
 		}, 1000)
 	}
+
+
 
 	// helper
 	function stripOuterHTML(str) {
