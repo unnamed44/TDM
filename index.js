@@ -180,8 +180,8 @@ module.exports = function DPS(d,ctx) {
 		var req_value = Number(api[0])
 		switch(api[1]) {
 			case "C":
-			if(req_value == 1 ) d.toServer('C_CHAT', 1, {"channel":1,"message":lastDps})
-			if(req_value == 2 ) d.toServer('C_CHAT', 1, {"channel":2,"message":lastDps})
+			if(req_value == 1 ) d.toServer('C_CHAT', 1, {"channel":1,"message":stripOuterHTML(lastDps)})
+			if(req_value == 2 ) d.toServer('C_CHAT', 1, {"channel":2,"message":stripOuterHTML(lastDps)})
 			return res.status(200).json('ok')
 			case "W":
 			var wname = req.params[0].substring(2, req.params[0].length)
