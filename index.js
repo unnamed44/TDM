@@ -15,6 +15,15 @@ const UI = require('ui')
 
 String.prototype.clr = function (hexColor) { return `<font color='#${hexColor}'>${this}</font>` }
 
+Long.prototype.divTen = function() {
+ 	return this.multiply(0x1999999A).shr(32)
+}
+
+Long.prototype.divThousand = function() {
+	var stringValue = this.toString()
+	return stringValue.substring(0, stringValue.length - 3)
+}
+
 module.exports = function DPS(d,ctx) {
 
 	const command = Command(d)
@@ -652,7 +661,7 @@ module.exports = function DPS(d,ctx) {
 		dpsmsg += '<table><tr><td>Name</td><td>DPS (dmg)</td><th>DPS (%)</td><td>Crit</td></tr>' + newLine
 		for(var i in party){
 			//log('totalPartyDamage ' + totalPartyDamage.shr(10).toString() + ' battleduration ' + battleduration + ' damage ')
-			if( totalPartyDamage.shr(10).equals(0) || battleduration <= 0 || typeof party[i][targetId] == 'undefined') continue
+			if( totalPartyDamage.divThousand() == '' || battleduration <= 0 || typeof party[i][targetId] == 'undefined') continue
 
 			cname=party[i].name
 			if(party[i].gameId.localeCompare(mygId) == 0) cname=cname.clr('00FF00')
@@ -661,9 +670,9 @@ module.exports = function DPS(d,ctx) {
 			//log(cname)
 
 			tdamage = Long.fromString(party[i][targetId].damage)
-			dps = numberWithCommas((tdamage.div(battleduration).toNumber()/1000).toFixed(1))
-
-			var percentage = tdamage.shr(10).multiply(1000).div(totalPartyDamage.shr(10)).toNumber()/10
+			//dps = numberWithCommas((tdamage.div(battleduration).toNumber()/1000).toFixed(1))
+			dps = numberWithCommas(tdamage.div(battleduration).divThousand())
+			var percentage = tdamage.div(totalPartyDamage.divThousand()).toNumber()/10
 
 			// the smallest gap size from highest damage (sorted)
 			if(i==0) fill_size = 100 - percentage
@@ -712,19 +721,14 @@ module.exports = function DPS(d,ctx) {
 		var minutes = Math.floor(battleduration / 60)
 		var seconds = Math.floor(battleduration % 60)
 
-		for(var j in party){
-			if( battleduration <= 0 || typeof party[j][targetId] == 'undefined') continue
-			totalPartyDamage = totalPartyDamage.add(party[j][targetId].damage)
-		}
 
-		if( totalPartyDamage.equals(0) || battleduration <= 0 || typeof party[i][targetId] == 'undefined'){
+		if(battleduration <= 0 || typeof party[i][targetId] == 'undefined'){
 			return
 		}
 
 		tdamage = Long.fromString(party[i][targetId].damage)
-		dps = (tdamage.div(battleduration).toNumber()>>10).toFixed(1)
-		dps = numberWithCommas(dps)
-		dpsmsg = numberWithCommas(damage.shr(10).toString()) + ' k '.clr('E69F00') + dps + ' k/s '.clr('E69F00')
+		dps = numberWithCommas(tdamage.div(battleduration).divThousand())
+		dpsmsg = numberWithCommas(damage.divThousand()) + ' k '.clr('E69F00') + dps + ' k/s '.clr('E69F00')
 
 		return dpsmsg
 	}
