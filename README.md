@@ -31,7 +31,7 @@ who has a problem with reset data upon dying
 
    [tera data](https://github.com/neowutran/TeraDpsMeterData )
 
-   Class icons and monsters put this under the
+   Put class icons and monsters under the html folder like below
 
    html/class-icons
 
@@ -41,6 +41,7 @@ who has a problem with reset data upon dying
 
 - It pops up automatically when you spawn in a dungeon
 - Type "!dps u" if you want to open UI
+- set region in config.json
 
 ## Functions
 
@@ -48,7 +49,7 @@ who has a problem with reset data upon dying
 - you can automate party leaving message by setting party_leaving_msg in config.json. Then press LeaveParty button.
 - Reset clears history and npc data, Data is reset by switching charactors anyway.
 - DPS history is shown in the UI
-- Whisper lastest dps to a user type in the input
+- Whisper lastest dps to a user type one's name in the input
 - Enraged notifier on UI
 
 ## Credits
