@@ -228,7 +228,7 @@ module.exports = function DPS(d,ctx) {
 				resetPartyDps(currentbossId)
 				return res.status(200).json('ok')
 			case "R":
-				return res.status(200).json(statusIcons() + '</br>' +estatus+ '</br>' + membersDps(currentbossId) )
+				return res.status(200).json(estatus+ '</br>' + membersDps(currentbossId)+ statusIcons())
 			case "H":
 				return res.status(200).json(dpsHistory)
 			case "P":
@@ -400,8 +400,8 @@ module.exports = function DPS(d,ctx) {
 			var newmember = {
 				'gameId' : member.gameId.toString(),
 				'playerId' : member.playerId.toString(),
-				'name' : classIcon ? member.name.toString():'13',
-				'class' :
+				'name' : member.name.toString(),
+				'class' : classIcon ? member.class.toString():'13'
 			}
 			if(!isPartyMember(member.gameId.toString())) {
 				party.push(newmember)
@@ -657,9 +657,10 @@ module.exports = function DPS(d,ctx) {
 	function statusIcons()
 	{
 		var statusmsg = ''
-		statusmsg += 'Boss Only ' + ((bossOnly) ? 'Enabled '.clr('56B4E9') : 'Disabled '.clr('E69F00'))
-		statusmsg += 'Notice ' + ((notice) ? 'Enabled '.clr('56B4E9') : 'Disabled '.clr('E69F00'))
-		statusmsg += 'Debug ' + ((debug) ? 'Enabled '.clr('56B4E9') : 'Disabled '.clr('E69F00'))
+		statusmsg += notice ? 'Notice '.clr('56B4E9') : 'Notice '.clr('E69F00')
+		statusmsg += debug ? 'Debug '.clr('56B4E9') : 'Debug '.clr('E69F00')
+		statusmsg += bossOnly ? 'Boss Only '.clr('56B4E9') : 'Boss Only '.clr('E69F00')
+		statusmsg += allUsers ? 'allUsers '.clr('56B4E9') : 'allUsers '.clr('E69F00')
 
 		return statusmsg
 	}
@@ -732,7 +733,7 @@ module.exports = function DPS(d,ctx) {
 			+ '<td class=graph> ' +  crit  + '%'.clr('E69F00') + ' </td></tr>'+ newLine
 			//log(dpsmsg)
 		}
-		dpsmsg += '</table>'
+		dpsmsg += '</table><br>'
 
 		// for history
 		NPCs[npcIndex].dpsmsg = dpsmsg
