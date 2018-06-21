@@ -3,7 +3,7 @@
     "notice": true,
     "notice_damage": 5000000,
     "region": "NA",
-    "bossOnly": false,
-    "party_leaving_msg": "tyfp!",
-    "debug" : true
+    "bossOnly": true,
+    "party_leaving_msg": "tyfp~!",
+    "debug" : false
 }

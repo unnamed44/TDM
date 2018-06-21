@@ -16,6 +16,7 @@ const ManagerUi = require('./managerui')
 
 String.prototype.clr = function (hexColor) { return `<font color='#${hexColor}'>${this}</font>` }
 
+// slower than Long div
 Long.prototype.divTen = function() {
  	return this.multiply(0x1999999A).shr(32)
 }
@@ -63,6 +64,9 @@ module.exports = function DPS(d,ctx) {
 	doc = null,
 	odoc = null,
 	classIcon = false
+
+	let enable_color = 'E69F00',
+	disable_color = '56B4E9'
 
 	if (fs.existsSync(path.join(__dirname,'/html/class-icons'))) {
 		classIcon = true
@@ -225,7 +229,7 @@ module.exports = function DPS(d,ctx) {
 				leaveParty()
 				return res.status(200).json('ok')
 			case "S":
-				resetPartyDps(currentbossId)
+				removeAllPartyDPSdata()
 				return res.status(200).json('ok')
 			case "R":
 				return res.status(200).json(estatus+ '</br>' + membersDps(currentbossId)+ statusIcons())
@@ -233,22 +237,22 @@ module.exports = function DPS(d,ctx) {
 				return res.status(200).json(dpsHistory)
 			case "P":
 				enable = false
-				send(`${enable ? 'Enabled'.clr('56B4E9') : 'Disabled'.clr('E69F00')}`)
+				statusToChat('dps popup',enable)
 				return res.status(200).json("ok")
 			case "M":
 				sendExec('manager')
 				return res.status(200).json("ok")
 			case "N":
 				notice = !notice
-				send(`Notice to screen ${notice ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
+				statusToChat('notice damage',notice)
 				return res.status(200).json("ok")
 			case "U":
 				allUsers = !allUsers
-				send(`allUsers to screen ${allUsers ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
+				statusToChat('Count all dps',allUsers)
 				return res.status(200).json("ok")
 			case "O":
 				bossOnly = !bossOnly
-				send(`Boss dps only ${bossOnly ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
+				statusToChat('boss Only',bossOnly)
 				return res.status(200).json("ok")
 			case "D":
 				notice_damage = req_value
@@ -261,7 +265,7 @@ module.exports = function DPS(d,ctx) {
 				return res.status(200).json(notice_damage.toString())
 			case "B":
 				debug = !debug
-				send(`Debug ${debug ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
+				statusToChat('Debug mode',debug)
 				return res.status(200).json("ok")
 			default:
 				return res.status(404).send("404")
@@ -270,14 +274,14 @@ module.exports = function DPS(d,ctx) {
 
 	// packet handle
 	d.hook('S_LOGIN',10, (e) => {
+		party = []
+		NPCs = []
+		dpsHistory = ''
 		mygId=e.gameId.toString()
 		myplayerId=e.playerId.toString()
 		myname=e.name.toString()
 		//# For players the convention is 1XXYY (X = 1 + race*2 + gender, Y = 1 + class). See C_CREATE_USER
 		myclass = Number((e.templateId - 1).toString().slice(-2)).toString()
-		party = []
-		NPCs = []
-		dpsHistory = ''
 		putMeInParty()
 	})
 
@@ -357,6 +361,7 @@ module.exports = function DPS(d,ctx) {
 			else dpsHistory += '<BR>' + NPCs[npcIndex].dpsmsg
 		}
 
+		if(bossOnly && !NPCs[npcIndex].isBoss) removePartyDPSdata(id)
 		NPCs.splice(npcIndex,1)
 	})
 
@@ -393,7 +398,7 @@ module.exports = function DPS(d,ctx) {
 
 	d.hook('S_PARTY_MEMBER_LIST',6,(e) => {
 		allUsers = false
-		send(`allUsers to screen ${allUsers ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
+		statusToChat('Count all users dps ',allUsers)
 		party = []
 
 		e.members.forEach(member => {
@@ -431,12 +436,11 @@ module.exports = function DPS(d,ctx) {
 		}
 	})
 
-	function resetPartyDps(gid)
+	function removePartyDPSdata(gid)
 	{
 		dpsHistory=''
 		lastDps =''
 		for(var i in party ){
-			//log('party ' + key)
 			if(typeof party[i][gid] == 'undefined') continue
 			delete party[i][gid]
 		}
@@ -444,6 +448,22 @@ module.exports = function DPS(d,ctx) {
 		for(var key in NPCs){
 			if(gid.localeCompare(NPCs[key].gameId) == 0){
 				//log('NPCs ' + key + 'NPCs[key].battlestarttime ' + NPCs[key].battlestarttime + 'NPCs[key].battleendtime '+NPCs[key].battleendtime)
+				NPCs[key].battlestarttime=0
+				NPCs[key].battleendtime=0
+			}
+		}
+	}
+
+	function removeAllPartyDPSdata()
+	{
+		dpsHistory=''
+		lastDps =''
+		for(var i in party ){
+			for(var key in party[i]) delete party[i][key]
+		}
+
+		for(var key in NPCs){
+			if(gid.localeCompare(NPCs[key].gameId) == 0){
 				NPCs[key].battlestarttime=0
 				NPCs[key].battleendtime=0
 			}
@@ -534,6 +554,7 @@ module.exports = function DPS(d,ctx) {
 		}
 
 		if(bossOnly && isBoss(gid)) {
+			removeAllPartyDPSdata(id)
 			currentbossId = gid
 			return
 		}
@@ -544,11 +565,24 @@ module.exports = function DPS(d,ctx) {
 		var memberIndex = getPartyMemberIndex(e.source.toString())
 		var sourceId = e.source.toString()
 		var target = e.target.toString()
+		var skill = e.skill.toString()
+
+		// first hit must be myself to set this values
+		if(debug && party.length == 0)
+		{
+			mygId=e.source.toString()
+			myplayerId='NODEF'
+			myname='FirstAtt'
+			//# For players the convention is 1XXYY (X = 1 + race*2 + gender, Y = 1 + class). See C_CREATE_USER
+			myclass = Number((e.templateId - 1).toString().slice(-2)).toString()
+			log('S_EACH_SKILL_RESULT ' + mygId)
+			putMeInParty()
+		}
 
 		if(e.damage.gt(0) && !e.blocked){
 			if(memberIndex >= 0){
 				// members damage
-				if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit)){
+				if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit,skill)){
 					//log('[DPS] : unhandled members damage ' + e.damage + ' target : ' + target)
 				}
 				// notice damage
@@ -565,7 +599,7 @@ module.exports = function DPS(d,ctx) {
 				var ownerIndex = getPartyMemberIndex(e.owner.toString())
 				if(ownerIndex >= 0) {
 					var sourceId = e.owner.toString()
-					if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit)){
+					if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit,skill)){
 						//log('[DPS] : unhandled projectile damage ' + e.damage + ' target : ' + target)
 						//log('[DPS] : srcId : ' + sourceId + ' mygId : ' + mygId)
 						//log(e)
@@ -585,7 +619,7 @@ module.exports = function DPS(d,ctx) {
 					var petIndex=getIndexOfPetOwner(e.source.toString(),e.owner.toString())
 					if(petIndex >= 0) {
 						var sourceId = party[petIndex].gameId
-						if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit)){
+						if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit,skill)){
 							//log('[DPS] : unhandled pet damage ' + e.damage + ' target : ' + target)
 							//log('[DPS] : srcId : ' + sourceId + ' mygId : ' + mygId)
 							//log(e)
@@ -611,7 +645,7 @@ module.exports = function DPS(d,ctx) {
 		}
 	})
 
-	function addMemberDamage(id,target,damage,crit)
+	function addMemberDamage(id,target,damage,crit,skill)
 	{
 		//log('addMemberDamage ' + id + ' ' + target + ' ' + damage + ' ' + crit)
 		var npcIndex = getNPCIndex(target)
@@ -638,6 +672,7 @@ module.exports = function DPS(d,ctx) {
 						'hit' : 1,
 						'crit' : crit
 					}
+
 					//log('addMemberDamage true new monster')
 					return true
 				}
@@ -649,6 +684,17 @@ module.exports = function DPS(d,ctx) {
 					//log('addMemberDamage true ' + party[i][target].damage)
 					return true
 				}
+
+				if(debug){
+					var skilldata = {
+						'skillId' : skill,
+						'Time' : Date.now(),
+						'damage' : damage,
+						'crit' : crit
+					}
+					log(skilldata)
+					party[i][target].skillLog.push(skilldata)
+				}
 			}
 		}
 		//log('addMemberDamage false')
@@ -658,10 +704,10 @@ module.exports = function DPS(d,ctx) {
 	function statusIcons()
 	{
 		var statusmsg = ''
-		statusmsg += notice ? 'Notice '.clr('56B4E9') : 'Notice '.clr('E69F00')
-		statusmsg += debug ? 'Debug '.clr('56B4E9') : 'Debug '.clr('E69F00')
-		statusmsg += bossOnly ? 'Boss Only '.clr('56B4E9') : 'Boss Only '.clr('E69F00')
-		statusmsg += allUsers ? 'allUsers '.clr('56B4E9') : 'allUsers '.clr('E69F00')
+		statusmsg += notice ? 'Notice '.clr(enable_color) : 'Notice '.strike().clr(disable_color)
+		statusmsg += debug ? 'Debug '.clr(enable_color) : 'Debug '.strike().clr(disable_color)
+		statusmsg += bossOnly ? 'Boss Only '.clr(enable_color) : 'Boss Only '.strike().clr(disable_color)
+		statusmsg += allUsers ? 'allUsers '.clr(enable_color) : 'allUsers '.strike().clr(disable_color)
 
 		return statusmsg
 	}
@@ -689,7 +735,7 @@ module.exports = function DPS(d,ctx) {
 		var seconds = Math.floor(battleduration % 60)
 
 		dpsmsg = NPCs[npcIndex].npcName + ' ' + minutes + ':' + seconds + newLine + '</br>'
-		dpsmsg = dpsmsg.clr('E69F00')
+		dpsmsg = dpsmsg.clr(enable_color)
 		if(enraged) dpsmsg = '<img class=enraged />'+dpsmsg
 
 		// when party over 10 ppl, only sort at the end of the battle for the perfomance
@@ -730,9 +776,9 @@ module.exports = function DPS(d,ctx) {
 			if(party[i][targetId].crit == 0 || party[i][targetId].hit == 0) crit = 0
 			else crit = Math.floor(party[i][targetId].crit * 100 / party[i][targetId].hit)
 
-			dpsmsg +='<tr><td> ' + cname + ' </td>' + `<td style="background: url('./icons/bar.jpg'); background-repeat: no-repeat; background-size: ${graph_size}% 20%;"> ` + dps + 'k/s '.clr('E69F00') + ' </td>'
-			+ '<td> ' + percentage  + '%'.clr('E69F00') + ' </td>'
-			+ '<td class=graph> ' +  crit  + '%'.clr('E69F00') + ' </td></tr>'+ newLine
+			dpsmsg +='<tr><td> ' + cname + ' </td>' + `<td style="background: url('./icons/bar.jpg'); background-repeat: no-repeat; background-size: ${graph_size}% 20%;"> ` + dps + 'k/s '.clr(enable_color) + ' </td>'
+			+ '<td> ' + percentage  + '%'.clr(enable_color) + ' </td>'
+			+ '<td class=graph> ' +  crit  + '%'.clr(enable_color) + ' </td></tr>'+ newLine
 			//log(dpsmsg)
 		}
 		dpsmsg += '</table><br>'
@@ -774,7 +820,7 @@ module.exports = function DPS(d,ctx) {
 
 		tdamage = Long.fromString(party[i][targetId].damage)
 		dps = numberWithCommas(tdamage.div(battleduration).divThousand())
-		dpsmsg = numberWithCommas(damage.divThousand()) + ' k '.clr('E69F00') + dps + ' k/s '.clr('E69F00')
+		dpsmsg = numberWithCommas(damage.divThousand()) + ' k '.clr(enable_color) + dps + ' k/s '.clr(enable_color)
 
 		return dpsmsg
 	}
@@ -825,16 +871,20 @@ module.exports = function DPS(d,ctx) {
 		if(debug) console.log(msg)
 	}
 
+	function statusToChat(tag,val)
+	{
+		send(`${tag} ${val ? 'enabled'.clr(enable_color) : 'disabled'.clr(disable_color)}`)
+	}
 	// command
 	command.add('dps', (arg, arg2,arg3) => {
 		// toggle
 		if (!arg) {
-			enable = !enable
-			send(`${enable ? 'Enabled'.clr('56B4E9') : 'Disabled'.clr('E69F00')}`)
+			enable = true
+			statusToChat('dps popup',enable)
 		}
 		else if (arg == 'u' || arg=='ui') {
 			enable = true
-			send(`${enable ? 'Enabled'.clr('56B4E9') : 'Disabled'.clr('E69F00')}`)
+			statusToChat('dps popup',enable)
 			ui.open()
 		}
 		else if (arg == 'nd' || arg=='notice_damage') {
@@ -854,7 +904,7 @@ module.exports = function DPS(d,ctx) {
 		// notice
 		else if (arg === 'n' ||  arg === 'notice') {
 			notice = !notice
-			send(`Notice to screen ${notice ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
+			statusToChat('notice',notice)
 		}
 		else send(`Invalid argument.`.clr('FF0000') + ' dps or dps u/h/n/s or dps nd 1000000')
 	})
