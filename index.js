@@ -385,23 +385,23 @@ module.exports = function DPS(d,ctx) {
 		}
 	})
 
-	d.hook('S_LEAVE_PARTY',1, (event) => {
+	d.hook('S_LEAVE_PARTY',1, (e) => {
 		party = []
 		putMeInParty()
 	})
 
 
-	d.hook('S_PARTY_MEMBER_LIST',6,(event) => {
+	d.hook('S_PARTY_MEMBER_LIST',6,(e) => {
 		allUsers = false
 		send(`allUsers to screen ${allUsers ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
 		party = []
 
-		event.members.forEach(member => {
+		e.members.forEach(member => {
 			var newmember = {
 				'gameId' : member.gameId.toString(),
 				'playerId' : member.playerId.toString(),
 				'name' : member.name.toString(),
-				'class' : classIcon ? member.class.toString():'13'
+				'class' : member.class.toString()
 			}
 			if(!isPartyMember(member.gameId.toString())) {
 				party.push(newmember)
@@ -417,15 +417,16 @@ module.exports = function DPS(d,ctx) {
 		}
 	})
 
-	d.hook('S_SPAWN_USER',12, (event) => {
+	d.hook('S_SPAWN_USER',12, (e) => {
 		if(!allUsers) return
+		var uclass = Number((e.templateId - 1).toString().slice(-2)).toString()
 		var newmember = {
-			'gameId' : event.gameId.toString(),
-			'playerId' : event.playerId.toString(),
-			'name' : event.name.toString(),
-			'class' : '13'//member.class.toString()
+			'gameId' : e.gameId.toString(),
+			'playerId' : e.playerId.toString(),
+			'name' : e.name.toString(),
+			'class' : uclass
 		}
-		if(!isPartyMember(event.gameId.toString()) && party.length <= 30) {
+		if(!isPartyMember(e.gameId.toString()) && party.length <= 30) {
 			party.push(newmember)
 		}
 	})
