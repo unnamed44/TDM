@@ -12,6 +12,7 @@ const fs = require('fs')
 const path = require('path')
 const ui_install = require('./ui_install')
 const UI = require('ui')
+const ManagerUi = require('./managerui')
 
 String.prototype.clr = function (hexColor) { return `<font color='#${hexColor}'>${this}</font>` }
 
@@ -28,7 +29,7 @@ module.exports = function DPS(d,ctx) {
 
 	const command = Command(d)
 	const ui = UI(d)
-
+	const manager = ManagerUi(d,ctx)
 	let enable = config.enable,
 	notice = config.notice,
 	notice_damage = config.notice_damage,
@@ -61,6 +62,7 @@ module.exports = function DPS(d,ctx) {
 	hpPer = 0,
 	doc = null,
 	odoc = null
+	//manager.Enable('test')
 
 	// moster xml file
 	const errorHandler = {
@@ -226,6 +228,9 @@ module.exports = function DPS(d,ctx) {
 			case "P":
 				enable = false
 				send(`${enable ? 'Enabled'.clr('56B4E9') : 'Disabled'.clr('E69F00')}`)
+				return res.status(200).json("ok")
+			case "M":
+				sendExec('manager')
 				return res.status(200).json("ok")
 			case "N":
 				notice = !notice
@@ -788,6 +793,7 @@ module.exports = function DPS(d,ctx) {
 	}
 
 	function send(msg) { command.message(`[DPS] : ` + [...arguments].join('\n  - '.clr('FFFFFF'))) }
+	function sendExec(msg) { command.exec([...arguments].join('\n  - '.clr('FFFFFF'))) }
 
 	function log(msg) {
 		if(debug) console.log(msg)
@@ -829,5 +835,6 @@ module.exports = function DPS(d,ctx) {
 
 	this.destructor = () => {
 		command.remove('dps')
+		command.remove('manager')
 	}
 }
