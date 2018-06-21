@@ -8,9 +8,9 @@ Tera DPS monitor.(TDM)
 
 Internal dps UI
 
-who has a problem to see dps in RAID
+For those who have a problem to see dps in RAID
 
-who has a problem with reset data upon dying
+For those who have a problem with reset data upon dying
 
 [Discord](https://discord.gg/JRa7FXd)
 
@@ -45,19 +45,21 @@ who has a problem with reset data upon dying
 
 - It pops up automatically when you spawn in a dungeon
 - Type "!dps u" if you want to open UI
-- set region in config.json
+- Set region in config.json
 
 ## Functions
 
-- If you don't want to pop up dps meter, press Close button on bottom. (X button on title is not same)
-- you can automate party leaving message by setting party_leaving_msg in config.json. Then press LeaveParty button.
+- If you don't want the dps meter to pop up, press Close button at the bottom. (X button on title is not the same)
+- You can automate party leaving message by setting party_leaving_msg in config.json. Then press LeaveParty button.
 - Reset clears history and npc data, Data is reset by switching charactors anyway.
 - DPS history is shown in the UI
-- Whisper lastest dps to a user type one's name in the input
+- To whisper the lastest dps to a user, type one's name in the input then press the button
 - Enraged notifier on UI
 
 ## Credits
 
 Bluehole Studio
+
 Meishu,Pinkipi,Caali
+
 GIO/neowutran
