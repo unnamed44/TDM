@@ -209,10 +209,12 @@ module.exports = function DPS(d,ctx) {
 		var req_value = Number(api[0])
 		switch(api[1]) {
 			case "C":
+				if(lastDps === '' ) return res.status(200).json('ok')
 				sendByEachLine(req_value,lastDps)
 				return res.status(200).json('ok')
 			case "W":
 				var wname = req.params[0].substring(2, req.params[0].length)
+				if(wname === '' || lastDps === '' ) return res.status(200).json('ok')
 				sendByEachLine(wname,lastDps)
 				return res.status(200).json('ok')
 			case "L":
