@@ -391,12 +391,17 @@ module.exports = function DPS(d,ctx) {
 		allUsers = false
 		send(`allUsers to screen ${allUsers ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
 		party = []
+		var classIcon = true
+		var dest=path.join(__dirname,'/html/class-icons')
+		if (!fs.existsSync(dest)) {
+			classIcon = false
+		}
 		event.members.forEach(member => {
 			var newmember = {
 				'gameId' : member.gameId.toString(),
 				'playerId' : member.playerId.toString(),
-				'name' : member.name.toString(),
-				'class' : member.class.toString()
+				'name' : classIcon ? member.name.toString():'13',
+				'class' :
 			}
 			if(!isPartyMember(member.gameId.toString())) {
 				party.push(newmember)
@@ -420,7 +425,7 @@ module.exports = function DPS(d,ctx) {
 			'name' : event.name.toString(),
 			'class' : '13'//member.class.toString()
 		}
-		if(!isPartyMember(event.gameId.toString()) && party.lengh <= 30) {
+		if(!isPartyMember(event.gameId.toString()) && party.length <= 30) {
 			party.push(newmember)
 		}
 	})
