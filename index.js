@@ -691,7 +691,8 @@ module.exports = function DPS(d,ctx) {
 		dpsmsg = dpsmsg.clr('E69F00')
 		if(enraged) dpsmsg = '<img class=enraged />'+dpsmsg
 
-		if(party.length < 10)
+		// when party over 10 ppl, only sort at the end of the battle for the perfomance
+		if(party.length < 10 || NPCs[npcIndex].battleendtime != 0)
 		party.sort(function(a,b) {
 			if(typeof a[targetId] == 'undefined' || typeof b[targetId] == 'undefined') return 0
 			if(Number(a[targetId].damage) < Number(b[targetId].damage)) return 1
