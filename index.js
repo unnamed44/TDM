@@ -61,8 +61,12 @@ module.exports = function DPS(d,ctx) {
 	nextEnrage = 0,
 	hpPer = 0,
 	doc = null,
-	odoc = null
-	//manager.Enable('test')
+	odoc = null,
+	classIcon = false
+
+	if (fs.existsSync(path.join(__dirname,'/html/class-icons'))) {
+		classIcon = true
+	}
 
 	// moster xml file
 	const errorHandler = {
@@ -391,11 +395,7 @@ module.exports = function DPS(d,ctx) {
 		allUsers = false
 		send(`allUsers to screen ${allUsers ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
 		party = []
-		var classIcon = true
-		var dest=path.join(__dirname,'/html/class-icons')
-		if (!fs.existsSync(dest)) {
-			classIcon = false
-		}
+
 		event.members.forEach(member => {
 			var newmember = {
 				'gameId' : member.gameId.toString(),
@@ -676,7 +676,6 @@ module.exports = function DPS(d,ctx) {
 
 		var npcIndex = getNPCIndex(targetId)
 
-		//if(npcIndex < 0) log(npcIndex)
 		if(npcIndex < 0) return lastDps
 		var totalPartyDamage = Long.fromString(NPCs[npcIndex].totalPartyDamage)
 
@@ -687,7 +686,6 @@ module.exports = function DPS(d,ctx) {
 		var minutes = Math.floor(battleduration / 60)
 		var seconds = Math.floor(battleduration % 60)
 
-		//dpsmsg = NPCs[npcIndex].npcName + ':' + NPCs[npcIndex].zoneName  + ' ' + minutes + ':' + seconds + newLine + '</br>'
 		dpsmsg = NPCs[npcIndex].npcName + ' ' + minutes + ':' + seconds + newLine + '</br>'
 		dpsmsg = dpsmsg.clr('E69F00')
 		if(enraged) dpsmsg = '<img class=enraged />'+dpsmsg
@@ -707,17 +705,15 @@ module.exports = function DPS(d,ctx) {
 
 		dpsmsg += '<table><tr><td> Name </td><td> DPS (dmg) </td><th> DPS (%) </td><td> Crit </td></tr>' + newLine
 		for(var i in party){
-			//log('totalPartyDamage ' + totalPartyDamage.shr(10).toString() + ' battleduration ' + battleduration + ' damage ')
 			if( totalPartyDamage.divThousand() == '' || battleduration <= 0 || typeof party[i][targetId] == 'undefined') continue
 
 			cname=party[i].name
 			if(party[i].gameId.localeCompare(mygId) == 0) cname=cname.clr('00FF00')
-			var cimg = '<img class=class' +party[i].class + ' />'
+			var cimg = ''
+			if(classIcon) cimg = '<img class=class' +party[i].class + ' />'
 			cname = cname + cimg
-			//log(cname)
 
 			tdamage = Long.fromString(party[i][targetId].damage)
-			//dps = numberWithCommas((tdamage.div(battleduration).toNumber()/1000).toFixed(1))
 			dps = numberWithCommas(tdamage.div(battleduration).divThousand())
 			var percentage = tdamage.div(totalPartyDamage.divThousand()).toNumber()/10
 
