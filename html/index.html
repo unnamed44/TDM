@@ -52,6 +52,8 @@
 
 	function AllUsersCB() {}
 	function AllUsers() {
+		_tera_client_proxy_.resize_to(320, 700)
+		document.getElementById('content').setAttribute("style","height:600px");
 		xhr("U",AllUsersCB)
 	}
 
