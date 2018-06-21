@@ -687,7 +687,7 @@ module.exports = function DPS(d,ctx) {
 		dpsmsg = dpsmsg.clr('E69F00')
 		if(enraged) dpsmsg = '<img class=enraged />'+dpsmsg
 
-		if(party < 10)
+		if(party.length < 10)
 		party.sort(function(a,b) {
 			if(typeof a[targetId] == 'undefined' || typeof b[targetId] == 'undefined') return 0
 			if(Number(a[targetId].damage) < Number(b[targetId].damage)) return 1
