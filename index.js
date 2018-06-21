@@ -317,6 +317,7 @@ module.exports = function DPS(d,ctx) {
 			'isBoss' : false,
 			'battlestarttime' : 0,
 			'battleendtime' : 0,
+			'totalPartyDamage' : '0',
 			'dpsmsg' : ''
 		}
 		if(getNPCIndex(e.gameId.toString()) < 0)
@@ -419,7 +420,7 @@ module.exports = function DPS(d,ctx) {
 			'name' : event.name.toString(),
 			'class' : '13'//member.class.toString()
 		}
-		if(!isPartyMember(event.gameId.toString()) && party.lengh <= 30) {			
+		if(!isPartyMember(event.gameId.toString()) && party.lengh <= 30) {
 			party.push(newmember)
 		}
 	})
@@ -614,6 +615,8 @@ module.exports = function DPS(d,ctx) {
 			NPCs[npcIndex].battlestarttime = Date.now()
 		}
 
+		NPCs[npcIndex].totalPartyDamage = Long.fromString(NPCs[npcIndex].totalPartyDamage).add(damage).toString()
+
 		for(var i in party){
 			if(id.localeCompare(party[i].gameId) == 0) {
 				//new monster
@@ -663,7 +666,6 @@ module.exports = function DPS(d,ctx) {
 		var dpsmsg = newLine
 		var bossIndex = -1
 		var tdamage = new Long(0,0)
-		var totalPartyDamage = new Long(0,0)
 
 		if(targetId==='') return lastDps
 
@@ -671,6 +673,7 @@ module.exports = function DPS(d,ctx) {
 
 		//if(npcIndex < 0) log(npcIndex)
 		if(npcIndex < 0) return lastDps
+		var totalPartyDamage = Long.fromString(NPCs[npcIndex].totalPartyDamage)
 
 		if( NPCs[npcIndex].battleendtime == 0) endtime=Date.now()
 		else endtime=NPCs[npcIndex].battleendtime
@@ -684,6 +687,7 @@ module.exports = function DPS(d,ctx) {
 		dpsmsg = dpsmsg.clr('E69F00')
 		if(enraged) dpsmsg = '<img class=enraged />'+dpsmsg
 
+		if(party < 10)
 		party.sort(function(a,b) {
 			if(typeof a[targetId] == 'undefined' || typeof b[targetId] == 'undefined') return 0
 			if(Number(a[targetId].damage) < Number(b[targetId].damage)) return 1
@@ -693,17 +697,6 @@ module.exports = function DPS(d,ctx) {
 
 		var cname
 		var dps=0
-
-		for(var i in party){
-			if( battleduration <= 0 || typeof party[i][targetId] == 'undefined' ) {
-				//log(battleduration + ':' + party[i][targetId])
-				continue
-			}
-			totalPartyDamage = totalPartyDamage.add(party[i][targetId].damage)
-		}
-
-		//if(!totalPartyDamage.sub(subHp).equals(0))
-		//log('sub Hp : total damage' + subHp + '-' + totalPartyDamage + '=' + subHp.sub(totalPartyDamage))
 
 		var fill_size = 0
 
