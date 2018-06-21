@@ -37,6 +37,10 @@ who has a problem with reset data upon dying
 
    html/monsters
 
+   [manager](https://github.com/Mathicha/manager)
+
+   Tera-proxy\bin\node_modules\
+
 ## Usage
 
 - It pops up automatically when you spawn in a dungeon
