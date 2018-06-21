@@ -76,7 +76,9 @@ img {
 .class12 {
 	content:url("./class-icons/valkyrie.png")
 }
-
+.class13 {
+	content:url("./class-icons/common.png")
+}
 
 .ipt {
 	padding: 0 3px;

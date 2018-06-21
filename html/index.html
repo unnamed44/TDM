@@ -49,6 +49,13 @@
 	function Notice() {
 		xhr("N",NoticeCB)
 	}
+
+	function AllUsersCB() {}
+	function AllUsers() {
+		xhr("U",AllUsersCB)
+	}
+
+
 	function BossOnlyCB() {}
 	function BossOnly() {
 		xhr("O", BossOnlyCB)
@@ -164,9 +171,10 @@
 		<button class=btn type="button" onclick="NoticeDamageAdd()">Notice value</button>
 		<button class=btn id="notice" onclick="Notice()">Notice</button>
 		<button class=btn id="bossonly" onclick="BossOnly()">bossOnly</button>
+		<button class=btn id="notice" onclick="AllUsers()">All DPS</button><br>
 		<button class=btn type="button" onclick="Debug()">Debug</button>
 		<button class=btn type="button" onclick="Reset()">Reset</button>
-		<button class=btn type="button" onclick="Manager()">Manager</button><br>
+		<button class=btn type="button" onclick="Manager()">Manager</button>
 		<button class=btn type="button" onclick="CloseDps()">Close</button><br>
 		<br><br><br><br>
 		<textarea id="debug" maxLength="2000" rows="14" cols="50"></textarea>

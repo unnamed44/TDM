@@ -57,7 +57,7 @@ module.exports = function DPS(d,ctx) {
 	estatus = '',
 	timeout = 0,
 	timeoutCounter = 0,
-	//CounterId = 0,
+	allUsers = false,
 	nextEnrage = 0,
 	hpPer = 0,
 	doc = null,
@@ -238,6 +238,10 @@ module.exports = function DPS(d,ctx) {
 				notice = !notice
 				send(`Notice to screen ${notice ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
 				return res.status(200).json("ok")
+			case "U":
+				allUsers = !allUsers
+				send(`allUsers to screen ${allUsers ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
+				return res.status(200).json("ok")
 			case "O":
 				bossOnly = !bossOnly
 				send(`Boss dps only ${bossOnly ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
@@ -383,6 +387,8 @@ module.exports = function DPS(d,ctx) {
 
 
 	d.hook('S_PARTY_MEMBER_LIST',6,(event) => {
+		allUsers = false
+		send(`allUsers to screen ${allUsers ? 'enabled'.clr('56B4E9') : 'disabled'.clr('E69F00')}`)
 		party = []
 		event.members.forEach(member => {
 			var newmember = {
@@ -395,6 +401,27 @@ module.exports = function DPS(d,ctx) {
 				party.push(newmember)
 			}
 		})
+	})
+
+	d.hook('S_DESPAWN_USER', 3, e => {
+		if(!allUsers) return
+		var id = e.gameId.toString()
+		for(var i in party){
+			if(id.localeCompare(party[i].gameId) == 0) party.splice(i,1)
+		}
+	})
+
+	d.hook('S_SPAWN_USER',12, (event) => {
+		if(!allUsers) return
+		var newmember = {
+			'gameId' : event.gameId.toString(),
+			'playerId' : event.playerId.toString(),
+			'name' : event.name.toString(),
+			'class' : '13'//member.class.toString()
+		}
+		if(!isPartyMember(event.gameId.toString()) && party.lengh <= 30) {			
+			party.push(newmember)
+		}
 	})
 
 	function resetPartyDps(gid)
