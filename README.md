@@ -31,7 +31,7 @@ For those who have a problem with reset data upon dying
 
    [tera data](https://github.com/neowutran/TeraDpsMeterData )
 
-   Put class icons and monsters under the html folder like below
+   Find class-icons and monsters from above then put under the html folder like below
 
    html/class-icons
 
@@ -39,7 +39,7 @@ For those who have a problem with reset data upon dying
 
    proxy module ui [manager](https://github.com/Mathicha/manager)
 
-   Tera-proxy\bin\node_modules\
+   Tera-proxy/bin/node_modules/
 
 ## Usage
 

@@ -249,6 +249,7 @@ module.exports = function DPS(d,ctx) {
 				return res.status(200).json("ok")
 			case "U":
 				allUsers = !allUsers
+				if(!allUsers) ui.open()
 				statusToChat('Count all dps',allUsers)
 				return res.status(200).json("ok")
 			case "O":

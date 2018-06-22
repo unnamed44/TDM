@@ -23,7 +23,9 @@ table ,td, tr{
   padding : 3;
 }
 div {
-  overflow-y: auto;
+	width: 320;
+	height: 600;
+  	overflow-y: auto;
 }
 
 ::-webkit-scrollbar {
