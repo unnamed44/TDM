@@ -229,7 +229,8 @@ module.exports = function DPS(d,ctx) {
 				leaveParty()
 				return res.status(200).json('ok')
 			case "S":
-				removePartyDPSdata(currentbossId)
+				//removePartyDPSdata(currentbossId)
+				removeAllPartyDPSdata()
 				return res.status(200).json('ok')
 			case "R":
 				return res.status(200).json(estatus+ '</br>' + membersDps(currentbossId)+ statusIcons())
@@ -361,7 +362,7 @@ module.exports = function DPS(d,ctx) {
 			else dpsHistory += '<BR>' + NPCs[npcIndex].dpsmsg
 		}
 
-		//if(bossOnly && !NPCs[npcIndex].isBoss) removePartyDPSdata(id)
+		removePartyDPSdata(id)
 		NPCs.splice(npcIndex,1)
 	})
 
@@ -438,8 +439,6 @@ module.exports = function DPS(d,ctx) {
 
 	function removePartyDPSdata(gid)
 	{
-		dpsHistory=''
-		lastDps =''
 		for(var i in party ){
 			if(typeof party[i][gid] == 'undefined') continue
 			delete party[i][gid]
@@ -552,7 +551,7 @@ module.exports = function DPS(d,ctx) {
 		}
 
 		if(bossOnly && isBoss(gid)) {
-			//removeAllPartyDPSdata()
+			//removeAllPartyDPSdata() // don't remove data here, cause problem when DESPAWN delayed.
 			currentbossId = gid
 			return
 		}

@@ -64,12 +64,15 @@ module.exports = function ModulesManager(dispatch,ctx) {
 			case "E":
 				Enable(moduleName)
 				return res.status(200).json('ok')
+			case "T":
+				TDM(moduleName)
+				return res.status(200).json('ok')
 			}
 		}
 
 	function sendExec(msg) { command.exec([...arguments].join('\n  - '.clr('FFFFFF'))) }
 
-	command.add('manager', m => {		
+	command.add('manager', m => {
 		ui.open()
 	});
 
@@ -86,6 +89,11 @@ module.exports = function ModulesManager(dispatch,ctx) {
 	function Reload(m)
 	{
 		sendExec(`reload ${m}`)
+	}
+
+	function TDM(m)
+	{
+		sendExec(`dps ${m}`)
 	}
 
 	function Enable(m){
