@@ -229,7 +229,7 @@ module.exports = function DPS(d,ctx) {
 				leaveParty()
 				return res.status(200).json('ok')
 			case "S":
-				removeAllPartyDPSdata()
+				removePartyDPSdata(currentbossId)
 				return res.status(200).json('ok')
 			case "R":
 				return res.status(200).json(estatus+ '</br>' + membersDps(currentbossId)+ statusIcons())
@@ -361,7 +361,7 @@ module.exports = function DPS(d,ctx) {
 			else dpsHistory += '<BR>' + NPCs[npcIndex].dpsmsg
 		}
 
-		if(bossOnly && !NPCs[npcIndex].isBoss) removePartyDPSdata(id)
+		//if(bossOnly && !NPCs[npcIndex].isBoss) removePartyDPSdata(id)
 		NPCs.splice(npcIndex,1)
 	})
 
@@ -459,7 +459,12 @@ module.exports = function DPS(d,ctx) {
 		dpsHistory=''
 		lastDps =''
 		for(var i in party ){
-			for(var key in party[i]) delete party[i][key]
+			for(var key in party[i]) {
+				if(key !== 'gameId' && key !== 'playerId' && key !== 'name' && key !== 'class'){
+					log(key)
+					delete party[i][key]
+				}
+			}
 		}
 	}
 
@@ -547,7 +552,7 @@ module.exports = function DPS(d,ctx) {
 		}
 
 		if(bossOnly && isBoss(gid)) {
-			//removeAllPartyDPSdata(gid)
+			//removeAllPartyDPSdata()
 			currentbossId = gid
 			return
 		}
