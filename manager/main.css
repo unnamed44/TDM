@@ -26,7 +26,9 @@ div {
   overflow-y: auto;
 }
 
-
+::-webkit-scrollbar {
+    display: none;
+}
 .ipt {
 	padding: 0 3px;
      border-radius: 3px;
