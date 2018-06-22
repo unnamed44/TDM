@@ -461,13 +461,6 @@ module.exports = function DPS(d,ctx) {
 		for(var i in party ){
 			for(var key in party[i]) delete party[i][key]
 		}
-
-		for(var key in NPCs){
-			if(gid.localeCompare(NPCs[key].gameId) == 0){
-				NPCs[key].battlestarttime=0
-				NPCs[key].battleendtime=0
-			}
-		}
 	}
 
 	function leaveParty()
@@ -554,7 +547,7 @@ module.exports = function DPS(d,ctx) {
 		}
 
 		if(bossOnly && isBoss(gid)) {
-			removeAllPartyDPSdata(gid)
+			//removeAllPartyDPSdata(gid)
 			currentbossId = gid
 			return
 		}
