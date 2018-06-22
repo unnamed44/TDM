@@ -144,6 +144,11 @@
 		xhr("M",refreshCB)
 	}
 
+	function Journal()
+	{
+		xhr("J",refreshCB)		
+	}
+
 	window.onload = function() {
 		_tera_client_proxy_.resize_to(320, 250)
 		_tera_client_proxy_.set_title('Tera DPS Monitor')
@@ -178,6 +183,7 @@
 		<button class=btn type="button" onclick="CloseDps()">Close</button><br>
 		<button class=btn type="button" onclick="Debug()">Debug</button>
 		<button class=btn type="button" onclick="Manager()">Manager</button>
+		<button class=btn type="button" onclick="Journal()">Journal</button>
 		<br><br><br><br>
 		<textarea id="debug" maxLength="2000" rows="14" cols="50"></textarea>
 </body>

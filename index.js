@@ -243,6 +243,9 @@ module.exports = function DPS(d,ctx) {
 			case "M":
 				sendExec('manager')
 				return res.status(200).json("ok")
+			case "J":
+				sendExec('journal ui')
+				return res.status(200).json("ok")
 			case "N":
 				notice = !notice
 				statusToChat('notice damage',notice)
