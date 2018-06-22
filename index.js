@@ -554,7 +554,7 @@ module.exports = function DPS(d,ctx) {
 		}
 
 		if(bossOnly && isBoss(gid)) {
-			removeAllPartyDPSdata(id)
+			removeAllPartyDPSdata(gid)
 			currentbossId = gid
 			return
 		}
