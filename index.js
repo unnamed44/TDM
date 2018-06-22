@@ -460,9 +460,16 @@ module.exports = function DPS(d,ctx) {
 		for(var i in party ){
 			for(var key in party[i]) {
 				if(key !== 'gameId' && key !== 'playerId' && key !== 'name' && key !== 'class'){
-					log(key)
 					delete party[i][key]
 				}
+			}
+		}
+
+		for(var key in NPCs){
+			if(currentbossId.localeCompare(NPCs[key].gameId) == 0){
+				//log('NPCs ' + key + 'NPCs[key].battlestarttime ' + NPCs[key].battlestarttime + 'NPCs[key].battleendtime '+NPCs[key].battleendtime)
+				NPCs[key].battlestarttime=0
+				NPCs[key].battleendtime=0
 			}
 		}
 	}
