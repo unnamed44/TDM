@@ -21,9 +21,9 @@ For those who have a problem with reset data upon dying
 
 ## Install
 
-1. Download the dps via clicking in the button `Clone or Download` and then on `Download Zip`.
+1. Download the TDM via clicking in the button `Clone or Download` and then on `Download Zip`.
 
-2. Uncompress dps,
+2. Uncompress TDM,
 
    place the resulting folder in `Tera-proxy\bin\node_modules\`
 
@@ -37,7 +37,7 @@ For those who have a problem with reset data upon dying
 
    html/monsters
 
-   [manager](https://github.com/Mathicha/manager)
+   proxy module ui [manager](https://github.com/Mathicha/manager)
 
    Tera-proxy\bin\node_modules\
 
