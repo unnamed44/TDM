@@ -589,10 +589,6 @@ module.exports = function DPS(d,ctx) {
 
 		if(e.damage.gt(0) && !e.blocked){
 			if(memberIndex >= 0){
-				// members damage
-				if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit,skill)){
-					//log('[DPS] : unhandled members damage ' + e.damage + ' target : ' + target)
-				}
 				// notice damage
 				if(mygId.localeCompare(sourceId) == 0){
 					setCurBoss(target)
@@ -601,18 +597,16 @@ module.exports = function DPS(d,ctx) {
 						toNotice(noticeDps(memberIndex,e.damage,target))
 					}
 				}
+				// members damage
+				if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit,skill)){
+					//log('[DPS] : unhandled members damage ' + e.damage + ' target : ' + target)
+				}
 			}
 			else if(memberIndex < 0){
 				// projectile
 				var ownerIndex = getPartyMemberIndex(e.owner.toString())
 				if(ownerIndex >= 0) {
 					var sourceId = e.owner.toString()
-					if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit,skill)){
-						//log('[DPS] : unhandled projectile damage ' + e.damage + ' target : ' + target)
-						//log('[DPS] : srcId : ' + sourceId + ' mygId : ' + mygId)
-						//log(e)
-					}
-
 					// notice damage
 					if(mygId.localeCompare(sourceId) == 0){
 						setCurBoss(target)
@@ -621,18 +615,19 @@ module.exports = function DPS(d,ctx) {
 							toNotice(noticeDps(ownerIndex,e.damage,target))
 						}
 					}
+					if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit,skill)){
+						//log('[DPS] : unhandled projectile damage ' + e.damage + ' target : ' + target)
+						//log('[DPS] : srcId : ' + sourceId + ' mygId : ' + mygId)
+						//log(e)
+					}
+
+
 
 				}
 				else{// pet
 					var petIndex=getIndexOfPetOwner(e.source.toString(),e.owner.toString())
 					if(petIndex >= 0) {
 						var sourceId = party[petIndex].gameId
-						if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit,skill)){
-							//log('[DPS] : unhandled pet damage ' + e.damage + ' target : ' + target)
-							//log('[DPS] : srcId : ' + sourceId + ' mygId : ' + mygId)
-							//log(e)
-						}
-
 						// notice damage
 						if(mygId.localeCompare(sourceId) == 0){
 							setCurBoss(target)
@@ -641,6 +636,13 @@ module.exports = function DPS(d,ctx) {
 								toNotice(noticeDps(petIndex,e.damage,target))
 							}
 						}
+						if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit,skill)){
+							//log('[DPS] : unhandled pet damage ' + e.damage + ' target : ' + target)
+							//log('[DPS] : srcId : ' + sourceId + ' mygId : ' + mygId)
+							//log(e)
+						}
+
+
 
 					}
 					else{
