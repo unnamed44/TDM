@@ -345,9 +345,8 @@ module.exports = function DPS(d,ctx) {
 		var npcIndex = getNPCIndex(id)
 		var duration = 0
 		if(npcIndex <0) return
-		if(NPCs[npcIndex].battleendtime == 0) NPCs[npcIndex].battleendtime == Date.now()
+		if(NPCs[npcIndex].battleendtime == 0) NPCs[npcIndex].battleendtime = Date.now()
 		if(NPCs[npcIndex].battlestarttime > 0) duration = NPCs[npcIndex].battleendtime - NPCs[npcIndex].battlestarttime
-
 		if(NPCs[npcIndex].isBoss){
 			enraged = false
 			clearTimeout(timeout)
@@ -357,17 +356,19 @@ module.exports = function DPS(d,ctx) {
 			estatus = ''
 		}
 
-		// dps history
+		// dps history only for boss and non-boss over 3 min
 		if(NPCs[npcIndex].isBoss || duration > 1000 * 60 * 3)
 		{
-			//log(NPCs[npcIndex].npcName + ' ' + Number(NPCs[npcIndex].isBoss))
-			if(id.localeCompare(currentbossId) == 0) dpsHistory += '<BR>' + membersDps(id)
-			// if this packet comes later then attacking on new boss monster or not Boss but over 3min battle
-			else dpsHistory += '<BR>' + NPCs[npcIndex].dpsmsg
+			dpsHistory += '<BR>' + membersDps(id)
+			// test if this packet comes later then attacking on new boss
+		}
+		else {
+			membersDps(id)
 		}
 
-		removePartyDPSdata(id)
-		NPCs.splice(npcIndex,1)
+		//removePartyDPSdata(id)
+		//log('removed ' + NPCs[npcIndex].npcName)
+		//NPCs.splice(npcIndex,1)
 	})
 
 	d.hook('S_NPC_STATUS',1, (e) => {
@@ -547,6 +548,7 @@ module.exports = function DPS(d,ctx) {
 
 	function getPartyMemberIndex(id){
 		for(var i in party){
+			log('index i ' + i + ' id ' +id)
 			if(id.localeCompare(party[i].gameId) == 0) return i
 		}
 		return -1
@@ -554,27 +556,14 @@ module.exports = function DPS(d,ctx) {
 
 	function setCurBoss(gid)
 	{
-		if(currentbossId.localeCompare(gid)==0) return
-
-		if(!bossOnly) {
-			currentbossId = gid
-			return
-		}
-
-		if(bossOnly && isBoss(gid)) {
-			//removeAllPartyDPSdata() // don't remove data here, cause problem when DESPAWN delayed.
-			currentbossId = gid
-			return
-		}
-
+		log('currentbossId gid:' +gid)
+		if(currentbossId === gid) return
+		if(bossOnly && !isBoss(gid)) return
+		currentbossId = gid
+		log('currentbossId:' +currentbossId)
 	}
 	// damage handler : Core
 	d.hook('S_EACH_SKILL_RESULT',d.base.majorPatchVersion < 74 ? 7:9, (e) => {
-		var memberIndex = getPartyMemberIndex(e.source.toString())
-		var sourceId = e.source.toString()
-		var target = e.target.toString()
-		var skill = e.skill.toString()
-
 		// first hit must be myself to set this values
 		if(debug && party.length == 0)
 		{
@@ -587,9 +576,16 @@ module.exports = function DPS(d,ctx) {
 			putMeInParty()
 		}
 
+		var memberIndex = getPartyMemberIndex(e.source.toString())
+		var sourceId = e.source.toString()
+		var target = e.target.toString()
+		var skill = e.skill.toString()
+//log('memberIndex:'+memberIndex)
+
 		if(e.damage.gt(0) && !e.blocked){
 			if(memberIndex >= 0){
 				// notice damage
+				log('b')
 				if(mygId.localeCompare(sourceId) == 0){
 					setCurBoss(target)
 					//currentbossId = target
@@ -660,7 +656,7 @@ module.exports = function DPS(d,ctx) {
 		//log('addMemberDamage ' + id + ' ' + target + ' ' + damage + ' ' + crit)
 		var npcIndex = getNPCIndex(target)
 		if(npcIndex <0) return false
-		//log(npcIndex + ':' + NPCs[npcIndex].battlestarttime)
+		log(npcIndex + ':' + NPCs[npcIndex].battlestarttime)
 		if(NPCs[npcIndex].battlestarttime == 0){
 			NPCs[npcIndex].battlestarttime = Date.now()
 		}
@@ -729,31 +725,37 @@ module.exports = function DPS(d,ctx) {
 		var dpsmsg = newLine
 		var bossIndex = -1
 		var tdamage = new Long(0,0)
-
+//log('1 targetId:' + targetId)
 		if(targetId==='') return lastDps
-
 		var npcIndex = getNPCIndex(targetId)
-
+//log('2 npcIndex:' + npcIndex)
 		if(npcIndex < 0) return lastDps
+		if( NPCs[npcIndex].battlestarttime == 0 ) return  lastDps
+
 		var totalPartyDamage = Long.fromString(NPCs[npcIndex].totalPartyDamage)
 
 		if( NPCs[npcIndex].battleendtime == 0) endtime=Date.now()
 		else endtime=NPCs[npcIndex].battleendtime
-		var battleduration = Math.floor((endtime-NPCs[npcIndex].battlestarttime) / 1000)
+		var battleduration = endtime-NPCs[npcIndex].battlestarttime
+		if (battleduration < 1000) battleduration = 1000
+		var battledurationbysec = Math.floor((battleduration) / 1000)
 
-		var minutes = Math.floor(battleduration / 60)
-		var seconds = Math.floor(battleduration % 60)
+		var minutes = 0
+		if(battledurationbysec > 59) minutes = Math.floor(battledurationbysec / 60)
+		var seconds = 0
+		if(battledurationbysec > 0 ) seconds = Math.floor(battledurationbysec % 60)
 
 		dpsmsg = NPCs[npcIndex].npcName + ' ' + minutes + ':' + seconds + newLine + '</br>'
+//log('3 dpsmsg:' + dpsmsg)
 		dpsmsg = dpsmsg.clr(enable_color)
 		if(enraged) dpsmsg = '<img class=enraged />'+dpsmsg
 
 		// when party over 10 ppl, only sort at the end of the battle for the perfomance
-		if(party.length < 10 || NPCs[npcIndex].battleendtime != 0)
+		//if(party.length < 10 || NPCs[npcIndex].battleendtime != 0)
 		party.sort(function(a,b) {
 			if(typeof a[targetId] == 'undefined' || typeof b[targetId] == 'undefined') return 0
-			if(Number(a[targetId].damage) < Number(b[targetId].damage)) return 1
-			else if(Number(b[targetId].damage) < Number(a[targetId].damage)) return -1
+			if(Long.fromString(a[targetId].damage).gt(b[targetId].damage)) return -1
+			else if(Long.fromString(b[targetId].damage).gt(a[targetId].damage)) return 1
 			else return 0
 		})
 
@@ -764,8 +766,8 @@ module.exports = function DPS(d,ctx) {
 
 		dpsmsg += '<table><tr><td> Name </td><td> DPS (dmg) </td><th> DPS (%) </td><td> Crit </td></tr>' + newLine
 		for(var i in party){
-			if( totalPartyDamage.divThousand() == '' || battleduration <= 0 || typeof party[i][targetId] == 'undefined') continue
-
+			log('3')
+			if(totalPartyDamage.equals(0) || battleduration <= 0 || typeof party[i][targetId] == 'undefined') continue
 			cname=party[i].name
 			if(party[i].gameId.localeCompare(mygId) == 0) cname=cname.clr('00FF00')
 			var cimg = ''
@@ -773,8 +775,15 @@ module.exports = function DPS(d,ctx) {
 			cname = cname + cimg
 
 			tdamage = Long.fromString(party[i][targetId].damage)
-			dps = numberWithCommas(tdamage.div(battleduration).divThousand())
-			var percentage = tdamage.div(totalPartyDamage.divThousand()).toNumber()/10
+			dps = numberWithCommas(tdamage.div(battledurationbysec).divThousand())
+
+
+			var percentage
+			if (totalPartyDamage.lt(10000)) {
+				percentage = tdamage.div(totalPartyDamage).toNumber()/10
+				log(totalPartyDamage.toString())
+			}
+			else percentage = tdamage.div(totalPartyDamage.divThousand()).toNumber()/10
 
 			// the smallest gap size from highest damage (sorted)
 			if(i==0) fill_size = 100 - percentage
@@ -819,10 +828,6 @@ module.exports = function DPS(d,ctx) {
 		if( NPCs[npcIndex].battleendtime == 0) endtime=Date.now()
 		else endtime=NPCs[npcIndex].battleendtime
 		var battleduration = Math.floor((endtime-NPCs[npcIndex].battlestarttime) / 1000)
-
-		var minutes = Math.floor(battleduration / 60)
-		var seconds = Math.floor(battleduration % 60)
-
 
 		if(battleduration <= 0 || typeof party[i][targetId] == 'undefined'){
 			return
