@@ -337,7 +337,7 @@ module.exports = function DPS(d,ctx) {
 		}
 		if(getNPCIndex(e.gameId.toString()) < 0)
 		{
-			if(NPCs.length > 29) NPCs.shift()
+			if(NPCs.length >= 50) NPCs.shift()
 			NPCs.push(newNPC)
 			getNPCInfoFromXml(e.gameId.toString())
 		}
@@ -348,9 +348,10 @@ module.exports = function DPS(d,ctx) {
 		var npcIndex = getNPCIndex(id)
 		var duration = 0
 		if(npcIndex <0) return
+		// removing NPC which has battle
 		if(NPCs[npcIndex].battlestarttime == 0) {
 			NPCs.splice(npcIndex,1)
-			//log('NPC removed : '+ id)
+			//log('NPC removed : '+ NPCs[npcIndex].npcName)
 			return
 		}
 		if(NPCs[npcIndex].battleendtime != 0) return // 길리안 두번
@@ -369,23 +370,23 @@ module.exports = function DPS(d,ctx) {
 
 		var dpsmsg = membersDps(id)
 
-		// dps history only for boss and non-boss over 3 min
-		if(NPCs[npcIndex].isBoss || duration > 1000 * 60 * 3)
+		// dps history only for boss and non-boss over 1 min
+		if(NPCs[npcIndex].isBoss || duration > 1000 * 60 * 1)
 		{
 			if(dpsmsg !== '') BAMHistory[id] = dpsmsg
 			// test if this packet comes later then attacking on new boss
 		}
-		else {
-			if(dpsmsg !== '') BAMHistory[id] = dpsmsg
-		}
 
-		if(Object.keys(BAMHistory).length > 5){
+		NPCs[npcIndex].dpsmsg = dpsmsg
+
+		//History limit 10
+		if(Object.keys(BAMHistory).length >= 10){
 			for(var key in BAMHistory) {
 				delete BAMHistory[key]
 				break;
 			}
 		}
-		//log('BAMHistory :' + Object.keys(BAMHistory).length)
+
 		// S_SPAWN_ME clears NPC data
 		// S_LEAVE_PARTY clears party and battle infos
 	})
@@ -427,14 +428,14 @@ module.exports = function DPS(d,ctx) {
 		party = []
 
 		e.members.forEach(member => {
-			var newmember = {
+			var newPartyMember = {
 				'gameId' : member.gameId.toString(),
 				'playerId' : member.playerId.toString(),
 				'name' : member.name.toString(),
 				'class' : member.class.toString()
 			}
 			if(!isPartyMember(member.gameId.toString())) {
-				party.push(newmember)
+				party.push(newPartyMember)
 			}
 		})
 	})
@@ -450,15 +451,15 @@ module.exports = function DPS(d,ctx) {
 	d.hook('S_SPAWN_USER',12, (e) => {
 		if(!allUsers) return
 		var uclass = Number((e.templateId - 1).toString().slice(-2)).toString()
-		var newmember = {
+		var newPartyMember = {
 			'gameId' : e.gameId.toString(),
 			'playerId' : e.playerId.toString(),
 			'name' : e.name.toString(),
 			'class' : uclass
 		}
 		if(!isPartyMember(e.gameId.toString()) ) {
-			if(party.length > 29) party.shift()
-			party.push(newmember)
+			if(party.length >= 30) party.shift()
+			party.push(newPartyMember)
 		}
 	})
 
@@ -493,7 +494,7 @@ module.exports = function DPS(d,ctx) {
 
 	function putMeInParty()
 	{
-		var newmember = {
+		var newPartyMember = {
 			'gameId' : mygId,
 			'playerId' : myplayerId,
 			'name' : myname,
@@ -501,7 +502,7 @@ module.exports = function DPS(d,ctx) {
 		}
 
 		if(!isPartyMember(mygId)) {
-			party.push(newmember)
+			party.push(newPartyMember)
 		}
 	}
 
@@ -712,7 +713,7 @@ module.exports = function DPS(d,ctx) {
 		statusmsg += debug ? 'Debug '.clr(enable_color) : 'Debug '.strike().clr(disable_color)
 		statusmsg += bossOnly ? 'Boss Only '.clr(enable_color) : 'Boss Only '.strike().clr(disable_color)
 		statusmsg += allUsers ? 'allUsers '.clr(enable_color) : 'allUsers '.strike().clr(disable_color)
-		if(debug) statusmsg += ' party:'+ party.length + ' NPCs:' + NPCs.length
+		if(debug) statusmsg += ' party:'+ party.length + ' NPCs:' + NPCs.length + ' BAMHistory:' + Object.keys(BAMHistory).length
 
 		return statusmsg
 	}
@@ -724,10 +725,12 @@ module.exports = function DPS(d,ctx) {
 		var dpsmsg = newLine
 		var bossIndex = -1
 		var tdamage = new Long(0,0)
+
 		if(targetId==='') return lastDps
 		var npcIndex = getNPCIndex(targetId)
 		if(npcIndex < 0) return lastDps
 		if( NPCs[npcIndex].battlestarttime == 0 ) return  lastDps
+		if( NPCs[npcIndex].dpsmsg !== '' ) return NPCs[npcIndex].dpsmsg
 
 		var totalPartyDamage = Long.fromString(NPCs[npcIndex].totalPartyDamage)
 
@@ -799,11 +802,9 @@ module.exports = function DPS(d,ctx) {
 		}
 		dpsmsg += '</table><br>'
 
-		// for history
-		NPCs[npcIndex].dpsmsg = dpsmsg
+
 		// To display last msg on ui even if boss removed from list by DESPAWN packet
-		if(bossOnly && NPCs[npcIndex].isBoss ) lastDps = dpsmsg
-		if(!bossOnly) lastDps = dpsmsg
+		lastDps = dpsmsg
 
 		return dpsmsg
 	}
