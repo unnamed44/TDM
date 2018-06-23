@@ -560,6 +560,8 @@ module.exports = function DPS(d,ctx) {
 		if(currentbossId === gid) return
 		if(bossOnly && !isBoss(gid)) return
 		currentbossId = gid
+
+		log('currentbossId ' + NPCs[getNPCIndex(gId)].npcName)
 	}
 	// damage handler : Core
 	d.hook('S_EACH_SKILL_RESULT',d.base.majorPatchVersion < 74 ? 7:9, (e) => {
@@ -804,8 +806,9 @@ module.exports = function DPS(d,ctx) {
 
 
 		// To display last msg on ui even if boss removed from list by DESPAWN packet
-		lastDps = dpsmsg
-
+		if(bossOnly && NPCs[npcIndex].isBoss ) lastDps = dpsmsg
+		if(!bossOnly) lastDps = dpsmsg
+		
 		return dpsmsg
 	}
 
