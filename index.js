@@ -48,7 +48,7 @@ module.exports = function DPS(d,ctx) {
 	boss = new Set(),
 	NPCs = new Array(),
 	party = new Array(),
-	dpsHistory = '',
+	BAMHistory = new Object(),
 	lastDps= '',
 	currentZone='',
 	currentbossId = '',
@@ -234,7 +234,9 @@ module.exports = function DPS(d,ctx) {
 			case "R":
 				return res.status(200).json(estatus+ '</br>' + membersDps(currentbossId)+ statusIcons())
 			case "H":
-				return res.status(200).json(dpsHistory)
+				var history = ''
+				for(var i in BAMHistory) history += BAMHistory[i]
+				return res.status(200).json(history)
 			case "P":
 				enable = false
 				statusToChat('dps popup',enable)
@@ -280,7 +282,7 @@ module.exports = function DPS(d,ctx) {
 	d.hook('S_LOGIN',10, (e) => {
 		party = []
 		NPCs = []
-		dpsHistory = ''
+		BAMHistory = {}
 		mygId=e.gameId.toString()
 		myplayerId=e.playerId.toString()
 		myname=e.name.toString()
@@ -334,6 +336,8 @@ module.exports = function DPS(d,ctx) {
 		}
 		if(getNPCIndex(e.gameId.toString()) < 0)
 		{
+			if(NPCs.length > 30) NPCs.slice(1)
+			//log('NPCs :' + NPCs.length)
 			NPCs.push(newNPC)
 			getNPCInfoFromXml(e.gameId.toString())
 		}
@@ -344,8 +348,16 @@ module.exports = function DPS(d,ctx) {
 		var npcIndex = getNPCIndex(id)
 		var duration = 0
 		if(npcIndex <0) return
-		if(NPCs[npcIndex].battleendtime == 0) NPCs[npcIndex].battleendtime = Date.now()
-		if(NPCs[npcIndex].battlestarttime > 0) duration = NPCs[npcIndex].battleendtime - NPCs[npcIndex].battlestarttime
+		if(NPCs[npcIndex].battlestarttime == 0) {
+			NPCs.splice(npcIndex,1)
+			//log('NPC removed : '+ id)
+			return
+		}
+		if(NPCs[npcIndex].battleendtime != 0) return // 길리안 두번
+
+		NPCs[npcIndex].battleendtime = Date.now()
+		duration = NPCs[npcIndex].battleendtime - NPCs[npcIndex].battlestarttime
+
 		if(NPCs[npcIndex].isBoss){
 			enraged = false
 			clearTimeout(timeout)
@@ -355,16 +367,25 @@ module.exports = function DPS(d,ctx) {
 			estatus = ''
 		}
 
+		var dpsmsg = membersDps(id)
+
 		// dps history only for boss and non-boss over 3 min
 		if(NPCs[npcIndex].isBoss || duration > 1000 * 60 * 3)
 		{
-			dpsHistory += '<BR>' + membersDps(id)
+			if(dpsmsg !== '') BAMHistory[id] = dpsmsg
 			// test if this packet comes later then attacking on new boss
 		}
 		else {
-			membersDps(id)
+			if(dpsmsg !== '') BAMHistory[id] = dpsmsg
 		}
 
+		if(Object.keys(BAMHistory).length > 5){
+			for(var key in BAMHistory) {
+				delete BAMHistory[key]
+				break;
+			}
+		}
+		//log('BAMHistory :' + Object.keys(BAMHistory).length)
 		// S_SPAWN_ME clears NPC data
 		// S_LEAVE_PARTY clears party and battle infos
 	})
@@ -442,7 +463,7 @@ module.exports = function DPS(d,ctx) {
 
 	function removeAllPartyDPSdata()
 	{
-		dpsHistory=''
+		BAMHistory = {}
 		lastDps =''
 		for(var i in party ){
 			for(var key in party[i]) {
@@ -545,19 +566,21 @@ module.exports = function DPS(d,ctx) {
 		{
 			mygId=e.source.toString()
 			myplayerId='NODEF'
-			myname='FirstAtt'
+			myname='ME'
 			//# For players the convention is 1XXYY (X = 1 + race*2 + gender, Y = 1 + class). See C_CREATE_USER
 			myclass = Number((e.templateId - 1).toString().slice(-2)).toString()
 			log('S_EACH_SKILL_RESULT ' + mygId)
 			putMeInParty()
 		}
 
+		//log('[DPS] : ' + e.damage + ' target : ' + e.target.toString())
+
 		var memberIndex = getPartyMemberIndex(e.source.toString())
 		var sourceId = e.source.toString()
 		var target = e.target.toString()
 		var skill = e.skill.toString()
 
-		if(e.damage.gt(0) && !e.blocked){
+		if(e.damage.gt(0)){// && !e.blocked){
 			if(memberIndex >= 0){
 				// notice damage
 				if(mygId===sourceId){
@@ -877,9 +900,6 @@ module.exports = function DPS(d,ctx) {
 		else if (arg == 'nd' || arg=='notice_damage') {
 			notice_damage = arg2
 			toChat('notice_damage : ' + notice_damage)
-		}
-		else if (arg == 'h' || arg=='history') {
-			toChat(dpsHistory)
 		}
 		else if (arg == 't' || arg=='test') {
 			d.toClient('S_NPC_MENU_SELECT', 1, {type:Number(arg2)})
