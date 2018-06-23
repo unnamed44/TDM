@@ -708,12 +708,8 @@ module.exports = function DPS(d,ctx) {
 
 		endtime=NPCs[npcIndex].battleendtime
 		if(endtime == 0) endtime=Date.now()
-
 		var battleduration = endtime-NPCs[npcIndex].battlestarttime
-
-		log(battleduration +  ' = '+ endtime + ' - '+ NPCs[npcIndex].battlestarttime )
-
-		// -32779 = 1529731235345 - 1529731268124
+		//log(battleduration +  ' = '+ endtime + ' - '+ NPCs[npcIndex].battlestarttime )
 
 		if (battleduration < 1000) battleduration = 1000
 		var battledurationbysec = Math.floor((battleduration) / 1000)
