@@ -337,8 +337,7 @@ module.exports = function DPS(d,ctx) {
 		}
 		if(getNPCIndex(e.gameId.toString()) < 0)
 		{
-			if(NPCs.length > 30) NPCs.slice(1)
-			//log('NPCs :' + NPCs.length)
+			if(NPCs.length > 29) NPCs.shift()
 			NPCs.push(newNPC)
 			getNPCInfoFromXml(e.gameId.toString())
 		}
@@ -458,7 +457,7 @@ module.exports = function DPS(d,ctx) {
 			'class' : uclass
 		}
 		if(!isPartyMember(e.gameId.toString()) ) {
-			if(party.length > 30) party.slice(1)
+			if(party.length > 29) party.shift()
 			party.push(newmember)
 		}
 	})
@@ -713,6 +712,7 @@ module.exports = function DPS(d,ctx) {
 		statusmsg += debug ? 'Debug '.clr(enable_color) : 'Debug '.strike().clr(disable_color)
 		statusmsg += bossOnly ? 'Boss Only '.clr(enable_color) : 'Boss Only '.strike().clr(disable_color)
 		statusmsg += allUsers ? 'allUsers '.clr(enable_color) : 'allUsers '.strike().clr(disable_color)
+		if(debug) statusmsg += ' party:'+ party.length + ' NPCs:' + NPCs.length
 
 		return statusmsg
 	}
