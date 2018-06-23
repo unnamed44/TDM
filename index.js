@@ -457,7 +457,8 @@ module.exports = function DPS(d,ctx) {
 			'name' : e.name.toString(),
 			'class' : uclass
 		}
-		if(!isPartyMember(e.gameId.toString()) && party.length <= 30) {
+		if(!isPartyMember(e.gameId.toString()) ) {
+			if(party.length > 30) party.slice(1)
 			party.push(newmember)
 		}
 	})
