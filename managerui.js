@@ -113,14 +113,14 @@ module.exports = function ModulesManager(dispatch,ctx) {
 		var newFoldername = m.replace('_','')
 		renameSync(join(moduleDir,m),join(moduleDir,newFoldername))
 		loadModulebuttons()
-		Load(m)
+		Load(newFoldername)
 		ui.open()
 	}
 	function Disable(m){
 		var newFoldername = '_' + m
 		renameSync(join(moduleDir,m),join(moduleDir,newFoldername))
 		loadModulebuttons()
-		Unload(m)
+		Unload(newFoldername)
 		ui.open()
 	}
 
