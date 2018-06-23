@@ -632,6 +632,7 @@ module.exports = function DPS(d,ctx) {
 		if(npcIndex <0) return false
 		if(NPCs[npcIndex].battlestarttime == 0){
 			NPCs[npcIndex].battlestarttime = Date.now()
+			NPCs[npcIndex].battleendtime = 0 // 지배석 버그
 		}
 
 		NPCs[npcIndex].totalPartyDamage = Long.fromString(NPCs[npcIndex].totalPartyDamage).add(damage).toString()
@@ -709,6 +710,11 @@ module.exports = function DPS(d,ctx) {
 		if(endtime == 0) endtime=Date.now()
 
 		var battleduration = endtime-NPCs[npcIndex].battlestarttime
+
+		log(battleduration +  ' = '+ endtime + ' - '+ NPCs[npcIndex].battlestarttime )
+
+		// -32779 = 1529731235345 - 1529731268124
+
 		if (battleduration < 1000) battleduration = 1000
 		var battledurationbysec = Math.floor((battleduration) / 1000)
 
