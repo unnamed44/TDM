@@ -117,10 +117,10 @@ module.exports = function ModulesManager(dispatch,ctx) {
 		ui.open()
 	}
 	function Disable(m){
+		Unload(m)
 		var newFoldername = '_' + m
 		renameSync(join(moduleDir,m),join(moduleDir,newFoldername))
 		loadModulebuttons()
-		Unload(newFoldername)
 		ui.open()
 	}
 
