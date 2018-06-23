@@ -252,6 +252,7 @@ module.exports = function DPS(d,ctx) {
 				statusToChat('notice damage',notice)
 				return res.status(200).json("ok")
 			case "U":
+				if(!debug) return res.status(200).json("only debug")
 				allUsers = !allUsers
 				if(!allUsers) ui.open()
 				statusToChat('Count all dps',allUsers)
@@ -688,7 +689,7 @@ module.exports = function DPS(d,ctx) {
 					return true
 				}
 
-				if(debug){
+				if(debug && mygId === party[i].gameId){
 					var skilldata = {
 						'skillId' : skill,
 						'Time' : Date.now(),
