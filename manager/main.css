@@ -23,7 +23,7 @@ table ,td, tr{
   padding : 3;
 }
 div {
-	width: 320;
+	width: 350;
 	height: 600;
   	overflow-y: auto;
 }

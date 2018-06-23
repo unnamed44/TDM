@@ -5,12 +5,13 @@ const UI = require('ui')
 module.exports = function ModulesManager(dispatch,ctx) {
 	const command = Command(dispatch);
 	const ui = UI(dispatch)
+	let modules,htmls
 
 	// awesomnium web browser UI
 	ui.use(UI.static(__dirname + '/manager'))
 	ui.get(`/api2/*`, api.bind(ctx))
 
-	const { lstatSync, readdirSync } = require('fs')
+	const { lstatSync, readdirSync ,renameSync} = require('fs')
 	const { join } = require('path')
 	const isDirectory = source => lstatSync(source).isDirectory()
 	const getDirectories = source =>
@@ -18,17 +19,29 @@ module.exports = function ModulesManager(dispatch,ctx) {
 
 	var moduleDir = join(__dirname, '..')
 
-	var modules=getDirectories(moduleDir)
-
-	var htmls = ''
+	loadModulebuttons()
 
 	for(var i in modules){
 		htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1U${modules[i]}'> Unload </button> `
 		htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1L${modules[i]}'> Load </button> `
 		htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1R${modules[i]}'> Reload </button> `
-		//htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1D${modules[i]}'> Disable  </button> `
-		//htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1E${modules[i]}'> Enable  </button> `
+		htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1D${modules[i]}'> Disable  </button> `
+		htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1E${modules[i]}'> Enable  </button> `
 		htmls += modules[i] + '<br><br>'
+	}
+
+	function loadModulebuttons()
+	{
+		modules=getDirectories(moduleDir)
+		htmls = ''
+		for(var i in modules){
+			htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1U${modules[i]}'> Unload </button> `
+			htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1L${modules[i]}'> Load </button> `
+			htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1R${modules[i]}'> Reload </button> `
+			htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1D${modules[i]}'> Disable  </button> `
+			htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1E${modules[i]}'> Enable  </button> `
+			htmls += modules[i] + '<br><br>'
+		}
 	}
 
 	function getData(param) {
@@ -97,10 +110,18 @@ module.exports = function ModulesManager(dispatch,ctx) {
 	}
 
 	function Enable(m){
-		message(`Enable is not implemented yet. ${m}`);
+		var newFoldername = m.replace('_','')
+		renameSync(join(moduleDir,m),join(moduleDir,newFoldername))
+		loadModulebuttons()
+		Load(m)
+		ui.open()
 	}
 	function Disable(m){
-		message(`Disable is not implemented yet. ${m}`);
+		var newFoldername = '_' + m
+		renameSync(join(moduleDir,m),join(moduleDir,newFoldername))
+		loadModulebuttons()
+		Unload(m)
+		ui.open()
 	}
 
 };
