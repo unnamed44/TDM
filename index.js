@@ -124,7 +124,7 @@ module.exports = function DPS(d,ctx) {
 			{
 				if(mon[j].getAttribute("id") == Number(NPCs[npcIndex].templateId)) {
 					NPCs[npcIndex].npcName = mon[j].getAttribute("name")
-					mon[j].getAttribute("isBoss").localeCompare("True") ? NPCs[npcIndex].isBoss = false : NPCs[npcIndex].isBoss = true
+					mon[j].getAttribute("isBoss")==="True" ? NPCs[npcIndex].isBoss = true : NPCs[npcIndex].isBoss = false
 					overrideIsBoss(gId)
 					break
 				}
@@ -173,7 +173,7 @@ module.exports = function DPS(d,ctx) {
 			{
 				if(mon[j].getAttribute("id") == Number(NPCs[npcIndex].templateId)) {
 					//NPCs[npcIndex].npcName = mon[j].getAttribute("name")
-					mon[j].getAttribute("isBoss").localeCompare("True") ? NPCs[npcIndex].isBoss = false : NPCs[npcIndex].isBoss = true
+					mon[j].getAttribute("isBoss")==="True" ? NPCs[npcIndex].isBoss = true : NPCs[npcIndex].isBoss = false
 					break
 				}
 			}
@@ -229,7 +229,6 @@ module.exports = function DPS(d,ctx) {
 				leaveParty()
 				return res.status(200).json('ok')
 			case "S":
-				//removePartyDPSdata(currentbossId)
 				removeAllPartyDPSdata()
 				return res.status(200).json('ok')
 			case "R":
@@ -366,9 +365,8 @@ module.exports = function DPS(d,ctx) {
 			membersDps(id)
 		}
 
-		//removePartyDPSdata(id)
-		//log('removed ' + NPCs[npcIndex].npcName)
-		//NPCs.splice(npcIndex,1)
+		// S_SPAWN_ME clears NPC data
+		// S_LEAVE_PARTY clears party and battle infos
 	})
 
 	d.hook('S_NPC_STATUS',1, (e) => {
@@ -392,7 +390,7 @@ module.exports = function DPS(d,ctx) {
 	d.hook('S_LEAVE_PARTY_MEMBER',2,(e) => {
 		var id = e.playerId.toString()
 		for(var i in party){
-			if(id.localeCompare(party[i].playerId) == 0) party.splice(i,1)
+			if(id===party[i].playerId) party.splice(i,1)
 		}
 	})
 
@@ -424,7 +422,7 @@ module.exports = function DPS(d,ctx) {
 		if(!allUsers) return
 		var id = e.gameId.toString()
 		for(var i in party){
-			if(id.localeCompare(party[i].gameId) == 0) party.splice(i,1)
+			if(id===party[i].gameId) party.splice(i,1)
 		}
 	})
 
@@ -442,22 +440,6 @@ module.exports = function DPS(d,ctx) {
 		}
 	})
 
-	function removePartyDPSdata(gid)
-	{
-		for(var i in party ){
-			if(typeof party[i][gid] == 'undefined') continue
-			delete party[i][gid]
-		}
-
-		for(var key in NPCs){
-			if(gid.localeCompare(NPCs[key].gameId) == 0){
-				//log('NPCs ' + key + 'NPCs[key].battlestarttime ' + NPCs[key].battlestarttime + 'NPCs[key].battleendtime '+NPCs[key].battleendtime)
-				NPCs[key].battlestarttime=0
-				NPCs[key].battleendtime=0
-			}
-		}
-	}
-
 	function removeAllPartyDPSdata()
 	{
 		dpsHistory=''
@@ -471,11 +453,8 @@ module.exports = function DPS(d,ctx) {
 		}
 
 		for(var key in NPCs){
-			if(currentbossId.localeCompare(NPCs[key].gameId) == 0){
-				//log('NPCs ' + key + 'NPCs[key].battlestarttime ' + NPCs[key].battlestarttime + 'NPCs[key].battleendtime '+NPCs[key].battleendtime)
-				NPCs[key].battlestarttime=0
-				NPCs[key].battleendtime=0
-			}
+			NPCs[key].battlestarttime=0
+			NPCs[key].battleendtime=0
 		}
 	}
 
@@ -508,13 +487,13 @@ module.exports = function DPS(d,ctx) {
 	{
 		for(var i in party){
 			for(var j in NPCs){
-				if(NPCs[j].owner.localeCompare(party[i].gameId) == 0){
+				if(NPCs[j].owner===party[i].gameId){
 					// pet attack
-					if(NPCs[j].gameId.localeCompare(sid) == 0) {
+					if(NPCs[j].gameId===sid) {
 						return i
 					}
 					// pet projectile
-					if(NPCs[j].gameId.localeCompare(oid) == 0) {
+					if(NPCs[j].gameId===oid) {
 						return i
 					}
 				}
@@ -526,7 +505,7 @@ module.exports = function DPS(d,ctx) {
 	function isBoss(gId)
 	{
 		for(var i in NPCs){
-			if(gId.localeCompare(NPCs[i].gameId) == 0) return NPCs[i].isBoss
+			if(gId===NPCs[i].gameId) return NPCs[i].isBoss
 		}
 		return false
 	}
@@ -534,33 +513,30 @@ module.exports = function DPS(d,ctx) {
 
 	function getNPCIndex(gId){
 		for(var i in NPCs){
-			if(gId.localeCompare(NPCs[i].gameId) == 0) return i
+			if(gId===NPCs[i].gameId) return i
 		}
 		return -1
 	}
 
 	function isPartyMember(gid){
 		for(var i in party){
-			if(gid.localeCompare(party[i].gameId) == 0) return true
+			if(gid===party[i].gameId) return true
 		}
 		return false
 	}
 
 	function getPartyMemberIndex(id){
 		for(var i in party){
-			log('index i ' + i + ' id ' +id)
-			if(id.localeCompare(party[i].gameId) == 0) return i
+			if(id===party[i].gameId) return i
 		}
 		return -1
 	}
 
 	function setCurBoss(gid)
 	{
-		log('currentbossId gid:' +gid)
 		if(currentbossId === gid) return
 		if(bossOnly && !isBoss(gid)) return
 		currentbossId = gid
-		log('currentbossId:' +currentbossId)
 	}
 	// damage handler : Core
 	d.hook('S_EACH_SKILL_RESULT',d.base.majorPatchVersion < 74 ? 7:9, (e) => {
@@ -580,13 +556,11 @@ module.exports = function DPS(d,ctx) {
 		var sourceId = e.source.toString()
 		var target = e.target.toString()
 		var skill = e.skill.toString()
-//log('memberIndex:'+memberIndex)
 
 		if(e.damage.gt(0) && !e.blocked){
 			if(memberIndex >= 0){
 				// notice damage
-				log('b')
-				if(mygId.localeCompare(sourceId) == 0){
+				if(mygId===sourceId){
 					setCurBoss(target)
 					//currentbossId = target
 					if(e.damage.gt(notice_damage)) {
@@ -604,7 +578,7 @@ module.exports = function DPS(d,ctx) {
 				if(ownerIndex >= 0) {
 					var sourceId = e.owner.toString()
 					// notice damage
-					if(mygId.localeCompare(sourceId) == 0){
+					if(mygId===sourceId){
 						setCurBoss(target)
 						//currentbossId = target
 						if(e.damage.gt(notice_damage)) {
@@ -625,7 +599,7 @@ module.exports = function DPS(d,ctx) {
 					if(petIndex >= 0) {
 						var sourceId = party[petIndex].gameId
 						// notice damage
-						if(mygId.localeCompare(sourceId) == 0){
+						if(mygId===sourceId){
 							setCurBoss(target)
 							//currentbossId = target
 							if(e.damage.gt(notice_damage)) {
@@ -656,7 +630,6 @@ module.exports = function DPS(d,ctx) {
 		//log('addMemberDamage ' + id + ' ' + target + ' ' + damage + ' ' + crit)
 		var npcIndex = getNPCIndex(target)
 		if(npcIndex <0) return false
-		log(npcIndex + ':' + NPCs[npcIndex].battlestarttime)
 		if(NPCs[npcIndex].battlestarttime == 0){
 			NPCs[npcIndex].battlestarttime = Date.now()
 		}
@@ -664,7 +637,7 @@ module.exports = function DPS(d,ctx) {
 		NPCs[npcIndex].totalPartyDamage = Long.fromString(NPCs[npcIndex].totalPartyDamage).add(damage).toString()
 
 		for(var i in party){
-			if(id.localeCompare(party[i].gameId) == 0) {
+			if(id===party[i].gameId) {
 				//new monster
 				if(typeof party[i][target] == 'undefined')
 				{
@@ -725,17 +698,16 @@ module.exports = function DPS(d,ctx) {
 		var dpsmsg = newLine
 		var bossIndex = -1
 		var tdamage = new Long(0,0)
-//log('1 targetId:' + targetId)
 		if(targetId==='') return lastDps
 		var npcIndex = getNPCIndex(targetId)
-//log('2 npcIndex:' + npcIndex)
 		if(npcIndex < 0) return lastDps
 		if( NPCs[npcIndex].battlestarttime == 0 ) return  lastDps
 
 		var totalPartyDamage = Long.fromString(NPCs[npcIndex].totalPartyDamage)
 
-		if( NPCs[npcIndex].battleendtime == 0) endtime=Date.now()
-		else endtime=NPCs[npcIndex].battleendtime
+		endtime=NPCs[npcIndex].battleendtime
+		if(endtime == 0) endtime=Date.now()
+
 		var battleduration = endtime-NPCs[npcIndex].battlestarttime
 		if (battleduration < 1000) battleduration = 1000
 		var battledurationbysec = Math.floor((battleduration) / 1000)
@@ -746,7 +718,6 @@ module.exports = function DPS(d,ctx) {
 		if(battledurationbysec > 0 ) seconds = Math.floor(battledurationbysec % 60)
 
 		dpsmsg = NPCs[npcIndex].npcName + ' ' + minutes + ':' + seconds + newLine + '</br>'
-//log('3 dpsmsg:' + dpsmsg)
 		dpsmsg = dpsmsg.clr(enable_color)
 		if(enraged) dpsmsg = '<img class=enraged />'+dpsmsg
 
@@ -766,10 +737,9 @@ module.exports = function DPS(d,ctx) {
 
 		dpsmsg += '<table><tr><td> Name </td><td> DPS (dmg) </td><th> DPS (%) </td><td> Crit </td></tr>' + newLine
 		for(var i in party){
-			log('3')
 			if(totalPartyDamage.equals(0) || battleduration <= 0 || typeof party[i][targetId] == 'undefined') continue
 			cname=party[i].name
-			if(party[i].gameId.localeCompare(mygId) == 0) cname=cname.clr('00FF00')
+			if(party[i].gameId===mygId) cname=cname.clr('00FF00')
 			var cimg = ''
 			if(classIcon) cimg = '<img class=class' +party[i].class + ' />'
 			cname = cname + cimg
@@ -910,11 +880,7 @@ module.exports = function DPS(d,ctx) {
 			toChat(dpsHistory)
 		}
 		else if (arg == 't' || arg=='test') {
-			var tmptxt
-			for(var i=0;i<10000;i++)
-				tmptxt+='test '
-
-			toChat(tmptxt)
+			d.toClient('S_NPC_MENU_SELECT', 1, {type:Number(arg2)})
 		}
 		// notice
 		else if (arg === 'n' ||  arg === 'notice') {
