@@ -2,9 +2,9 @@
 const Command = require('command');
 const UI = require('ui')
 
-module.exports = function ModulesManager(dispatch,ctx) {
-	const command = Command(dispatch);
-	const ui = UI(dispatch)
+module.exports = function ModulesManager(d,ctx) {
+	const command = Command(d);
+	const ui = UI(d)
 	let modules,htmls
 
 	// awesomnium web browser UI
