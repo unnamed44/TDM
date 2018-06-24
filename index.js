@@ -559,7 +559,7 @@ module.exports = function DPS(d,ctx) {
 	{
 		if(currentbossId === gid) return
 		if(bossOnly && !isBoss(gid)) return
-		currentbossId = gid		
+		currentbossId = gid
 	}
 	// damage handler : Core
 	d.hook('S_EACH_SKILL_RESULT',d.base.majorPatchVersion < 74 ? 7:9, (e) => {
@@ -697,7 +697,7 @@ module.exports = function DPS(d,ctx) {
 						'damage' : damage,
 						'crit' : crit
 					}
-					log(skilldata)
+					//log(skilldata)
 					party[i][target].skillLog.push(skilldata)
 				}
 			}
@@ -776,14 +776,7 @@ module.exports = function DPS(d,ctx) {
 
 			tdamage = Long.fromString(party[i][targetId].damage)
 			dps = numberWithCommas(tdamage.div(battledurationbysec).divThousand())
-
-
-			var percentage
-			if (totalPartyDamage.lt(10000)) {
-				percentage = tdamage.div(totalPartyDamage).toNumber()/10
-				log(totalPartyDamage.toString())
-			}
-			else percentage = tdamage.div(totalPartyDamage.divThousand()).toNumber()/10
+			var percentage = tdamage.multiply(100).div(totalPartyDamage).toString()
 
 			// the smallest gap size from highest damage (sorted)
 			if(i==0) fill_size = 100 - percentage
