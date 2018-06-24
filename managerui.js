@@ -22,12 +22,8 @@ module.exports = function ModulesManager(dispatch,ctx) {
 	loadModulebuttons()
 
 	for(var i in modules){
-		htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1U${modules[i]}'> Unload </button> `
-		htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1L${modules[i]}'> Load </button> `
-		htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1R${modules[i]}'> Reload </button> `
-		htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1D${modules[i]}'> Disable  </button> `
-		htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1E${modules[i]}'> Enable  </button> `
-		htmls += modules[i] + '<br><br>'
+
+
 	}
 
 	function loadModulebuttons()
@@ -35,12 +31,13 @@ module.exports = function ModulesManager(dispatch,ctx) {
 		modules=getDirectories(moduleDir)
 		htmls = ''
 		for(var i in modules){
+			htmls += modules[i] + '<br>'
 			htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1U${modules[i]}'> Unload </button> `
 			htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1L${modules[i]}'> Load </button> `
 			htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1R${modules[i]}'> Reload </button> `
 			htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1D${modules[i]}'> Disable  </button> `
 			htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1E${modules[i]}'> Enable  </button> `
-			htmls += modules[i] + '<br><br>'
+			htmls += ` <button type='button' class='btn' onclick='onClick(this.value)' value='1C${modules[i]}'> !!!!!!  </button> <br><br>`
 		}
 	}
 
@@ -80,6 +77,9 @@ module.exports = function ModulesManager(dispatch,ctx) {
 			case "T":
 				TDM(moduleName)
 				return res.status(200).json('ok')
+			case "C":
+				Commands(moduleName)
+				return res.status(200).json('ok')
 			}
 		}
 
@@ -107,6 +107,12 @@ module.exports = function ModulesManager(dispatch,ctx) {
 	function TDM(m)
 	{
 		sendExec(`dps ${m}`)
+	}
+
+	function Commands(m)
+	{
+		if( m === 'broker') d.toServer('C_CHAT', 1, {"channel":2,"message": "<FONT>" + "!broker" + "</FONT>"});
+		else sendExec(`${m}`)
 	}
 
 	function Enable(m){
