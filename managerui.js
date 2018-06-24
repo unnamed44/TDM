@@ -111,7 +111,7 @@ module.exports = function ModulesManager(d,ctx) {
 
 	function Commands(m)
 	{
-		else sendExec(`${m}`)
+		sendExec(`${m}`)
 	}
 
 	function Enable(m){
