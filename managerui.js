@@ -111,7 +111,6 @@ module.exports = function ModulesManager(d,ctx) {
 
 	function Commands(m)
 	{
-		if( m === 'broker') d.toServer('C_CHAT', 1, {"channel":2,"message": "<FONT>" + "!broker" + "</FONT>"});
 		else sendExec(`${m}`)
 	}
 
