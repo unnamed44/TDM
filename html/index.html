@@ -4,7 +4,6 @@
 	<link rel="stylesheet" href="main.css" />
 	<script>
 	var x
-	var waitForThis = false;
 	var previousDps = ''
 
 	function xhr(url, cb) {
@@ -16,94 +15,10 @@
 		return;
 	}
 
-	function refreshCB()
-	{
-		if(previousDps.localeCompare(this.responseText) == 0) return
-		var dpsmsg = this.responseText.substring(1, this.responseText.length - 1)
-		document.getElementById("content").innerHTML = dpsmsg.replace(/(\\n|\\)/gm,"");
-		document.getElementById("debug").innerHTML = dpsmsg.replace(/(\\n|\\)/gm,"");
-		previousDps = this.responseText
-	}
-
-	function HistoryCB() {
-		var dpsmsg = '<button type="button" class=btn onclick="refreshDPS()">Return</button><br>' + this.responseText.substring(1, this.responseText.length - 1)
-		document.getElementById("content").innerHTML = dpsmsg.replace(/(\\n|\\)/gm,"");
-	}
-	function History() {
-		waitForThis = true
-		previousDps = ''
-		xhr("H",HistoryCB)
-	}
-
 	function stripOuterHTML(str) {
 		return str.replace(/\'|^<[^>]+>|<\/[^>]+><[^\/][^>]*>|<\/[^>]+>$/g, '')
 	}
-	function WhisperCB() {}
-	function Whisper() {
 
-		var name = document.getElementById("name").value;
-		xhr("0W"+ name,WhisperCB)
-	}
-
-	function NoticeCB() {}
-	function Notice() {
-		xhr("N",NoticeCB)
-	}
-
-	function AllUsersCB() {}
-	function AllUsers() {
-		//_tera_client_proxy_.resize_to(320, 700)
-		//document.getElementById('content').setAttribute("style","height:620px");
-		xhr("U",AllUsersCB)
-	}
-
-
-	function BossOnlyCB() {}
-	function BossOnly() {
-		xhr("O", BossOnlyCB)
-	}
-	function CloseDpsCB() {
-		_tera_client_proxy_.close()
-	}
-	function CloseDps() {
-		xhr("P",CloseDpsCB)
-	}
-	function DebugCB() {}
-	function Debug() {
-		xhr("B",DebugCB)
-	}
-	function ToGuildCB() {}
-	function ToGuild() {
-		_tera_client_proxy_.alert("Please remember TDM is not for mocking others.");
-		xhr("2C",ToGuildCB)
-	}
-
-	function ToPartyCB() {}
-	function ToParty() {
-		_tera_client_proxy_.alert("Please remember TDM is not for mocking others.");
-		xhr("1C",ToPartyCB)
-	}
-
-	function LeavePartyCB() {}
-	function LeaveParty() {
-		xhr("L",LeavePartyCB)
-	}
-	function ResetCB() {}
-	function Reset() {
-		xhr("S",ResetCB)
-	}
-
-	function NoticeDamageCB() {
-		//document.getElementById("NDV").value = this.responseText.replace(/(\")/gm,"");
-	}
-
-	function NoticeDamage() {
-		xhr(document.getElementById("NDV").value + "D",NoticeDamageCB)
-	}
-
-	function NoticeDamageAdd() {
-		xhr("A",NoticeDamageCB)
-	}
 
 	function Clipboard() {
 		var copyText = document.getElementById("txt");
@@ -122,9 +37,153 @@
 		}
 	}
 
-	window.addEventListener('error', function(e) {
-		_tera_client_proxy_.alert('Error: ' + e.message)
-	})
+
+	function Whisper() {
+
+		var name = document.getElementById("name").value;
+		xhr("0W"+ name,null)
+	}
+
+	function ToGuild() {
+		_tera_client_proxy_.alert("Please remember TDM is not for mocking others.");
+		xhr("2C",null)
+	}
+
+	function ToParty() {
+		_tera_client_proxy_.alert("Please remember TDM is not for mocking others.");
+		xhr("1C",null)
+	}
+
+	function LeaveParty() {
+		xhr("L",null)
+	}
+
+	function Reset() {
+		xhr("S",null)
+	}
+	function CloseDpsCB() {
+		_tera_client_proxy_.close()
+	}
+	function CloseDps() {
+		xhr("P",CloseDpsCB)
+	}
+
+	// settings
+	function NoticeDamageCB() {
+		//document.getElementById("NDV").value = this.responseText.replace(/(\")/gm,"");
+	}
+
+	function NoticeDamage() {
+		xhr(document.getElementById("NDV").value + "D",NoticeDamageCB)
+		xhr("Y",SettingsCB)
+	}
+
+	function NoticeDamageAdd() {
+		xhr("A",NoticeDamageCB)
+		xhr("Y",SettingsCB)
+	}
+
+	function Debug() {
+		xhr("B",null)
+		xhr("Y",SettingsCB)
+	}
+
+	function Notice() {
+		xhr("N",null)
+		xhr("Y",SettingsCB)
+	}
+
+	function AllUsers() {
+		//_tera_client_proxy_.resize_to(320, 700)
+		//document.getElementById('content').setAttribute("style","height:620px");
+		xhr("U",null)
+		xhr("Y",SettingsCB)
+	}
+
+
+	function BossOnly() {
+		xhr("O", null)
+		xhr("Y",SettingsCB)
+	}
+	function Manager()
+	{
+		xhr("M",null)
+	}
+
+	function Journal()
+	{
+		xhr("J",null)
+	}
+
+	function HideNames()
+	{
+		xhr("I",null)
+		xhr("Y",SettingsCB)
+	}
+	function ReloadTDM()
+	{
+		xhr("X",refreshCB)
+	}
+
+	function openweb(e) {
+		//_tera_client_proxy_.alert("TDM does not support details of skill info yet.");
+	}
+
+
+	// history tab
+	function HistoryCB() {
+		var dpsmsg = this.responseText.substring(1, this.responseText.length - 1)
+		document.getElementById("history").innerHTML = dpsmsg.replace(/(\\n|\\)/gm,"");
+	}
+
+	function History() {
+
+		var wrapper = document.getElementById("wrapper");
+		var settings = document.getElementById("settings");
+		var history = document.getElementById("history");
+		settings.style.display = "none";
+		wrapper.style.display = "none";
+		history.style.display = "block";
+
+		xhr("H",HistoryCB)
+	}
+
+	// setting tab
+	function SettingsCB()
+	{
+		var dpsmsg = this.responseText.substring(1, this.responseText.length - 1)
+		document.getElementById("status").innerHTML = dpsmsg.replace(/(\\n|\\)/gm,"");
+	}
+
+	function Settings(){
+		var wrapper = document.getElementById("wrapper");
+		var settings = document.getElementById("settings");
+		var history = document.getElementById("history");
+		settings.style.display = "block";
+		wrapper.style.display = "none";
+		history.style.display = "none";
+
+		xhr("Y",SettingsCB)
+	}
+
+	// dps tab
+	function DPS(){
+		var wrapper = document.getElementById("wrapper");
+		var settings = document.getElementById("settings");
+		var history = document.getElementById("history");
+		settings.style.display = "none";
+		wrapper.style.display = "block";
+		history.style.display = "none";
+	}
+
+	function refreshCB()
+	{
+		if(previousDps.localeCompare(this.responseText) == 0) return
+		var dpsmsg = this.responseText.substring(1, this.responseText.length - 1)
+		document.getElementById("content").innerHTML = dpsmsg.replace(/(\\n|\\)/gm,"");
+		document.getElementById("debug").innerHTML = dpsmsg.replace(/(\\n|\\)/gm,"");
+		previousDps = this.responseText
+	}
 
 	function refreshDPS()
 	{
@@ -139,19 +198,13 @@
 		}, 1000);
 	}
 
-	function Manager()
-	{
-		xhr("M",refreshCB)
-	}
+	window.addEventListener('error', function(e) {
+		_tera_client_proxy_.alert('Error: ' + e.message)
+	})
 
-	function Journal()
-	{
-		xhr("J",refreshCB)
-	}
-
-	function HideNames()
-	{
-		xhr("I",refreshCB)
+	window.onbeforeunload =  function() {
+		xhr("P",CloseDpsCB)
+		return null;
 	}
 
 	function setStyleCB()
@@ -162,6 +215,10 @@
 		_tera_client_proxy_.resize_to(Number(size[0]), Number(size[1]))
 		var divhight = 'height:' + (Number(size[1]) - 50) + 'px'
 		document.getElementById('content').setAttribute("style",divhight);
+		var wrapperdivhight = 'height:' + size[1] + 'px'
+		document.getElementById('wrapper').setAttribute("style",wrapperdivhight);
+		document.getElementById('history').setAttribute("style",wrapperdivhight);
+		document.getElementById('settings').setAttribute("style",wrapperdivhight);
 	}
 
 	function readConfig()
@@ -169,10 +226,6 @@
 		xhr("Z",setStyleCB)
 	}
 
-	function ReloadTDM()
-	{
-		xhr("X",refreshCB)
-	}
 
 	window.onload = function() {
 		_tera_client_proxy_.resize_to(320, 250)
@@ -181,38 +234,42 @@
 		//_tera_client_proxy_.alert("Please remember TDM is not for mocking others.");
 		refreshDPS()
 	}
-
-	window.onbeforeunload =  function() {
-		xhr("P",CloseDpsCB)
-		return null;
-	}
-
-	function openweb(e) {
-	    //_tera_client_proxy_.alert("TDM does not support details of skill info yet.");
-	}
-
 	</script>
 </head>
 <body>
-	<div  id="content" onclick="openweb(event);"></div >
-		<input class=ipt type="text" size="1" id="name" value="">
-		<button class=btn type="button" onclick="Whisper()">Whisper</button>
-		<button class=btn type="button" onclick="ToGuild()">ToGuild</button>
-		<button class=btn type="button" onclick="ToParty()">ToParty</button>
-		<button class=btn type="button" onclick="History()">History</button>
-		<button class=btn type="button" onclick="LeaveParty()">LeaveParty</button><br>
-		<button class=btn type="button" onclick="NoticeDamageAdd()">Notice value</button>
-		<button class=btn id="notice" onclick="Notice()">Notice</button>
-		<button class=btn id="bossonly" onclick="BossOnly()">bossOnly</button>
-		<button class=btn id="notice" onclick="AllUsers()">All DPS</button>
-		<button class=btn type="button" onclick="Reset()">Reset</button>
-		<button class=btn type="button" onclick="CloseDps()">Close</button><br>
-		<button class=btn type="button" onclick="Debug()">Debug</button>
-		<button class=btn type="button" onclick="ReloadTDM()">ReloadTDM</button>
-		<button class=btn type="button" onclick="Manager()">Manager</button>
-		<button class=btn type="button" onclick="Journal()">Journal</button>
-		<button class=btn type="button" onclick="HideNames()">HideNames</button>
-		<br><br><br><br>
-		<textarea id="debug" maxLength="2000" rows="14" cols="50"></textarea>
-</body>
-</html>
+	<button type="button" class=tab onclick="DPS()">DPS</button>
+	<button type="button" class=tab onclick="History()">History</button>
+	<button type="button" class=tab  onclick="Settings()">Settings</button>
+	<button class=tab type="button" onclick="CloseDps()">Close</button><br>
+	<div  id="wrapper">
+		<div  id="content"></div >
+			<input class=ipt type="text" size="1" id="name" value="">
+			<button class=btn type="button" onclick="Whisper()">Whisper</button>
+			<button class=btn type="button" onclick="ToParty()">ToParty</button>
+			<button class=btn type="button" onclick="ToGuild()">ToGuild</button>
+			<button class=btn type="button" onclick="LeaveParty()">LeaveParty</button><br>
+			<button class=btn type="button" onclick="Reset()">Reset</button>
+
+		</div>
+		<div  id="history"></div>
+		<div  id="settings">
+			<br>
+			<div id='status'></div>
+			<br>
+			<br>
+			<button class=btn type="button" onclick="NoticeDamageAdd()">Notice value</button>
+			<button class=btn id="notice" onclick="Notice()">Notice</button>
+			<button class=btn id="bossonly" onclick="BossOnly()">bossOnly</button>
+			<button class=btn type="button" onclick="HideNames()">HideNames</button>
+			<button class=btn id="notice" onclick="AllUsers()">All DPS</button>
+			<button class=btn type="button" onclick="Debug()">Debug</button>
+			<button class=btn type="button" onclick="ReloadTDM()">ReloadTDM</button>
+			<button class=btn type="button" onclick="Manager()">Manager</button>
+			<button class=btn type="button" onclick="Journal()">Journal</button>
+			<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+			<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+			<textarea id="debug" maxLength="2000" rows="14" cols="50"></textarea>
+		</div>
+
+	</body>
+	</html>

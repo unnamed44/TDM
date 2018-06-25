@@ -273,7 +273,7 @@ module.exports = function DPS(d,ctx) {
 				statusToChat('dps popup',enable)
 				return res.status(200).json("ok")
 			case "R":
-				return res.status(200).json(estatus+ '</br>' + membersDps(currentbossId)+ statusIcons())
+				return res.status(200).json(estatus+ '</br>' + membersDps(currentbossId))
 			case "S":
 				removeAllPartyDPSdata()
 				return res.status(200).json('ok')
@@ -298,6 +298,8 @@ module.exports = function DPS(d,ctx) {
 				}
 				sendExec('reload TDM')
 				return res.status(200).json("ok")
+			case "Y":
+				return res.status(200).json(statusIcons())
 			case "Z":
 				if(maxSize) return res.status(200).json('320,700')
 				else return res.status(200).json('320,250')
@@ -737,9 +739,10 @@ module.exports = function DPS(d,ctx) {
 	{
 		var statusmsg = ''
 		statusmsg += notice ? 'Notice '.clr(enable_color) : 'Notice '.strike().clr(disable_color)
-//		statusmsg += debug ? 'Debug '.clr(enable_color) : 'Debug '.strike().clr(disable_color)
 		statusmsg += bossOnly ? 'Boss Only '.clr(enable_color) : 'Boss Only '.strike().clr(disable_color)
+		statusmsg += hideNames ? 'hideNames '.clr(enable_color) : 'hideNames '.strike().clr(disable_color)
 		statusmsg += allUsers ? 'allUsers '.clr(enable_color) : 'allUsers '.strike().clr(disable_color)
+		statusmsg += debug ? 'Debug '.clr(enable_color) : 'Debug '.strike().clr(disable_color)
 		if(debug) statusmsg += '<br> party:'+ party.length + ' NPCs:' + NPCs.length + ' BAMHistory:' + Object.keys(BAMHistory).length
 
 		return statusmsg
