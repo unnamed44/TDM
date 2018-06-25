@@ -52,7 +52,7 @@ config.json에서 region 설정
 
 ## 기능들
 
-TDM이 나타나지 않게하려면 하단의 닫기 버튼을 누릅니다. (제목의 X 버튼이 동일하지 않음)
+TDM이 나타나지 않게하려면 Close 버튼을 누릅니다. (제목의 X 버튼과 동일하지 않음)
 
 config.json에서 party_leaving_msg를 설정하여 파티 탈퇴 메시지를 자동화 할 수 있습니다. 그런 다음 LeaveParty 버튼을 누릅니다.
 

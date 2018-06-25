@@ -272,6 +272,12 @@ module.exports = function DPS(d,ctx) {
 				enable = false
 				statusToChat('dps popup',enable)
 				return res.status(200).json("ok")
+			case "Q":
+				if(!debug) {
+					toChat('This button is only for debug mode')
+					return res.status(200).json("not implemented yet")
+				}
+				return res.status(200).json("not implemented yet")
 			case "R":
 				return res.status(200).json(estatus+ '</br>' + membersDps(currentbossId))
 			case "S":
@@ -738,17 +744,15 @@ module.exports = function DPS(d,ctx) {
 	function statusIcons()
 	{
 		var statusmsg = ''
-		statusmsg += numberWithCommas(notice_damage.toString())
+		statusmsg += notice ? numberWithCommas(notice_damage.toString()).clr(enable_color) : numberWithCommas(notice_damage.toString()).strike().clr(disable_color)
 		statusmsg += '|'
-		statusmsg += notice ? 'Notice '.clr(enable_color) : 'Notice '.strike().clr(disable_color)
+		statusmsg += bossOnly ? 'Boss Only'.clr(enable_color) : 'Boss Only'.strike().clr(disable_color)
 		statusmsg += '|'
-		statusmsg += bossOnly ? 'Boss Only '.clr(enable_color) : 'Boss Only '.strike().clr(disable_color)
+		statusmsg += hideNames ? 'hideNames'.clr(enable_color) : 'hideNames'.strike().clr(disable_color)
 		statusmsg += '|'
-		statusmsg += hideNames ? 'hideNames '.clr(enable_color) : 'hideNames '.strike().clr(disable_color)
-		statusmsg += '|'
-		statusmsg += allUsers ? 'allUsers '.clr(enable_color) : 'allUsers '.strike().clr(disable_color)
+		statusmsg += allUsers ? 'allUsers'.clr(enable_color) : 'allUsers'.strike().clr(disable_color)
 
-		if(debug) statusmsg += '<br> party:'+ party.length + ' NPCs:' + NPCs.length + ' BAMHistory:' + Object.keys(BAMHistory).length
+		if(debug) statusmsg += '<br> party:'+ party.length + '| NPCs:' + NPCs.length + '| BAMHistory:' + Object.keys(BAMHistory).length
 
 		return statusmsg
 	}

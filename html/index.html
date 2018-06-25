@@ -125,6 +125,16 @@
 		xhr("X",refreshCB)
 	}
 
+	function UpdateCB()
+	{
+		var dpsmsg = this.responseText.substring(1, this.responseText.length - 1)
+		document.getElementById("status").innerHTML = dpsmsg.replace(/(\\n|\\)/gm,"");
+	}
+	function Update()
+	{
+		xhr("Q",UpdateCB)
+	}
+
 	function openweb(e) {
 		//_tera_client_proxy_.alert("TDM does not support details of skill info yet.");
 	}
@@ -267,6 +277,7 @@
 			<button class=btn type="button" onclick="ReloadTDM()">ReloadTDM</button>
 			<button class=btn type="button" onclick="Manager()">Manager</button>
 			<button class=btn type="button" onclick="Journal()">Journal</button>
+			<button class=btn type="button" onclick="Update()">Update</button>
 			<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 			<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 			<textarea id="debug" maxLength="2000" rows="14" cols="50"></textarea>

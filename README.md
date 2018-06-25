@@ -49,7 +49,7 @@ For those who have a problem with reset data upon dying
 
 ## Functions
 
-- If you don't want the dps meter to pop up, press Close button at the bottom. (X button on title is not the same)
+- If you don't want the dps meter to pop up, press Close button. (X button on title is not the same)
 - You can automate party leaving message by setting party_leaving_msg in config.json. Then press LeaveParty button.
 - Reset clears history and npc data, Data is reset by switching charactors anyway.
 - DPS history is shown in the UI
