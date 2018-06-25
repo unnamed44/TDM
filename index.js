@@ -738,11 +738,16 @@ module.exports = function DPS(d,ctx) {
 	function statusIcons()
 	{
 		var statusmsg = ''
+		statusmsg += numberWithCommas(notice_damage.toString())
+		statusmsg += '|'
 		statusmsg += notice ? 'Notice '.clr(enable_color) : 'Notice '.strike().clr(disable_color)
+		statusmsg += '|'
 		statusmsg += bossOnly ? 'Boss Only '.clr(enable_color) : 'Boss Only '.strike().clr(disable_color)
+		statusmsg += '|'
 		statusmsg += hideNames ? 'hideNames '.clr(enable_color) : 'hideNames '.strike().clr(disable_color)
+		statusmsg += '|'
 		statusmsg += allUsers ? 'allUsers '.clr(enable_color) : 'allUsers '.strike().clr(disable_color)
-		statusmsg += debug ? 'Debug '.clr(enable_color) : 'Debug '.strike().clr(disable_color)
+
 		if(debug) statusmsg += '<br> party:'+ party.length + ' NPCs:' + NPCs.length + ' BAMHistory:' + Object.keys(BAMHistory).length
 
 		return statusmsg
