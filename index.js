@@ -59,10 +59,12 @@ module.exports = function DPS(d,ctx) {
 	timeout = 0,
 	timeoutCounter = 0,
 	allUsers = false,
+	maxSize = false,
 	nextEnrage = 0,
 	hpPer = 0,
 	doc = null,
 	odoc = null,
+	hideNames = false,
 	classIcon = false
 
 	let enable_color = 'E69F00',
@@ -216,55 +218,6 @@ module.exports = function DPS(d,ctx) {
 		const api = getData(req.params[0])
 		var req_value = Number(api[0])
 		switch(api[1]) {
-			case "C":
-				if(lastDps === '' ) return res.status(200).json('ok')
-				sendByEachLine(req_value,lastDps)
-				return res.status(200).json('ok')
-			case "W":
-				var wname = req.params[0].substring(2, req.params[0].length)
-				if(wname === '' || lastDps === '' ) return res.status(200).json('ok')
-				sendByEachLine(wname,lastDps)
-				return res.status(200).json('ok')
-			case "L":
-				leaveParty()
-				return res.status(200).json('ok')
-			case "S":
-				removeAllPartyDPSdata()
-				return res.status(200).json('ok')
-			case "R":
-				return res.status(200).json(estatus+ '</br>' + membersDps(currentbossId)+ statusIcons())
-			case "H":
-				var history = ''
-				for(var i in BAMHistory) history += BAMHistory[i]
-				return res.status(200).json(history)
-			case "P":
-				enable = false
-				statusToChat('dps popup',enable)
-				return res.status(200).json("ok")
-			case "M":
-				sendExec('manager')
-				return res.status(200).json("ok")
-			case "J":
-				sendExec('journal ui')
-				return res.status(200).json("ok")
-			case "N":
-				notice = !notice
-				statusToChat('notice damage',notice)
-				return res.status(200).json("ok")
-			case "U":
-				if(!debug) return res.status(200).json("only debug")
-				allUsers = !allUsers
-				if(!allUsers) ui.open()
-				statusToChat('Count all dps',allUsers)
-				return res.status(200).json("ok")
-			case "O":
-				bossOnly = !bossOnly
-				statusToChat('boss Only',bossOnly)
-				return res.status(200).json("ok")
-			case "D":
-				notice_damage = req_value
-				send('Notice damage is ' + numberWithCommas(notice_damage.toString()))
-				return res.status(200).json(notice_damage.toString())
 			case "A":
 				notice_damage += 1000000
 				if(notice_damage > 20000000) notice_damage = 1000000
@@ -274,6 +227,80 @@ module.exports = function DPS(d,ctx) {
 				debug = !debug
 				statusToChat('Debug mode',debug)
 				return res.status(200).json("ok")
+			case "C":
+				if(lastDps === '' ) return res.status(200).json('ok')
+				sendByEachLine(req_value,lastDps)
+				return res.status(200).json('ok')
+			case "D":
+				notice_damage = req_value
+				send('Notice damage is ' + numberWithCommas(notice_damage.toString()))
+				return res.status(200).json(notice_damage.toString())
+			case "H":
+				var history = ''
+				for(var i in BAMHistory) history += BAMHistory[i]
+				return res.status(200).json(history)
+			case "I":
+				hideNames = !hideNames
+				statusToChat('hideNames',hideNames)
+				return res.status(200).json("ok")
+			case "J":
+				if(!debug) {
+					toChat('This button is only for debug mode')
+					return res.status(200).json("no")
+				}
+				sendExec('journal ui')
+				return res.status(200).json("ok")
+			case "L":
+				leaveParty()
+				return res.status(200).json('ok')
+			case "M":
+				if(!debug) {
+					toChat('This button is only for debug mode')
+					return res.status(200).json("no")
+				}
+				sendExec('manager')
+				return res.status(200).json("ok")
+			case "N":
+				notice = !notice
+				statusToChat('notice damage',notice)
+				return res.status(200).json("ok")
+			case "O":
+				bossOnly = !bossOnly
+				statusToChat('boss Only',bossOnly)
+				return res.status(200).json("ok")
+			case "P":
+				enable = false
+				statusToChat('dps popup',enable)
+				return res.status(200).json("ok")
+			case "R":
+				return res.status(200).json(estatus+ '</br>' + membersDps(currentbossId)+ statusIcons())
+			case "S":
+				removeAllPartyDPSdata()
+				return res.status(200).json('ok')
+			case "U":
+				if(!debug) {
+					toChat('This button is only for debug mode')
+					return res.status(200).json("no")
+				}
+				allUsers = maxSize =  !allUsers
+				ui.open()
+				statusToChat('Count all dps',allUsers)
+				return res.status(200).json("ok")
+			case "W":
+				var wname = req.params[0].substring(2, req.params[0].length)
+				if(wname === '' || lastDps === '' ) return res.status(200).json('ok')
+				sendByEachLine(wname,lastDps)
+				return res.status(200).json('ok')
+			case "X":
+				if(!debug) {
+					toChat('This button is only for debug mode')
+					return res.status(200).json("no")
+				}
+				sendExec('reload TDM')
+				return res.status(200).json("ok")
+			case "Z":
+				if(maxSize) return res.status(200).json('320,700')
+				else return res.status(200).json('320,250')
 			default:
 				return res.status(404).send("404")
 		}
@@ -568,7 +595,7 @@ module.exports = function DPS(d,ctx) {
 		{
 			mygId=e.source.toString()
 			myplayerId='NODEF'
-			myname='ME'
+			myname='_ME'
 			//# For players the convention is 1XXYY (X = 1 + race*2 + gender, Y = 1 + class). See C_CREATE_USER
 			myclass = Number((e.templateId - 1).toString().slice(-2)).toString()
 			log('S_EACH_SKILL_RESULT ' + mygId)
@@ -710,10 +737,10 @@ module.exports = function DPS(d,ctx) {
 	{
 		var statusmsg = ''
 		statusmsg += notice ? 'Notice '.clr(enable_color) : 'Notice '.strike().clr(disable_color)
-		statusmsg += debug ? 'Debug '.clr(enable_color) : 'Debug '.strike().clr(disable_color)
+//		statusmsg += debug ? 'Debug '.clr(enable_color) : 'Debug '.strike().clr(disable_color)
 		statusmsg += bossOnly ? 'Boss Only '.clr(enable_color) : 'Boss Only '.strike().clr(disable_color)
 		statusmsg += allUsers ? 'allUsers '.clr(enable_color) : 'allUsers '.strike().clr(disable_color)
-		if(debug) statusmsg += ' party:'+ party.length + ' NPCs:' + NPCs.length + ' BAMHistory:' + Object.keys(BAMHistory).length
+		if(debug) statusmsg += '<br> party:'+ party.length + ' NPCs:' + NPCs.length + ' BAMHistory:' + Object.keys(BAMHistory).length
 
 		return statusmsg
 	}
@@ -769,6 +796,7 @@ module.exports = function DPS(d,ctx) {
 		for(var i in party){
 			if(totalPartyDamage.equals(0) || battleduration <= 0 || typeof party[i][targetId] == 'undefined') continue
 			cname=party[i].name
+			if(hideNames) cname='HIDDEN'
 			if(party[i].gameId===mygId) cname=cname.clr('00FF00')
 			var cimg = ''
 			if(classIcon) cimg = '<img class=class' +party[i].class + ' />'
