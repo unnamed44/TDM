@@ -69,42 +69,29 @@
 	}
 
 	// settings
-	function NoticeDamageCB() {
-		//document.getElementById("NDV").value = this.responseText.replace(/(\")/gm,"");
-	}
-
-	function NoticeDamage() {
-		xhr(document.getElementById("NDV").value + "D",NoticeDamageCB)
-		xhr("Y",SettingsCB)
-	}
-
 	function NoticeDamageAdd() {
-		xhr("A",NoticeDamageCB)
-		xhr("Y",SettingsCB)
+		xhr("A",Settings)
 	}
 
 	function Debug() {
-		xhr("B",null)
-		xhr("Y",SettingsCB)
+		xhr("B",Settings)
 	}
 
 	function Notice() {
-		xhr("N",null)
-		xhr("Y",SettingsCB)
+		xhr("N",Settings)
 	}
 
 	function AllUsers() {
-		//_tera_client_proxy_.resize_to(320, 700)
-		//document.getElementById('content').setAttribute("style","height:620px");
-		xhr("U",null)
-		xhr("Y",SettingsCB)
+		xhr("U",Settings)
 	}
-
-
 	function BossOnly() {
-		xhr("O", null)
-		xhr("Y",SettingsCB)
+		xhr("O", Settings)
 	}
+	function HideNames()
+	{
+		xhr("I",Settings)
+	}
+
 	function Manager()
 	{
 		xhr("M",null)
@@ -115,11 +102,6 @@
 		xhr("J",null)
 	}
 
-	function HideNames()
-	{
-		xhr("I",null)
-		xhr("Y",SettingsCB)
-	}
 	function ReloadTDM()
 	{
 		xhr("X",refreshCB)
