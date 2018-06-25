@@ -29,18 +29,9 @@ Tera-proxy\bin\node_modules\
 
 ## 선택적 데이터
 
-[tera data](https://github.com/neowutran/TeraDpsMeterData )
-
-아래처럼 html 폴더 밑에 클래스 아이콘과 몬스터를 넣으세요.
-
-html/class-icons
-
-html/monsters
-
-
 모듈 메니져 [manager](https://github.com/Mathicha/manager)
 
-Tera-proxy\bin\node_modules\
+infinity journal
 
 ## 사용법
 

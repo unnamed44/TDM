@@ -27,19 +27,11 @@ For those who have a problem with reset data upon dying
 
    place the resulting folder in `Tera-proxy\bin\node_modules\`
 
-## Optional data
+## Optional data (for dev)
 
-   [tera data](https://github.com/neowutran/TeraDpsMeterData )
+   module manager [manager](https://github.com/Mathicha/manager)
 
-   Find class-icons and monsters from above then put under the html folder like below
-
-   html/class-icons
-
-   html/monsters
-
-   proxy module ui [manager](https://github.com/Mathicha/manager)
-
-   Tera-proxy/bin/node_modules/
+   infinity journal
 
 ## Usage
 
