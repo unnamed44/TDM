@@ -79,7 +79,7 @@ module.exports = function DPS(d,ctx) {
 	if (fs.existsSync(path.join(__dirname,'/html/class-icons'))) {
 		classIcon = true
 	}
-
+	
 	function download(url, dest, cb) {
 		var file = fs.createWriteStream(dest);
 		var request = https.get(url, function(response) {
@@ -99,33 +99,6 @@ module.exports = function DPS(d,ctx) {
 		});
 	}
 
-	function download(url, dest, cb) {
-		var file = fs.createWriteStream(dest);
-		var request = https.get(url, function(response) {
-			response.pipe(file);
-		}).on('error', function(err) { // Handle errors
-			fs.unlink(dest); // Delete the file async. (But we don't check the result)
-			if (err) throw err
-		})
-
-		file.on('finish', function() {
-			file.close(cb);
-		});
-
-		file.on('error', function (err) {
-			fs.unlink(dest);
-			console.log(err);
-		});
-	}
-
-	function renameDownloadedFiles(downloaded, dest)
-	{
-		fs.rename(downloaded, dest+'.test', function (err) {
-			log('OverWriteFiles :'+  downloaded + ' '+ dest)
-			if (err) log(err)
-
-		})
-	}
 	function downloadRename(url, downloaded, dest, cb) {
 		var file = fs.createWriteStream(downloaded);
 		var request = https.get(url, function(response) {
@@ -136,6 +109,10 @@ module.exports = function DPS(d,ctx) {
 		})
 		file.on('finish', function() {
 			file.close(cb);
+			fs.rename(downloaded, dest, function (err) {
+				log('OverWriteFiles :'+  downloaded + ' '+ dest)
+				if (err) throw err
+			})
 		});
 
 		file.on('error', function (err) {
@@ -144,9 +121,7 @@ module.exports = function DPS(d,ctx) {
 		});
 	}
 
-	update()
-
-	async function update()
+	function update()
 	{
 		var dest,url
 		var rootUrl = `https://raw.githubusercontent.com/xmljson/TDM/master/`
@@ -154,19 +129,10 @@ module.exports = function DPS(d,ctx) {
 		var gitkey = 'manifest.json'
 		dest = path.join(__dirname,'_' + gitkey)
 		url = rootUrl + gitkey
-		let v
-		try{
-			v= await download(url,dest,null)
-		}
-		catch(e)
-		{
-
-		}
-		return checkVersionCB(v)
-
+		download(url,dest,checkVersionCB)
 	}
 
-	function checkVersionCB(x)
+	function checkVersionCB()
 	{
 		var _manifest = require('./_manifest.json')
 		log(manifest.version + ' : '+ _manifest.version)
@@ -174,7 +140,7 @@ module.exports = function DPS(d,ctx) {
 		updateFiles()
 	}
 
-	async function updateFiles()
+	function updateFiles()
 	{
 		var dest,url
 		var rootUrl = 'https://raw.githubusercontent.com/xmljson/TDM/master/'
@@ -188,15 +154,13 @@ module.exports = function DPS(d,ctx) {
 			dest = path.join(__dirname,key)
 			url = rootUrl + key
 			result += `Downloading ${key}<br>`
-			await download(url,dest+'.downloaded',null)
-			renameDownloadedFiles(dest+'.downloaded',dest)
-			//download(url,dest+'.downloaded',null,renameDownloadedFiles(dest+'.downloaded',dest))
+			downloadRename(url,dest+'.downloaded',dest,null)
 		}
 
 		var tmpkey = 'manifest.json'
 		dest = path.join(__dirname,tmpkey)
 		url = rootUrl + tmpkey
-		//download(url,dest+'.downloaded',null,renameDownloadedFiles(dest+'.downloaded',dest))
+		downloadRename(url,dest+'.downloaded',dest,null)
 
 		log('TDM has been Updated. restart proxy.')
 		result += 'TDM has been Updated. restart tera proxy'
@@ -210,7 +174,7 @@ module.exports = function DPS(d,ctx) {
 		var monsteroverrideUrl = `https://raw.githubusercontent.com/neowutran/TeraDpsMeterData/master/monsters/monsters-${region}.xml`
 
 		download(monsterUrl,monsterfile,null)
-		download(monsteroverrideUrl,override,null,createXmlDoc)
+		download(monsteroverrideUrl,override,createXmlDoc)
 	}
 	else {
 		createXmlDoc()
