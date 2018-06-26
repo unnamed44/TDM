@@ -1,11 +1,13 @@
 {
-	"version": "1.0",
+	"version": "1.0.0",
 	"files": {
-		"index.js": "17f1454c84e11ac9f101abc300c6271eb8578261a0c08f93248205b6a79bd71d",
+		"index.js": "f79357694af43485416e2a67f8c96a1ec94504efd150dff0f9dca3beeb6d9c22",
 		"managerui.js": "c14cabb40f49cbc4a439f397757b0ac65b5703742eb14ddd7950422905c9dc0a",
 		"html/index.html": "a24f9e0731cb82c8f6d89f787a2a2223c4ab992fc2ab831da9d00cfe9c7bce98",
 		"html/main.css": "34f7e46c0d525c1212c93ecc7e1a7f90d10353fafc3f27c5859cf284d63dfdc2",
 		"manager/index.html": "632ca966679aff750d447d18c146bc161deb180a7cc22ea5c9bf0e2891b4abe3",
-		"manager/main.css": "036f2eeb06982d0fb73ef05b9ba238daf2cb9d9a224469b0923f9d5e708e7a3f"
+		"manager/main.css": "036f2eeb06982d0fb73ef05b9ba238daf2cb9d9a224469b0923f9d5e708e7a3f",
+		"logger.js": "3488d2c4d7b15a99f054e712b31752e26b3edab54bedfbaec94c981b3e6cf17d",
+		"manifest.json": "3488d2c4d7b15a99f054e712b31752e26b3edab54bedfbaec94c981b3e6cf17d"
 	}
 }
