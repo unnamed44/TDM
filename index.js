@@ -67,6 +67,7 @@ module.exports = function DPS(d,ctx) {
 	doc = null,
 	odoc = null,
 	hideNames = false,
+	_version = manifest.version,
 	classIcon = false
 
 	let enable_color = 'E69F00',
@@ -78,6 +79,12 @@ module.exports = function DPS(d,ctx) {
 
 	if (fs.existsSync(path.join(__dirname,'/html/class-icons'))) {
 		classIcon = true
+	}
+
+	function checkUpdateInterval()
+	{
+		let i = 0
+		let CounterId = setInterval( () => {checkUpdate()}, 1000*60*30 ) // every 30 min
 	}
 
 	function download(url, dest, cb) {
@@ -121,6 +128,27 @@ module.exports = function DPS(d,ctx) {
 		});
 	}
 
+	function checkUpdate()
+	{
+		var dest,url
+		var rootUrl = `https://raw.githubusercontent.com/xmljson/TDM/master/`
+		// check manifest
+		var gitkey = 'manifest.json'
+		dest = path.join(__dirname,'_' + gitkey)
+		url = rootUrl + gitkey
+		download(url,dest,getVersionCB)
+	}
+
+	function getVersionCB()
+	{
+		var _manifest = require('./_manifest.json')
+
+		//log(manifest.version + ' : '+ _manifest.version)
+		if(_manifest.version === manifest.version) return
+		_version = `Please update new ${_manifest.version} version`.clr('FF0000')
+
+	}
+
 	function update()
 	{
 		var dest,url
@@ -135,6 +163,7 @@ module.exports = function DPS(d,ctx) {
 	function checkVersionCB()
 	{
 		var _manifest = require('./_manifest.json')
+
 		log(manifest.version + ' : '+ _manifest.version)
 		if(_manifest.version === manifest.version) return
 		updateFiles()
@@ -173,11 +202,12 @@ module.exports = function DPS(d,ctx) {
 		var monsterUrl = `https://raw.githubusercontent.com/neowutran/TeraDpsMeterData/master/monsters/monsters-${region}.xml`
 		var monsteroverrideUrl = `https://raw.githubusercontent.com/neowutran/TeraDpsMeterData/master/monsters/monsters-${region}.xml`
 
-		download(monsterUrl,monsterfile,null)
-		download(monsteroverrideUrl,override,createXmlDoc)
+		download(monsterUrl,monsterfile,createXmlDoc)
+		download(monsteroverrideUrl,override,createXmlODoc)
 	}
 	else {
 		createXmlDoc()
+		//createXmlODoc()
 	}
 
 	// moster xml file
@@ -212,6 +242,9 @@ module.exports = function DPS(d,ctx) {
 			//log(findZoneMonster(152,2003)) //학살의 사브라니악
 		})
 
+	}
+	function createXmlODoc() // async
+	{
 		//override.xml
 		fs.readFile(override, "utf-8", function (err,data)
 		{
@@ -387,7 +420,7 @@ module.exports = function DPS(d,ctx) {
 				update()
 				return res.status(200).json("restart proxy.")
 			case "R":
-				return res.status(200).json(estatus+ '</br>' + membersDps(currentbossId))
+				return res.status(200).json(estatus+ '</br>' + membersDps(currentbossId) + _version)
 			case "S":
 				removeAllPartyDPSdata()
 				return res.status(200).json('ok')
