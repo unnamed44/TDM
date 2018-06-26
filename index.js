@@ -146,8 +146,9 @@ module.exports = function DPS(d,ctx) {
 	{
 		var _manifest = require('./_manifest.json')
 
-		//log(manifest.version + ' : '+ _manifest.version)
-		if(_manifest.version === manifest.version) return
+		//log(_version + ' : '+ _manifest.version)
+		_version = manifest.version
+		if(_version === manifest.version) return
 		_version = `Please update new ${_manifest.version} version`.clr('FF0000')
 
 	}
