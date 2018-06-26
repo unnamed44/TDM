@@ -81,10 +81,13 @@ module.exports = function DPS(d,ctx) {
 		classIcon = true
 	}
 
+	checkUpdateInterval()
+
 	function checkUpdateInterval()
 	{
 		let i = 0
-		let CounterId = setInterval( () => {checkUpdate()}, 1000*60*30 ) // every 30 min
+		checkUpdate()
+		let CounterId = setInterval( () => {checkUpdate()}, 1000 * 60 * 30 ) // every 30 min
 	}
 
 	function download(url, dest, cb) {
