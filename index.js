@@ -79,7 +79,7 @@ module.exports = function DPS(d,ctx) {
 	if (fs.existsSync(path.join(__dirname,'/html/class-icons'))) {
 		classIcon = true
 	}
-	
+
 	function download(url, dest, cb) {
 		var file = fs.createWriteStream(dest);
 		var request = https.get(url, function(response) {
@@ -462,7 +462,14 @@ module.exports = function DPS(d,ctx) {
 		subHp = e.maxHp.sub(e.curHp) // Long
 		hpPer = hpCur.multiply(100).div(hpMax)
 		nextEnrage = (hpPer > 10) ? (hpPer - 10) : 0
+		if(hpMax.equals(hpCur)) setBoss(e.id.toString())
 	})
+
+	function setBoss(id)
+	{
+		for(var i in NPCs)
+			if(NPCs[i].gameId === id) NPCs[i].isBoss = true
+	}
 
 	d.hook('S_SPAWN_NPC',8, (e) => {
 		var newNPC = {
