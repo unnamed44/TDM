@@ -5,9 +5,11 @@
 const Command = require('command')
 const Long = require("long")
 const config = require('./config.json')
+const manifest = require('./manifest.json')
 const regionConfig = require('../../config.json')
 const logger = require('./logger')
 const xmldom = require('xmldom')
+var https = require('https');
 const fs = require('fs')
 const path = require('path')
 const ui_install = require('./ui_install')
@@ -70,8 +72,148 @@ module.exports = function DPS(d,ctx) {
 	let enable_color = 'E69F00',
 	disable_color = '56B4E9'
 
+	if(region === 'EU') region = 'EU-EN'
+	let monsterfile = path.join(__dirname, '/monsters-'+ region + '.xml')
+	let override = path.join(__dirname, '/monsters-override.xml')
+
 	if (fs.existsSync(path.join(__dirname,'/html/class-icons'))) {
 		classIcon = true
+	}
+
+	function download(url, dest, cb) {
+		var file = fs.createWriteStream(dest);
+		var request = https.get(url, function(response) {
+			response.pipe(file);
+		}).on('error', function(err) { // Handle errors
+			fs.unlink(dest); // Delete the file async. (But we don't check the result)
+			if (err) throw err
+		})
+
+		file.on('finish', function() {
+			file.close(cb);
+		});
+
+		file.on('error', function (err) {
+			fs.unlink(dest);
+			console.log(err);
+		});
+	}
+
+	function download(url, dest, cb) {
+		var file = fs.createWriteStream(dest);
+		var request = https.get(url, function(response) {
+			response.pipe(file);
+		}).on('error', function(err) { // Handle errors
+			fs.unlink(dest); // Delete the file async. (But we don't check the result)
+			if (err) throw err
+		})
+
+		file.on('finish', function() {
+			file.close(cb);
+		});
+
+		file.on('error', function (err) {
+			fs.unlink(dest);
+			console.log(err);
+		});
+	}
+
+	function renameDownloadedFiles(downloaded, dest)
+	{
+		fs.rename(downloaded, dest+'.test', function (err) {
+			log('OverWriteFiles :'+  downloaded + ' '+ dest)
+			if (err) log(err)
+
+		})
+	}
+	function downloadRename(url, downloaded, dest, cb) {
+		var file = fs.createWriteStream(downloaded);
+		var request = https.get(url, function(response) {
+			response.pipe(file);
+		}).on('error', function(err) {
+			fs.unlink(downloaded)
+			if (err) throw err
+		})
+		file.on('finish', function() {
+			file.close(cb);
+		});
+
+		file.on('error', function (err) {
+			fs.unlink(downloaded);
+			console.log(err);
+		});
+	}
+
+	update()
+
+	async function update()
+	{
+		var dest,url
+		var rootUrl = `https://raw.githubusercontent.com/xmljson/TDM/master/`
+		// check manifest
+		var gitkey = 'manifest.json'
+		dest = path.join(__dirname,'_' + gitkey)
+		url = rootUrl + gitkey
+		let v
+		try{
+			v= await download(url,dest,null)
+		}
+		catch(e)
+		{
+
+		}
+		return checkVersionCB(v)
+
+	}
+
+	function checkVersionCB(x)
+	{
+		var _manifest = require('./_manifest.json')
+		log(manifest.version + ' : '+ _manifest.version)
+		if(_manifest.version === manifest.version) return
+		updateFiles()
+	}
+
+	async function updateFiles()
+	{
+		var dest,url
+		var rootUrl = 'https://raw.githubusercontent.com/xmljson/TDM/master/'
+		var result= ''
+
+		var _manifest = require('./_manifest.json')
+
+		for(var key in _manifest.files)
+		{
+			if(key === 'config.json') continue
+			dest = path.join(__dirname,key)
+			url = rootUrl + key
+			result += `Downloading ${key}<br>`
+			await download(url,dest+'.downloaded',null)
+			renameDownloadedFiles(dest+'.downloaded',dest)
+			//download(url,dest+'.downloaded',null,renameDownloadedFiles(dest+'.downloaded',dest))
+		}
+
+		var tmpkey = 'manifest.json'
+		dest = path.join(__dirname,tmpkey)
+		url = rootUrl + tmpkey
+		//download(url,dest+'.downloaded',null,renameDownloadedFiles(dest+'.downloaded',dest))
+
+		log('TDM has been Updated. restart proxy.')
+		result += 'TDM has been Updated. restart tera proxy'
+
+		//return result
+	}
+
+
+	if (!fs.existsSync(monsterfile)|| !fs.existsSync(override)) {
+		var monsterUrl = `https://raw.githubusercontent.com/neowutran/TeraDpsMeterData/master/monsters/monsters-${region}.xml`
+		var monsteroverrideUrl = `https://raw.githubusercontent.com/neowutran/TeraDpsMeterData/master/monsters/monsters-${region}.xml`
+
+		download(monsterUrl,monsterfile,null)
+		download(monsteroverrideUrl,override,null,createXmlDoc)
+	}
+	else {
+		createXmlDoc()
 	}
 
 	// moster xml file
@@ -88,20 +230,38 @@ module.exports = function DPS(d,ctx) {
 			logger.error({ err: msg }, 'xml parser fatal error')
 		},
 	}
-	var monsterfile = path.join(__dirname, '/html/monsters/monsters-'+ region + '.xml')
-	fs.readFile(monsterfile, "utf-8", function (err,data)
+
+
+	function createXmlDoc() // async
 	{
-		if (err) {
-			return log(err)
-		}
-		const parser = new xmldom.DOMParser({ errorHandler })
-		doc = parser.parseFromString(data, 'text/xml')
-		if (!doc) {
-			log('ERROR xml doc')
-			return
-		}
-		//log(findZoneMonster(152,2003)) //학살의 사브라니악
-	})
+		fs.readFile(monsterfile, "utf-8", function (err,data)
+		{
+			if (err) {
+				return log(err)
+			}
+			const parser = new xmldom.DOMParser({ errorHandler })
+			doc = parser.parseFromString(data, 'text/xml')
+			if (!doc) {
+				log('ERROR xml doc :' + monsterfile)
+				return
+			}
+			//log(findZoneMonster(152,2003)) //학살의 사브라니악
+		})
+
+		//override.xml
+		fs.readFile(override, "utf-8", function (err,data)
+		{
+			if (err) {
+				return log(err)
+			}
+			const oparser = new xmldom.DOMParser({ errorHandler })
+			odoc = oparser.parseFromString(data, 'text/xml')
+			if (!odoc) {
+				log('ERROR xml odoc :' + override)
+				return
+			}
+		})
+	}
 
 	function getNPCInfoFromXml(gId)
 	{
@@ -137,20 +297,7 @@ module.exports = function DPS(d,ctx) {
 		}
 		return true
 	}
-	//override.xml
-	var override = path.join(__dirname, '/html/monsters/monsters-override.xml')
-	fs.readFile(override, "utf-8", function (err,data)
-	{
-		if (err) {
-			return log(err)
-		}
-		const oparser = new xmldom.DOMParser({ errorHandler })
-		odoc = oparser.parseFromString(data, 'text/xml')
-		if (!odoc) {
-			log('ERROR xml odoc')
-			return
-		}
-	})
+
 
 	function overrideIsBoss(gId)
 	{
@@ -273,11 +420,8 @@ module.exports = function DPS(d,ctx) {
 				statusToChat('dps popup',enable)
 				return res.status(200).json("ok")
 			case "Q":
-				if(!debug) {
-					toChat('This button is only for debug mode')
-					return res.status(200).json("not implemented yet")
-				}
-				return res.status(200).json("not implemented yet")
+				update()
+				return res.status(200).json("restart proxy.")
 			case "R":
 				return res.status(200).json(estatus+ '</br>' + membersDps(currentbossId))
 			case "S":
