@@ -67,7 +67,7 @@ module.exports = function DPS(d,ctx) {
 	doc = null,
 	odoc = null,
 	hideNames = false,
-	_version = manifest.version,
+	versionMsg = '',
 	classIcon = false
 
 	let enable_color = 'E69F00',
@@ -81,14 +81,7 @@ module.exports = function DPS(d,ctx) {
 		classIcon = true
 	}
 
-	checkUpdateInterval()
-
-	function checkUpdateInterval()
-	{
-		let i = 0
-		checkUpdate()
-		let CounterId = setInterval( () => {checkUpdate()}, 1000 * 60 * 30 ) // every 30 min
-	}
+	checkUpdate()
 
 	function download(url, dest, cb) {
 		var file = fs.createWriteStream(dest);
@@ -144,13 +137,15 @@ module.exports = function DPS(d,ctx) {
 
 	function getVersionCB()
 	{
-		var _manifest = require('./_manifest.json')
-
-		//log(_version + ' : '+ _manifest.version)
-		_version = manifest.version
-		if(_version === manifest.version) return
-		_version = `Please update new ${_manifest.version} version`.clr('FF0000')
-
+		var gitManifest = require('./_manifest.json')
+		var currentManifest = require('./manifest.json')
+		var gitkey = 'manifest.json'
+		dest = path.join(__dirname,'_' + gitkey)
+		fs.unlink(dest)
+		versionMsg = 'TDM version ' + currentManifest.version
+		log(Date.now() + ' ' + currentManifest.version + ' ' + gitManifest.version )
+		if(currentManifest.version === gitManifest.version) return
+		versionMsg = `Please update new ${gitManifest.version} version.`.clr('FF0000') + '<button class=btn type="button" onclick="Update()">Update</button>'
 	}
 
 	function update()
@@ -166,10 +161,15 @@ module.exports = function DPS(d,ctx) {
 
 	function checkVersionCB()
 	{
-		var _manifest = require('./_manifest.json')
-
-		log(manifest.version + ' : '+ _manifest.version)
-		if(_manifest.version === manifest.version) return
+		var gitManifest = require('./_manifest.json')
+		var currentManifest = require('./manifest.json')
+		var gitkey = 'manifest.json'
+		dest = path.join(__dirname,'_' + gitkey)
+		fs.unlink(dest)
+		versionMsg = 'TDM version ' + currentManifest.version
+		log(currentManifest.version + ' ' + gitManifest.version)
+		if(currentManifest.version === gitManifest.version) return
+		versionMsg = `Downloading new ${gitManifest.version} version.`.clr('FF0000')
 		updateFiles()
 	}
 
@@ -197,7 +197,7 @@ module.exports = function DPS(d,ctx) {
 
 		log('TDM has been Updated. restart proxy.')
 		result += 'TDM has been Updated. restart tera proxy'
-
+		versionMsg = `TDM has been Updated. restart tera proxy.`.clr('FF0000')
 		//return result
 	}
 
@@ -424,7 +424,7 @@ module.exports = function DPS(d,ctx) {
 				update()
 				return res.status(200).json("restart proxy.")
 			case "R":
-				return res.status(200).json(estatus+ '</br>' + membersDps(currentbossId) + _version)
+				return res.status(200).json(estatus+ '</br>' + membersDps(currentbossId) + versionMsg)
 			case "S":
 				removeAllPartyDPSdata()
 				return res.status(200).json('ok')

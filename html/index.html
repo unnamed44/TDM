@@ -38,19 +38,24 @@
 	}
 
 
-	function Whisper() {
+	function warningMsg()
+	{
+		_tera_client_proxy_.alert("Please remember TDM is not for mocking others. It is at your own risk to get banned by sending dps data");
+	}
 
+	function Whisper() {
+		warningMsg()
 		var name = document.getElementById("name").value;
 		xhr("0W"+ name,null)
 	}
 
 	function ToGuild() {
-		_tera_client_proxy_.alert("Please remember TDM is not for mocking others.");
+		warningMsg()
 		xhr("2C",null)
 	}
 
 	function ToParty() {
-		_tera_client_proxy_.alert("Please remember TDM is not for mocking others.");
+		warningMsg()
 		xhr("1C",null)
 	}
 
@@ -195,7 +200,7 @@
 	})
 
 	window.onbeforeunload =  function() {
-		xhr("P",CloseDpsCB)
+		//xhr("P",CloseDpsCB)
 		return null;
 	}
 
@@ -226,7 +231,16 @@
 		//_tera_client_proxy_.alert("Please remember TDM is not for mocking others.");
 		refreshDPS()
 	}
+
+	function useBrowser(url)
+	{
+		_tera_client_proxy_.resize_to(1024, 768)
+		window.location.href=url
+	}
+
 	</script>
+
+
 </head>
 <body>
 	<button type="button" class=tab onclick="DPS()">DPS</button>
@@ -234,36 +248,63 @@
 	<button type="button" class=tab  onclick="Settings()">Settings</button>
 	<button class=tab type="button" onclick="CloseDps()">Close</button><br>
 	<div  id="wrapper">
-		<div  id="content"></div >
-			<input class=ipt type="text" size="1" id="name" value="">
-			<button class=btn type="button" onclick="Whisper()">Whisper</button>
-			<button class=btn type="button" onclick="ToParty()">ToParty</button>
-			<button class=btn type="button" onclick="ToGuild()">ToGuild</button>
-			<button class=btn type="button" onclick="LeaveParty()">LeaveParty</button>
-			<button class=btn type="button" onclick="Reset()">Reset</button><br>
+		<div  id="content">
+		</div >
+		<input class=ipt type="text" size="1" id="name" value="">
+		<button class=btn type="button" onclick="Whisper()">Whisper</button>
+		<button class=btn type="button" onclick="ToParty()">ToParty</button>
+		<button class=btn type="button" onclick="ToGuild()">ToGuild</button>
+		<button class=btn type="button" onclick="LeaveParty()">LeaveParty</button>
+		<button class=btn type="button" onclick="Reset()">Reset</button><br>
 
+	</div>
+	<div  id="history">
+	</div>
+	<div  id="settings">
+		<br>
+		Settings<br><br>
+		<div id='status'>
 		</div>
-		<div  id="history"></div>
-		<div  id="settings">
-			<br>
-			<div id='status'></div>
-			<br>
-			<br>
-			<button class=btn type="button" onclick="NoticeDamageAdd()">Notice value</button>
-			<button class=btn id="notice" onclick="Notice()">Notice</button>
-			<button class=btn id="bossonly" onclick="BossOnly()">bossOnly</button>
-			<button class=btn type="button" onclick="HideNames()">HideNames</button>
-			<button class=btn id="notice" onclick="AllUsers()">All DPS</button><br>
-			<button class=btn type="button" onclick="Debug()">Debug</button>
-
-			<button class=btn type="button" onclick="ReloadTDM()">ReloadTDM</button>
-			<button class=btn type="button" onclick="Manager()">Manager</button>
-			<button class=btn type="button" onclick="Journal()">Journal</button>
-			<button class=btn type="button" onclick="Update()">Update</button>
-			<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-			<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-			<textarea id="debug" maxLength="2000" rows="14" cols="50"></textarea>
+		<br>
+		<br>
+		<button class=btn type="button" onclick="NoticeDamageAdd()">Notice value</button>
+		<button class=btn id="notice" onclick="Notice()">Notice</button>
+		<button class=btn id="bossonly" onclick="BossOnly()">bossOnly</button>
+		<button class=btn type="button" onclick="HideNames()">HideNames</button>
+		<button class=btn id="notice" onclick="AllUsers()">All DPS</button><br>
+		<button class=btn type="button" onclick="Update()">Update</button><br>
+		<br><br><br><br><br>
+		Debug<br>
+		<button class=btn type="button" onclick="Debug()">Debug</button>
+		<button class=btn type="button" onclick="ReloadTDM()">ReloadTDM</button>
+		<button class=btn type="button" onclick="Manager()">Manager</button>
+		<button class=btn type="button" onclick="Journal()">Journal</button>
+		<button class=btn onclick="useBrowser('http://www.google.com')">google</button>
+		<button class=btn onclick="useBrowser('http://www.youtube.com')">youtube</button>
+		<br><br><br><br>
+		<div style="position:relative;width:267px;height:25px;overflow:hidden;">
+			<div style="position:absolute;top:-276px;left:-5px">
+				<iframe width="300" height="300"
+				src="https://www.youtube.com/embed/9Ugfve_qx-s?rel=0">
+			</iframe>
+			</div>
 		</div>
 
-	</body>
-	</html>
+		<!--
+		<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=C6BU555NMQJD6">
+		<img src="https://www.paypalobjects.com/en_AU/i/btn/btn_donateCC_LG.gif">
+			</a>
+			<form action="https://www.paypal.com/cgi-bin/webscr" onclick="enlarge()" method="post" target="_top">
+			<input type="hidden" name="cmd" value="_s-xclick">
+			<input type="hidden" name="hosted_button_id" value="C6BU555NMQJD6">
+			<input type="image" src="https://www.paypalobjects.com/en_AU/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal – The safer, easier way to pay online!">
+			<img alt="" border="0" src="https://www.paypalobjects.com/en_AU/i/scr/pixel.gif" width="1" height="1" >
+		</form><br><br>
+
+		</div>-->
+	<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+	<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+	<textarea id="debug" maxLength="2000" rows="14" cols="50"></textarea>
+	</div>
+</body>
+</html>

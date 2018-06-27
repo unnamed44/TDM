@@ -95,9 +95,11 @@ img {
      color: #ffffff;
      font-size: 10px;
      background: #577080;
-  	padding: 0px 20px 0px 20px;
+  	padding: 1px 20px 1px 20px;
      text-decoration: none;
 }
+
+
 
 .tab:hover {
 	background: #3cb0fd;
@@ -107,6 +109,10 @@ img {
      background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
      background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
      text-decoration: none;
+}
+
+.tab:active {
+	background: #3c00fd;
 }
 
 .btn {
@@ -135,4 +141,8 @@ img {
 	background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
 	background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
 	text-decoration: none;
+}
+
+.btn:active {
+	background: #3c00fd;
 }
