@@ -348,12 +348,14 @@ module.exports = function DPS(d,ctx) {
 	function textDPSFormat(data)
 	{
 		var dpsmsg = ''
-		dpsmsg += stripOuterHTML(data[0].monsterBattleInfo) + '\n'		
+		dpsmsg += stripOuterHTML(data[0].monsterBattleInfo) + '\n'
 		for(var i in data){
 			if(i == 0) continue
+			if(hideNames) data[i].name='HIDDEN'
 			dpsmsg 	+=data[i].name + ' '+ data[i].dps + 'k/s '.clr(enable_color)
-					+ data[i].percentage  + '% '.clr(enable_color)
-					+ data[i].crit  + '% '.clr(enable_color) + '\n'
+					+ data[i].totalDamage.substring(0, data[i].totalDamage.length - 3)  + 'k Damage '.clr(enable_color)
+					+ data[i].percentage  + '% Damage '.clr(enable_color)
+					+ data[i].crit  + '% Crit '.clr(enable_color) + '\n'
 		}
 		return dpsmsg
 	}
