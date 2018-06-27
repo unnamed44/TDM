@@ -288,7 +288,10 @@
 		_tera_client_proxy_.resize_to(1024, 768)
 		window.location.href=url
 	}
-
+	function openWebsite(url)
+	{
+		_tera_client_proxy_.open_web_direct(url)
+	}
 
 	</script>
 
@@ -325,7 +328,7 @@
 				<td><button class=btn onclick="Debug()">Debug</button></td><td><p id="Debug"></p></td></tr>
 			<tr><td><button class=btn onclick="ReloadTDM()">ReloadTDM</button></td><td><button class=btn onclick="Manager()">Manager</button></td>
 				<td><button class=btn onclick="Journal()">Journal</button></td><td><button class=btn onclick="Update()">Update</button></td></tr>
-			<tr><td><button class=btn onclick="useBrowser('http://www.google.com')">google</button></td><td><button class=btn onclick="useBrowser('http://www.youtube.com')">youtube</button></td>
+			<tr><td><button class=btn onclick="openWebsite('https://discord.gg/JRa7FXd')">TDM discord(external web browser)</button></td><td><button class=btn onclick="useBrowser('http://www.youtube.com')">youtube</button></td>
 				<td><button class=btn onclick="useBrowser('https://www.gnu.org/licenses/gpl-3.0-standalone.html')">LICENSE</button></td><td><button class=btn onclick="useBrowserHelp()">Usage</button></td></tr>
 		</table>
 		<br><br><br><br><br><br><br><br>

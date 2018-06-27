@@ -1,12 +1,18 @@
 {
-	"version": "1.2.3",
+	"version": "1.2.4",
 	"files": {
-		"index.js": "f79357694af43485416e2a67f8c96a1ec94504efd150dff0f9dca3beeb6d9c22",
+		"index.js": "b259745ac713fe1580abaa85ea04c283904d2c984270e03b6bd5b81541f89509",
 		"managerui.js": "c14cabb40f49cbc4a439f397757b0ac65b5703742eb14ddd7950422905c9dc0a",
-		"html/index.html": "a24f9e0731cb82c8f6d89f787a2a2223c4ab992fc2ab831da9d00cfe9c7bce98",
-		"html/main.css": "34f7e46c0d525c1212c93ecc7e1a7f90d10353fafc3f27c5859cf284d63dfdc2",
+		"html/index.html": "5d1761eefe74b51fc004aff24695a8ef54065d894af21dfe7c24dfbc18849627",
+		"html/main.css": "a377d9d2a3d5c62bfdda0440bac8c0c30cdfcd2ebdf5b6f1d9aa8e52d7cfb5ed",
 		"manager/index.html": "632ca966679aff750d447d18c146bc161deb180a7cc22ea5c9bf0e2891b4abe3",
 		"manager/main.css": "036f2eeb06982d0fb73ef05b9ba238daf2cb9d9a224469b0923f9d5e708e7a3f",
-		"logger.js": "3488d2c4d7b15a99f054e712b31752e26b3edab54bedfbaec94c981b3e6cf17d"
+		"logger.js": "3488d2c4d7b15a99f054e712b31752e26b3edab54bedfbaec94c981b3e6cf17d",
+		"config.json": "3733fb717675922c3937a826d5feb07b0e18014b52a6added03c5fd67661847e",
+		"README.md": "b5211c67747a94880d2667383e7469c2109017ede4545b31553755a9c036f6b2",
+		"README_KR.md": "f58daf8de818e6b2d8fbefff3fb4800a8e6e432ea3a888a9443068b43b476dba",
+		"ui_install.js": "79d05624336bbb01c127ccae6bada72b92bbd3b10da346dec0a770ff18587a76",
+		"html/README.html": "01f9532836ff2bd056a537d9e4635cc05e0fc2b90beceaec15556d3d98e1518a",
+		"html/README_KR.html": "af66bcde2b02cae1d867e059cd162f5e8fb6fdb1c11104b12c2c696c578055f0"
 	}
 }
