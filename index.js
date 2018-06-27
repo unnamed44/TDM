@@ -140,7 +140,7 @@ module.exports = function DPS(d,ctx) {
 		var gitManifest = require('./_manifest.json')
 		var currentManifest = require('./manifest.json')
 		var gitkey = 'manifest.json'
-		dest = path.join(__dirname,'_' + gitkey)
+		var dest = path.join(__dirname,'_' + gitkey)
 		fs.unlink(dest)
 		versionMsg = 'TDM version ' + currentManifest.version
 		log(Date.now() + ' ' + currentManifest.version + ' ' + gitManifest.version )
@@ -164,7 +164,7 @@ module.exports = function DPS(d,ctx) {
 		var gitManifest = require('./_manifest.json')
 		var currentManifest = require('./manifest.json')
 		var gitkey = 'manifest.json'
-		dest = path.join(__dirname,'_' + gitkey)
+		var dest = path.join(__dirname,'_' + gitkey)
 		fs.unlink(dest)
 		versionMsg = 'TDM version ' + currentManifest.version
 		log(currentManifest.version + ' ' + gitManifest.version)
