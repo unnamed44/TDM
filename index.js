@@ -348,10 +348,9 @@ module.exports = function DPS(d,ctx) {
 	function textDPSFormat(data)
 	{
 		var dpsmsg = ''
-		var i = 0
-		dpsmsg += stripOuterHTML(data[0].monsterBattleInfo) + '\n'
-		i=1
-		for(i in data){
+		dpsmsg += stripOuterHTML(data[0].monsterBattleInfo) + '\n'		
+		for(var i in data){
+			if(i == 0) continue
 			dpsmsg 	+=data[i].name + ' '+ data[i].dps + 'k/s '.clr(enable_color)
 					+ data[i].percentage  + '% '.clr(enable_color)
 					+ data[i].crit  + '% '.clr(enable_color) + '\n'
