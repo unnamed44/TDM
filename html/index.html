@@ -5,6 +5,9 @@
 	<script>
 	var x
 	var previousDps = ''
+	var versionMsg = ''
+	var TDMSettings
+	//var enable_color = 'E69F00',	disable_color = '56B4E9'
 
 	function xhr(url, cb) {
 		x = new XMLHttpRequest();
@@ -17,6 +20,10 @@
 
 	function stripOuterHTML(str) {
 		return str.replace(/\'|^<[^>]+>|<\/[^>]+><[^\/][^>]*>|<\/[^>]+>$/g, '')
+	}
+
+	String.prototype.clr = function (hexColor) {
+		return '<font color="#' +hexColor+'">'+ this +'</font>'
 	}
 
 
@@ -129,8 +136,13 @@
 
 	// history tab
 	function HistoryCB() {
-		var dpsmsg = this.responseText.substring(1, this.responseText.length - 1)
-		document.getElementById("history").innerHTML = dpsmsg.replace(/(\\n|\\)/gm,"");
+		var res = JSON.parse(this.responseText)
+		if(res === '') return
+		var result = ''
+		for(var key in res){
+			result += tableDPSFormat(res[key])
+		}
+		document.getElementById("history").innerHTML = result;
 	}
 
 	function History() {
@@ -145,11 +157,18 @@
 		xhr("H",HistoryCB)
 	}
 
+
 	// setting tab
 	function SettingsCB()
 	{
-		var dpsmsg = this.responseText.substring(1, this.responseText.length - 1)
-		document.getElementById("status").innerHTML = dpsmsg.replace(/(\\n|\\)/gm,"");
+		TDMSettings = JSON.parse(this.responseText)
+		document.getElementById("NoticeDamageAdd").innerHTML = TDMSettings.noticeDamage
+		document.getElementById("Notice").innerHTML = TDMSettings.notice
+		document.getElementById("BossOnly").innerHTML = TDMSettings.bossOnly
+		document.getElementById("HideNames").innerHTML = TDMSettings.hideNames
+		document.getElementById("AllUsers").innerHTML = TDMSettings.allUsers
+		document.getElementById("Debug").innerHTML = TDMSettings.debug
+		document.getElementById("debug").innerHTML = 'party:'+ TDMSettings.partyLengh + '| NPCs:' + TDMSettings.NPCsLength + '| BAMHistory:' + TDMSettings.BAMHistoryLength
 	}
 
 	function Settings(){
@@ -173,13 +192,35 @@
 		history.style.display = "none";
 	}
 
+
+
+	function tableDPSFormat(data)
+	{
+		var dpsmsg = ''
+		dpsmsg += data[0].enraged
+		dpsmsg += '<br>' + data[0].monsterBattleInfo
+		dpsmsg += '<table>'
+		for(var i in data){
+			if(i == 0) continue
+			dpsmsg 	+='<tr><td> ' + data[i].name  + ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">'//`<td style="background: url('./icons/bar.jpg'); background-repeat: no-repeat; background-size: ${data[i].percentage}% 20%;"> `
+					+ data[i].dps + 'k/s '.clr('E69F00') + ' </td>'
+					+ '<td> ' + data[i].percentage  + '%'.clr('E69F00') + ' </td>'
+					+ '<td class=graph> ' +  data[i].crit  + '%'.clr('E69F00') + ' </td></tr>'
+		}
+		dpsmsg += '</table>'
+		versionMsg  = data[0].versionMsg
+		return dpsmsg
+	}
+
 	function refreshCB()
 	{
-		if(previousDps.localeCompare(this.responseText) == 0) return
-		var dpsmsg = this.responseText.substring(1, this.responseText.length - 1)
-		document.getElementById("content").innerHTML = dpsmsg.replace(/(\\n|\\)/gm,"");
-		document.getElementById("debug").innerHTML = dpsmsg.replace(/(\\n|\\)/gm,"");
-		previousDps = this.responseText
+		var res = JSON.parse(this.responseText)
+		if(res === '') return
+		var result = tableDPSFormat(res)
+		if(result === previousDps) return
+		document.getElementById("content").innerHTML = result + '<br>' + versionMsg;
+		document.getElementById("debug").innerHTML = result;
+		previousDps = result
 	}
 
 	function refreshDPS()
@@ -243,45 +284,40 @@
 
 </head>
 <body>
-	<button type="button" class=tab onclick="DPS()">DPS</button>
-	<button type="button" class=tab onclick="History()">History</button>
-	<button type="button" class=tab  onclick="Settings()">Settings</button>
-	<button class=tab type="button" onclick="CloseDps()">Close</button><br>
+	<button class=tab onclick="DPS()">DPS</button>
+	<button class=tab onclick="History()">History</button>
+	<button class=tab  onclick="Settings()">Settings</button>
+	<button class=tab onclick="CloseDps()">Close</button><br>
 	<div  id="wrapper">
 		<div  id="content">
 		</div >
 		<input class=ipt type="text" size="1" id="name" value="">
-		<button class=btn type="button" onclick="Whisper()">Whisper</button>
-		<button class=btn type="button" onclick="ToParty()">ToParty</button>
-		<button class=btn type="button" onclick="ToGuild()">ToGuild</button>
-		<button class=btn type="button" onclick="LeaveParty()">LeaveParty</button>
-		<button class=btn type="button" onclick="Reset()">Reset</button><br>
+		<button class=btn onclick="Whisper()">Whisper</button>
+		<button class=btn onclick="ToParty()">ToParty</button>
+		<button class=btn onclick="ToGuild()">ToGuild</button>
+		<button class=btn onclick="LeaveParty()">LeaveParty</button>
+		<button class=btn onclick="Reset()">Reset</button><br>
 
 	</div>
 	<div  id="history">
 	</div>
 	<div  id="settings">
-		<br>
-		Settings<br><br>
-		<div id='status'>
+		<div id='status'><br><br>
 		</div>
-		<br>
-		<br>
-		<button class=btn type="button" onclick="NoticeDamageAdd()">Notice value</button>
-		<button class=btn id="notice" onclick="Notice()">Notice</button>
-		<button class=btn id="bossonly" onclick="BossOnly()">bossOnly</button>
-		<button class=btn type="button" onclick="HideNames()">HideNames</button>
-		<button class=btn id="notice" onclick="AllUsers()">All DPS</button><br>
-		<button class=btn type="button" onclick="Update()">Update</button><br>
-		<br><br><br><br><br>
-		Debug<br>
-		<button class=btn type="button" onclick="Debug()">Debug</button>
-		<button class=btn type="button" onclick="ReloadTDM()">ReloadTDM</button>
-		<button class=btn type="button" onclick="Manager()">Manager</button>
-		<button class=btn type="button" onclick="Journal()">Journal</button>
-		<button class=btn onclick="useBrowser('http://www.google.com')">google</button>
-		<button class=btn onclick="useBrowser('http://www.youtube.com')">youtube</button>
-		<br><br><br><br>
+
+		<table class=tablehide bordercolor="#2E3440">
+			<tr><td><button class=btn onclick="NoticeDamageAdd()">Notice value</button></td><td><p id="NoticeDamageAdd"></p></td>
+				<td><button class=btn onclick="Notice()">Notice</button></td><td><p id="Notice"></p></td></tr>
+			<tr><td><button class=btn onclick="BossOnly()">bossOnly</button></td><td><p id="BossOnly"></p></td>
+				<td><button class=btn onclick="HideNames()">HideNames</button></td><td><p id="HideNames"></p></td></tr>
+			<tr><td><button class=btn onclick="AllUsers()">All DPS</button><br></td><td><p id="AllUsers"></p></td>
+				<td><button class=btn onclick="Debug()">Debug</button></td><td><p id="Debug"></p></td></tr>
+			<tr><td><button class=btn onclick="ReloadTDM()">ReloadTDM</button></td><td><button class=btn onclick="Manager()">Manager</button></td>
+				<td><button class=btn onclick="Journal()">Journal</button></td><td><button class=btn onclick="Update()">Update</button></td></tr>
+			<tr><td><button class=btn onclick="useBrowser('http://www.google.com')">google</button></td><td><button class=btn onclick="useBrowser('http://www.youtube.com')">youtube</button></td>
+				<td><button class=btn onclick="useBrowser('http://www.google.com')">------</button></td><td><button class=btn onclick="useBrowser('http://www.youtube.com')">------</button></td></tr>
+		</table>
+		<br><br><br><br><br><br><br><br>
 		<div style="position:relative;width:267px;height:25px;overflow:hidden;">
 			<div style="position:absolute;top:-276px;left:-5px">
 				<iframe width="300" height="300"
@@ -302,8 +338,7 @@
 		</form><br><br>
 
 		</div>-->
-	<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-	<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
 	<textarea id="debug" maxLength="2000" rows="14" cols="50"></textarea>
 	</div>
 </body>

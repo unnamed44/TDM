@@ -345,11 +345,28 @@ module.exports = function DPS(d,ctx) {
 		return data
 	}
 
-	function sendByEachLine(where,msg)
+	function textDPSFormat(data)
 	{
-		let i = 0,
-			msgs = stripOuterHTML(msg).split('\n'),
-			len = msgs.length,
+		var dpsmsg = ''
+		var i = 0
+		dpsmsg += stripOuterHTML(data[0].monsterBattleInfo) + '\n'
+		i=1
+		for(i in data){
+			dpsmsg 	+=data[i].name + ' '+ data[i].dps + 'k/s '.clr(enable_color)
+					+ data[i].percentage  + '% '.clr(enable_color)
+					+ data[i].crit  + '% '.clr(enable_color) + '\n'
+		}
+		return dpsmsg
+	}
+
+	function sendByEachLine(where,dpsjson)
+	{
+
+		let i = 0
+		var msg = textDPSFormat(dpsjson)
+		let msgs = msg.split('\n')
+
+		let len = msgs.length,
 			CounterId = setInterval( () => {
 				if (i < len) {
 					if(typeof where === 'string') d.toServer('C_WHISPER', 1, {"target": where,"message": msgs[i]})
@@ -384,9 +401,7 @@ module.exports = function DPS(d,ctx) {
 				send('Notice damage is ' + numberWithCommas(notice_damage.toString()))
 				return res.status(200).json(notice_damage.toString())
 			case "H":
-				var history = ''
-				for(var i in BAMHistory) history += BAMHistory[i]
-				return res.status(200).json(history)
+				return res.status(200).json(BAMHistory)
 			case "I":
 				hideNames = !hideNames
 				statusToChat('hideNames',hideNames)
@@ -424,7 +439,7 @@ module.exports = function DPS(d,ctx) {
 				update()
 				return res.status(200).json("restart proxy.")
 			case "R":
-				return res.status(200).json(estatus+ '</br>' + membersDps(currentbossId) + versionMsg)
+				return res.status(200).json(membersDps(currentbossId))
 			case "S":
 				removeAllPartyDPSdata()
 				return res.status(200).json('ok')
@@ -450,7 +465,7 @@ module.exports = function DPS(d,ctx) {
 				sendExec('reload TDM')
 				return res.status(200).json("ok")
 			case "Y":
-				return res.status(200).json(statusIcons())
+				return res.status(200).json(getSettings())
 			case "Z":
 				if(maxSize) return res.status(200).json('320,700')
 				else return res.status(200).json('320,250')
@@ -751,7 +766,7 @@ module.exports = function DPS(d,ctx) {
 	// damage handler : Core
 	d.hook('S_EACH_SKILL_RESULT',d.base.majorPatchVersion < 74 ? 7:9, (e) => {
 		// first hit must be myself to set this values
-		if(debug && party.length == 0)
+		if(party.length == 0)
 		{
 			mygId=e.source.toString()
 			myplayerId='NODEF'
@@ -893,23 +908,23 @@ module.exports = function DPS(d,ctx) {
 		return false
 	}
 
-	function statusIcons()
+	function getSettings()
 	{
-		var statusmsg = ''
-		statusmsg += notice ? numberWithCommas(notice_damage.toString()).clr(enable_color) : numberWithCommas(notice_damage.toString()).strike().clr(disable_color)
-		statusmsg += '|'
-		statusmsg += bossOnly ? 'Boss Only'.clr(enable_color) : 'Boss Only'.strike().clr(disable_color)
-		statusmsg += '|'
-		statusmsg += hideNames ? 'hideNames'.clr(enable_color) : 'hideNames'.strike().clr(disable_color)
-		statusmsg += '|'
-		statusmsg += allUsers ? 'allUsers'.clr(enable_color) : 'allUsers'.strike().clr(disable_color)
-
-		if(debug) statusmsg += '<br> party:'+ party.length + '| NPCs:' + NPCs.length + '| BAMHistory:' + Object.keys(BAMHistory).length
-
-		return statusmsg
+		var settings = {
+			"noticeDamage" : notice ? numberWithCommas(notice_damage.toString()).clr(enable_color) : numberWithCommas(notice_damage.toString()).strike().clr(disable_color),
+			"notice" : notice ? 'notice'.clr(enable_color) : 'notice'.strike().clr(disable_color),
+			"bossOnly" : bossOnly ? 'Boss Only'.clr(enable_color) : 'Boss Only'.strike().clr(disable_color),
+			"hideNames" : hideNames ? 'hideNames'.clr(enable_color) : 'hideNames'.strike().clr(disable_color),
+			"allUsers" : allUsers ? 'allUsers'.clr(enable_color) : 'allUsers'.strike().clr(disable_color),
+			"debug" : debug ? 'debug'.clr(enable_color) : 'debug'.strike().clr(disable_color),
+			"partyLengh" : party.length,
+			"NPCsLength" : NPCs.length,
+			"BAMHistoryLength" : Object.keys(BAMHistory).length
+		}
+		return settings
 	}
 
-	function membersDps(targetId)
+	function membersDps(targetId) // 0 : text,html 2:json
 	{
 		var newLine = '    \n'
 		var endtime = 0
@@ -938,9 +953,18 @@ module.exports = function DPS(d,ctx) {
 		var seconds = 0
 		if(battledurationbysec > 0 ) seconds = Math.floor(battledurationbysec % 60)
 
-		dpsmsg = NPCs[npcIndex].npcName + ' ' + minutes + ':' + seconds + newLine + '</br>'
-		dpsmsg = dpsmsg.clr(enable_color)
-		if(enraged) dpsmsg = '<img class=enraged />'+dpsmsg
+
+		var dpsJson= []
+
+		var monsterBattleInfo = NPCs[npcIndex].npcName + ' ' + minutes + ':' + seconds + newLine + '</br>'
+		monsterBattleInfo = monsterBattleInfo.clr(enable_color)
+		if(enraged) monsterBattleInfo = '<img class=enraged />'+monsterBattleInfo
+
+		dpsJson.push({
+			"enraged":estatus,
+			"monsterBattleInfo": monsterBattleInfo,
+			"versionMsg":versionMsg
+		})
 
 		// when party over 10 ppl, only sort at the end of the battle for the perfomance
 		//if(party.length < 10 || NPCs[npcIndex].battleendtime != 0)
@@ -953,10 +977,8 @@ module.exports = function DPS(d,ctx) {
 
 		var cname
 		var dps=0
-
 		var fill_size = 0
 
-		dpsmsg += '<table><tr><td> Name </td><td> DPS (dmg) </td><th> DPS (%) </td><td> Crit </td></tr>' + newLine
 		for(var i in party){
 			if(totalPartyDamage.equals(0) || battleduration <= 0 || typeof party[i][targetId] == 'undefined') continue
 			cname=party[i].name
@@ -980,19 +1002,22 @@ module.exports = function DPS(d,ctx) {
 			if(party[i][targetId].crit == 0 || party[i][targetId].hit == 0) crit = 0
 			else crit = Math.floor(party[i][targetId].crit * 100 / party[i][targetId].hit)
 
-			dpsmsg +='<tr><td> ' + cname + ' </td>' + `<td style="background: url('./icons/bar.jpg'); background-repeat: no-repeat; background-size: ${graph_size}% 20%;"> ` + dps + 'k/s '.clr(enable_color) + ' </td>'
-			+ '<td> ' + percentage  + '%'.clr(enable_color) + ' </td>'
-			+ '<td class=graph> ' +  crit  + '%'.clr(enable_color) + ' </td></tr>'+ newLine
-			//log(dpsmsg)
+			dpsJson.push({
+						"name": cname,
+						"totalDamage":tdamage.toString(),
+						"dps":dps,
+						"percentage":percentage,
+						"crit":crit
+			})
 		}
-		dpsmsg += '</table><br>'
 
 
 		// To display last msg on ui even if boss removed from list by DESPAWN packet
-		if(bossOnly && NPCs[npcIndex].isBoss ) lastDps = dpsmsg
-		if(!bossOnly) lastDps = dpsmsg
+		if(bossOnly && NPCs[npcIndex].isBoss ) lastDps = dpsJson
+		if(!bossOnly) lastDps = dpsJson
 
-		return dpsmsg
+		//return dpsmsg
+		return dpsJson
 	}
 
 	function noticeDps(i,damage,targetId)

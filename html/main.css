@@ -20,7 +20,7 @@ table ,td, tr{
 	border: 1px solid;
 	vertical-align: center;
 	text-align: right;
-	padding : 3;
+	padding : 2;
 }
 div {
 	overflow-y: auto;
