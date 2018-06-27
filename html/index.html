@@ -206,7 +206,7 @@
 					+ '<td> ' + data[i].percentage  + '%'.clr('E69F00') + ' </td>'
 					+ '<td class=graph> ' +  data[i].crit  + '%'.clr('E69F00') + ' </td></tr>'
 		}
-		dpsmsg += '</table>'		
+		dpsmsg += '</table>'
 		document.getElementById("version").innerHTML = data[0].versionMsg
 		return dpsmsg
 	}
@@ -278,6 +278,18 @@
 		window.location.href=url
 	}
 
+	function useBrowserHelp()
+	{
+		var locale = _tera_client_proxy_.get_locale()
+		//_tera_client_proxy_.alert(locale);
+		var url = ''
+		if(locale === 'kr') url = './README_KR.html'
+		else url = './README.html'
+		_tera_client_proxy_.resize_to(1024, 768)
+		window.location.href=url
+	}
+
+
 	</script>
 
 
@@ -298,9 +310,9 @@
 		<button class=btn onclick="Reset()">Reset</button><br>
 		<p id="version"></p>
 	</div>
-	<div  id="history">
+	<div  id="history" style="display:none">
 	</div>
-	<div  id="settings">
+	<div  id="settings" style="display:none">
 		<div id='status'><br><br>
 		</div>
 
@@ -314,7 +326,7 @@
 			<tr><td><button class=btn onclick="ReloadTDM()">ReloadTDM</button></td><td><button class=btn onclick="Manager()">Manager</button></td>
 				<td><button class=btn onclick="Journal()">Journal</button></td><td><button class=btn onclick="Update()">Update</button></td></tr>
 			<tr><td><button class=btn onclick="useBrowser('http://www.google.com')">google</button></td><td><button class=btn onclick="useBrowser('http://www.youtube.com')">youtube</button></td>
-				<td><button class=btn onclick="useBrowser('http://www.google.com')">------</button></td><td><button class=btn onclick="useBrowser('http://www.youtube.com')">------</button></td></tr>
+				<td><button class=btn onclick="useBrowser('https://www.gnu.org/licenses/gpl-3.0-standalone.html')">LICENSE</button></td><td><button class=btn onclick="useBrowserHelp()">Usage</button></td></tr>
 		</table>
 		<br><br><br><br><br><br><br><br>
 		<div style="position:relative;width:267px;height:25px;overflow:hidden;">
