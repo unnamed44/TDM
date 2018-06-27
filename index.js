@@ -145,7 +145,7 @@ module.exports = function DPS(d,ctx) {
 		versionMsg = 'TDM version ' + currentManifest.version
 		log(Date.now() + ' ' + currentManifest.version + ' ' + gitManifest.version )
 		if(currentManifest.version === gitManifest.version) return
-		versionMsg = `Please update new ${gitManifest.version} version.`.clr('FF0000') + '<button class=btn type="button" onclick="Update()">Update</button>'
+		versionMsg = `Please update new ${gitManifest.version} version.`.clr('FF0000') + '<button class=btn onclick="Update()">Update</button>'
 	}
 
 	function update()

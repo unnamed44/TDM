@@ -5,7 +5,6 @@
 	<script>
 	var x
 	var previousDps = ''
-	var versionMsg = ''
 	var TDMSettings
 	//var enable_color = 'E69F00',	disable_color = '56B4E9'
 
@@ -207,8 +206,8 @@
 					+ '<td> ' + data[i].percentage  + '%'.clr('E69F00') + ' </td>'
 					+ '<td class=graph> ' +  data[i].crit  + '%'.clr('E69F00') + ' </td></tr>'
 		}
-		dpsmsg += '</table>'
-		versionMsg  = data[0].versionMsg
+		dpsmsg += '</table>'		
+		document.getElementById("version").innerHTML = data[0].versionMsg
 		return dpsmsg
 	}
 
@@ -218,7 +217,7 @@
 		if(res === '') return
 		var result = tableDPSFormat(res)
 		if(result === previousDps) return
-		document.getElementById("content").innerHTML = result + '<br>' + versionMsg;
+		document.getElementById("content").innerHTML = result + '<br>'
 		document.getElementById("debug").innerHTML = result;
 		previousDps = result
 	}
@@ -255,8 +254,8 @@
 		document.getElementById('content').setAttribute("style",divhight);
 		var wrapperdivhight = 'height:' + size[1] + 'px'
 		document.getElementById('wrapper').setAttribute("style",wrapperdivhight);
-		document.getElementById('history').setAttribute("style",wrapperdivhight);
-		document.getElementById('settings').setAttribute("style",wrapperdivhight);
+		document.getElementById('history').setAttribute("style",divhight);
+		document.getElementById('settings').setAttribute("style",divhight);
 	}
 
 	function readConfig()
@@ -297,7 +296,7 @@
 		<button class=btn onclick="ToGuild()">ToGuild</button>
 		<button class=btn onclick="LeaveParty()">LeaveParty</button>
 		<button class=btn onclick="Reset()">Reset</button><br>
-
+		<p id="version"></p>
 	</div>
 	<div  id="history">
 	</div>
