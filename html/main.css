@@ -87,32 +87,39 @@ img {
      margin: 1px;
 }
 
+
+/* Style the tab */
 .tab {
-	-webkit-border-radius: 0;
-     -moz-border-radius: 0;
-     border-radius: 0px;
+    overflow: hidden;
+    background-color: #577080;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+	border-radius: 0px;
      font-family: Arial;
      color: #ffffff;
      font-size: 10px;
      background: #577080;
-  	padding: 1px 20px 1px 20px;
+  	padding: 1px 10px 1px 10px;
      text-decoration: none;
 }
 
-
-
-.tab:hover {
+/* Change background color of buttons on hover */
+.tab button:hover {
 	background: #3cb0fd;
-     background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
-     background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
-     background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
-     background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
-     background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
-     text-decoration: none;
 }
 
-.tab:active {
-	background: #3c00fd;
+/* Create an active/current tablink class */
+.tab button.active {
+    background-color: #3cb0fd;
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border-top: none;
 }
 
 .btn {
