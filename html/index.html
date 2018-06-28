@@ -234,7 +234,7 @@
 		var data = this.responseText.substring(1, this.responseText.length - 1)
 		var size = data.split(',')
 		_tera_client_proxy_.resize_to(Number(size[0]), Number(size[1]))
-		var divhight = 'height:' + (Number(size[1]) - 50) + 'px'
+		var divhight = 'height:' + (Number(size[1]) - 55) + 'px'
 		document.getElementById('content').setAttribute("style",divhight);
 		var wrapperdivhight = 'height:' + size[1] + 'px'
 		document.getElementById('wrapper').setAttribute("style",wrapperdivhight);
