@@ -6,7 +6,6 @@ const Command = require('command')
 const Long = require("long")
 const config = require('./config.json')
 const manifest = require('./manifest.json')
-const regionConfig = require('../../config.json')
 const logger = require('./logger')
 const xmldom = require('xmldom')
 var https = require('https');
@@ -24,6 +23,11 @@ Long.prototype.divTen = function() {
 }
 
 Long.prototype.divThousand = function() {
+	var stringValue = this.toString()
+	return stringValue.substring(0, stringValue.length - 3)
+}
+
+BigInt.prototype.divThousand = function() {
 	var stringValue = this.toString()
 	return stringValue.substring(0, stringValue.length - 3)
 }
@@ -528,7 +532,7 @@ module.exports = function DPS(d,ctx) {
 		var hpMax = e.maxHp
 		var hpCur = e.curHp
 		subHp = e.maxHp.sub(e.curHp) // Long
-		hpPer = hpCur.multiply(100).div(hpMax)
+		hpPer = Number(hpCur.multiply(100).div(hpMax))
 		nextEnrage = (hpPer > 10) ? (hpPer - 10) : 0
 		if(hpMax.equals(hpCur)) setBoss(e.id.toString())
 	})
