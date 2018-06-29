@@ -2,7 +2,7 @@
 const Command = require('command');
 const UI = require('ui')
 
-module.exports = function ModulesManager(d,ctx) {
+module.exports = function ModulesManagerUi(d,ctx) {
 	const command = Command(d);
 	const ui = UI(d)
 	let modules,htmls

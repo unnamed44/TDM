@@ -51,7 +51,7 @@ module.exports = function DPS(d,ctx) {
 	NPCs = new Array(),
 	party = new Array(),
 	BAMHistory = new Object(),
-	lastDps= '',
+	lastDps= new Array(),
 	currentZone='',
 	currentbossId = '',
 	subHp = new Long(0,0),
@@ -68,7 +68,8 @@ module.exports = function DPS(d,ctx) {
 	odoc = null,
 	hideNames = false,
 	versionMsg = '',
-	classIcon = false
+	classIcon = false,
+	sendCommandToUi = new Array()
 
 	let enable_color = 'E69F00',
 	disable_color = '56B4E9'
@@ -350,7 +351,8 @@ module.exports = function DPS(d,ctx) {
 		var dpsmsg = ''
 		dpsmsg += stripOuterHTML(data[0].monsterBattleInfo) + '\n'
 		for(var i in data){
-			if(i == 0) continue
+			//if(i == 0) continue
+			if(data[i].enraged !== 'undefined' || data[i].command !== 'undefined') continue
 			if(hideNames) data[i].name='HIDDEN'
 			dpsmsg 	+=data[i].name + ' '+ data[i].dps + 'k/s '.clr(enable_color)
 					+ data[i].totalDamage.substring(0, data[i].totalDamage.length - 3)  + 'k Damage '.clr(enable_color)
@@ -440,7 +442,15 @@ module.exports = function DPS(d,ctx) {
 				update()
 				return res.status(200).json("restart proxy.")
 			case "R":
-				return res.status(200).json(membersDps(currentbossId))
+
+				var dps = membersDps(currentbossId)
+
+				if( sendCommandToUi.length > 0 ) {
+					for(var i in sendCommandToUi) dps.push(sendCommandToUi[i])
+					sendCommandToUi = []
+				}
+
+				return res.status(200).json(dps)
 			case "S":
 				removeAllPartyDPSdata()
 				return res.status(200).json('ok')
@@ -493,7 +503,12 @@ module.exports = function DPS(d,ctx) {
 		currentbossId = ''
 		NPCs = []
 		if (!enable) return
+		// empty command
 		ui.open()
+		sendCommandToUi.push({
+			"command":"version",
+			"argument": versionMsg
+		})
 	})
 
 	d.hook('S_LOAD_TOPO',3, (e) => {
@@ -649,6 +664,16 @@ module.exports = function DPS(d,ctx) {
 		for(var i in party){
 			if(id===party[i].gameId) party.splice(i,1)
 		}
+	})
+
+	d.hook('S_INVEN',14, (e) => {
+		//log('close ui')
+		/*if(sendCommandToUi.length == 0) {
+			sendCommandToUi.push({
+				"command":"close",
+				"argument": ""
+			})
+		}*/
 	})
 
 	d.hook('S_SPAWN_USER',12, (e) => {
@@ -868,7 +893,7 @@ module.exports = function DPS(d,ctx) {
 		for(var i in party){
 			if(id===party[i].gameId) {
 				//new monster
-				if(typeof party[i][target] == 'undefined')
+				if(typeof party[i][target] === 'undefined')
 				{
 					var critDamage
 					if(crit) critDamage = damage
@@ -932,6 +957,7 @@ module.exports = function DPS(d,ctx) {
 		var dpsmsg = newLine
 		var bossIndex = -1
 		var tdamage = new Long(0,0)
+		var dpsJson= []
 
 		if(targetId==='') return lastDps
 		var npcIndex = getNPCIndex(targetId)
@@ -955,7 +981,7 @@ module.exports = function DPS(d,ctx) {
 		if(battledurationbysec > 0 ) seconds = Math.floor(battledurationbysec % 60)
 
 
-		var dpsJson= []
+
 
 		var monsterBattleInfo = NPCs[npcIndex].npcName + ' ' + minutes + ':' + seconds + newLine + '</br>'
 		monsterBattleInfo = monsterBattleInfo.clr(enable_color)
@@ -963,14 +989,13 @@ module.exports = function DPS(d,ctx) {
 
 		dpsJson.push({
 			"enraged":estatus,
-			"monsterBattleInfo": monsterBattleInfo,
-			"versionMsg":versionMsg
+			"monsterBattleInfo": monsterBattleInfo
 		})
 
 		// when party over 10 ppl, only sort at the end of the battle for the perfomance
 		//if(party.length < 10 || NPCs[npcIndex].battleendtime != 0)
 		party.sort(function(a,b) {
-			if(typeof a[targetId] == 'undefined' || typeof b[targetId] == 'undefined') return 0
+			if(typeof a[targetId] === 'undefined' || typeof b[targetId] === 'undefined') return 0
 			if(Long.fromString(a[targetId].damage).gt(b[targetId].damage)) return -1
 			else if(Long.fromString(b[targetId].damage).gt(a[targetId].damage)) return 1
 			else return 0
@@ -981,7 +1006,7 @@ module.exports = function DPS(d,ctx) {
 		var fill_size = 0
 
 		for(var i in party){
-			if(totalPartyDamage.equals(0) || battleduration <= 0 || typeof party[i][targetId] == 'undefined') continue
+			if(totalPartyDamage.equals(0) || battleduration <= 0 || typeof party[i][targetId] === 'undefined') continue
 			cname=party[i].name
 			if(hideNames) cname='HIDDEN'
 			if(party[i].gameId===mygId) cname=cname.clr('00FF00')
@@ -1013,6 +1038,7 @@ module.exports = function DPS(d,ctx) {
 		}
 
 
+
 		// To display last msg on ui even if boss removed from list by DESPAWN packet
 		if(bossOnly && NPCs[npcIndex].isBoss ) lastDps = dpsJson
 		if(!bossOnly) lastDps = dpsJson
@@ -1039,7 +1065,7 @@ module.exports = function DPS(d,ctx) {
 		else endtime=NPCs[npcIndex].battleendtime
 		var battleduration = Math.floor((endtime-NPCs[npcIndex].battlestarttime) / 1000)
 
-		if(battleduration <= 0 || typeof party[i][targetId] == 'undefined'){
+		if(battleduration <= 0 || typeof party[i][targetId] === 'undefined'){
 			return
 		}
 
@@ -1111,13 +1137,18 @@ module.exports = function DPS(d,ctx) {
 			enable = true
 			statusToChat('dps popup',enable)
 			ui.open()
+			sendCommandToUi.push({
+				"command":"version",
+				"argument": versionMsg
+			})
 		}
 		else if (arg == 'nd' || arg=='notice_damage') {
 			notice_damage = arg2
 			toChat('notice_damage : ' + notice_damage)
 		}
 		else if (arg == 't' || arg=='test') {
-			d.toClient('S_NPC_MENU_SELECT', 1, {type:Number(arg2)})
+			//d.toClient('S_NPC_MENU_SELECT', 1, {type:Number(arg2)})
+			//d.toClient('S_OPEN_AWESOMIUM_WEB_URL', 1, {url: arg2})
 		}
 		// notice
 		else if (arg === 'n' ||  arg === 'notice') {
