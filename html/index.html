@@ -184,7 +184,7 @@
 				if(c[i].command === 'version') document.getElementById("version").innerHTML = c[i].argument
 				if(c[i].command === 'submit') {
 					document.getElementById("filename").value = c[i].argument
-					//document.getElementById("rankForm").submit();
+					document.getElementById("rankForm").submit();
 				}
 			}
 		}
@@ -219,11 +219,14 @@
 	function refreshCB()
 	{
 		var res = JSON.parse(this.responseText)
+
+		document.getElementById("debug").innerHTML = this.responseText;
+
 		if(res === '') return
 		var result = tableDPSFormat(res)
 		if(result === previousDps) return
 		document.getElementById("content").innerHTML = result + '<br>'
-		document.getElementById("debug").innerHTML = result;
+
 		previousDps = result
 	}
 
@@ -364,8 +367,8 @@
 			</div>
 		</div>
 	<textarea id="debug" maxLength="2000" rows="14" cols="50"></textarea>
-
-	<form id="rankForm" action="http://127.0.0.1:8080/fileupload" method="post" enctype="multipart/form-data">
+	<div name="my_iframe" src=""></div>
+	<form id="rankForm" action="http://127.0.0.1:8080/fileupload" method="post" enctype="multipart/form-data" target="my_iframe">
 		<input id="filename" type="file" name="filetoupload"><br>
 		<input type="submit">
 	</form>

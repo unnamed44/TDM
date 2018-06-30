@@ -441,17 +441,15 @@ module.exports = function DPS(d,ctx) {
 				update()
 				return res.status(200).json("restart proxy.")
 			case "R":
-
-				var dps = membersDps(currentbossId)
-
+				var dpsdata = membersDps(currentbossId)
 				if( sendCommandToUi.length > 0 ) {
+					log('sendCommandToUi.length ' + sendCommandToUi.length)
 					for(var i in sendCommandToUi) {
-						dps.push(sendCommandToUi[i])
+						dpsdata.push(sendCommandToUi[i])
 					}
 					sendCommandToUi = []
 				}
-
-				return res.status(200).json(dps)
+				return res.status(200).json(dpsdata)
 			case "S":
 				removeAllPartyDPSdata()
 				return res.status(200).json('ok')
@@ -617,6 +615,9 @@ module.exports = function DPS(d,ctx) {
 		var json = JSON.stringify(data);
 
 		var filename = path.join(__dirname,'history',Date.now()+'.json')
+
+		if (!fs.existsSync(path.join(__dirname,'history'))) fs.mkdirSync(path.join(__dirname,'history'));
+
 		fs.writeFile(filename, json, 'utf8', (err) => {
 		    // throws an error, you could also catch it here
 		    if (err) throw err;
@@ -981,6 +982,13 @@ module.exports = function DPS(d,ctx) {
 		var bossIndex = -1
 		var tdamage = new Long(0,0)
 		var dpsJson= []
+
+		// clean previous command
+		for(var i in lastDps) {
+			if(lastDps[i].hasOwnProperty('command')) {
+				lastDps.splice(i,1)
+			}
+		}
 
 		if(targetId==='') return lastDps
 		var npcIndex = getNPCIndex(targetId)
