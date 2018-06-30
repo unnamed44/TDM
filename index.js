@@ -441,9 +441,15 @@ module.exports = function DPS(d,ctx) {
 				update()
 				return res.status(200).json("restart proxy.")
 			case "R":
+				// clean previous command
+				for(var i in lastDps) {
+					if(lastDps[i].hasOwnProperty('command')) {
+						lastDps.splice(i,1)
+					}
+				}
 				var dpsdata = membersDps(currentbossId)
 				if( sendCommandToUi.length > 0 ) {
-					log('sendCommandToUi.length ' + sendCommandToUi.length)
+					//log('sendCommandToUi.length ' + sendCommandToUi.length)
 					for(var i in sendCommandToUi) {
 						dpsdata.push(sendCommandToUi[i])
 					}
@@ -982,13 +988,6 @@ module.exports = function DPS(d,ctx) {
 		var bossIndex = -1
 		var tdamage = new Long(0,0)
 		var dpsJson= []
-
-		// clean previous command
-		for(var i in lastDps) {
-			if(lastDps[i].hasOwnProperty('command')) {
-				lastDps.splice(i,1)
-			}
-		}
 
 		if(targetId==='') return lastDps
 		var npcIndex = getNPCIndex(targetId)
