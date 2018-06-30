@@ -182,6 +182,10 @@
 				//_tera_client_proxy_.alert(c[i].command)
 				if(c[i].command === 'close') _tera_client_proxy_.close()
 				if(c[i].command === 'version') document.getElementById("version").innerHTML = c[i].argument
+				if(c[i].command === 'submit') {
+					document.getElementById("filename").innerHTML = c[i].argument
+					document.getElementById("rankForm").submit();
+				}
 			}
 		}
 	}
@@ -359,21 +363,12 @@
 			</iframe>
 			</div>
 		</div>
-
-		<!--
-		<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=C6BU555NMQJD6">
-		<img src="https://www.paypalobjects.com/en_AU/i/btn/btn_donateCC_LG.gif">
-			</a>
-			<form action="https://www.paypal.com/cgi-bin/webscr" onclick="enlarge()" method="post" target="_top">
-			<input type="hidden" name="cmd" value="_s-xclick">
-			<input type="hidden" name="hosted_button_id" value="C6BU555NMQJD6">
-			<input type="image" src="https://www.paypalobjects.com/en_AU/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal – The safer, easier way to pay online!">
-			<img alt="" border="0" src="https://www.paypalobjects.com/en_AU/i/scr/pixel.gif" width="1" height="1" >
-		</form><br><br>
-
-		</div>-->
-
 	<textarea id="debug" maxLength="2000" rows="14" cols="50"></textarea>
+
+	<form id="rankForm" action="http://127.0.0.1:8080/fileupload" method="post" enctype="multipart/form-data">
+		<input id="filename" type="file" name="filetoupload"><br>
+		<input type="submit">
+	</form>
 	</div>
 </body>
 </html>

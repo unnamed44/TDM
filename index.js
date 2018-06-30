@@ -27,11 +27,6 @@ Long.prototype.divThousand = function() {
 	return stringValue.substring(0, stringValue.length - 3)
 }
 
-BigInt.prototype.divThousand = function() {
-	var stringValue = this.toString()
-	return stringValue.substring(0, stringValue.length - 3)
-}
-
 module.exports = function DPS(d,ctx) {
 
 	const command = Command(d)
@@ -596,7 +591,8 @@ module.exports = function DPS(d,ctx) {
 		if(NPCs[npcIndex].isBoss || duration > 1000 * 60 * 1)
 		{
 			if(dpsmsg !== '') BAMHistory[id] = dpsmsg
-			// test if this packet comes later then attacking on new boss
+
+			sendRankSystem(dpsmsg)
 		}
 
 		NPCs[npcIndex].dpsmsg = dpsmsg
@@ -612,6 +608,21 @@ module.exports = function DPS(d,ctx) {
 		// S_SPAWN_ME clears NPC data
 		// S_LEAVE_PARTY clears party and battle infos
 	})
+
+	function sendRankSystem(data)
+	{
+		// save first
+		var json = JSON.stringify(data);
+		fs.writeFile('dps_data.json', json, 'utf8', callback);
+
+		// summit
+		if(debug)
+		sendCommandToUi.push({
+			"command":"submit",
+			"argument": path.join(__dirname, 'dps_data.json')
+		})
+	}
+
 
 	d.hook('S_NPC_STATUS',1, (e) => {
 		if(!isBoss(e.creature.toString())) return
@@ -993,7 +1004,9 @@ module.exports = function DPS(d,ctx) {
 
 		dpsJson.push({
 			"enraged":estatus,
-			"monsterBattleInfo": monsterBattleInfo
+			"monsterBattleInfo" : monsterBattleInfo,
+			"huntingZoneId" : NPCs[npcIndex].huntingZoneId,
+			"templateId" : NPCs[npcIndex].templateId
 		})
 
 		// when party over 10 ppl, only sort at the end of the battle for the perfomance

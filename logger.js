@@ -8,7 +8,7 @@ function c(method) {
     }
 
     if (typeof args[0] === 'string') {
-      args[0] = `[sls] ${args[0]}`;
+      args[0] = `[TDM] ${args[0]}`;
     }
 
     console[method](...args);
