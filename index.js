@@ -143,7 +143,7 @@ module.exports = function DPS(d,ctx) {
 		var dest = path.join(__dirname,'_' + gitkey)
 		//fs.unlink(dest)
 		versionMsg = 'TDM version ' + currentManifest.version
-		log(Date.now() + ' ' + currentManifest.version + ' ' + gitManifest.version )
+		//log(Date.now() + ' ' + currentManifest.version + ' ' + gitManifest.version )
 		if(currentManifest.version === gitManifest.version) return
 		versionMsg = `Please update new ${gitManifest.version} version.`.clr('FF0000') + '<button class=btn onclick="Update()">Update</button>'
 	}
@@ -445,7 +445,9 @@ module.exports = function DPS(d,ctx) {
 				var dps = membersDps(currentbossId)
 
 				if( sendCommandToUi.length > 0 ) {
-					for(var i in sendCommandToUi) dps.push(sendCommandToUi[i])
+					for(var i in sendCommandToUi) {
+						dps.push(sendCommandToUi[i])
+					}
 					sendCommandToUi = []
 				}
 
@@ -592,7 +594,7 @@ module.exports = function DPS(d,ctx) {
 		{
 			if(dpsmsg !== '') BAMHistory[id] = dpsmsg
 
-			sendRankSystem(dpsmsg)
+			if(debug) sendDpsData(dpsmsg)
 		}
 
 		NPCs[npcIndex].dpsmsg = dpsmsg
@@ -609,11 +611,13 @@ module.exports = function DPS(d,ctx) {
 		// S_LEAVE_PARTY clears party and battle infos
 	})
 
-	function sendRankSystem(data)
+	function sendDpsData(data)
 	{
 		// save first
 		var json = JSON.stringify(data);
-		fs.writeFile('dps_data.json', json, 'utf8', (err) => {  
+
+		var filename = path.join(__dirname,'history',Date.now()+'.json')
+		fs.writeFile(filename, json, 'utf8', (err) => {
 		    // throws an error, you could also catch it here
 		    if (err) throw err;
 		    // success case, the file was saved
@@ -621,10 +625,9 @@ module.exports = function DPS(d,ctx) {
 		});
 
 		// summit
-		if(debug)
 		sendCommandToUi.push({
 			"command":"submit",
-			"argument": path.join(__dirname, 'dps_data.json')
+			"argument": filename
 		})
 	}
 
@@ -1169,8 +1172,10 @@ module.exports = function DPS(d,ctx) {
 			toChat('notice_damage : ' + notice_damage)
 		}
 		else if (arg == 't' || arg=='test') {
-			//d.toClient('S_NPC_MENU_SELECT', 1, {type:Number(arg2)})
-			//d.toClient('S_OPEN_AWESOMIUM_WEB_URL', 1, {url: arg2})
+			sendCommandToUi.push({
+				"command":"submit",
+				"argument": path.join(__dirname, 'dps_data.json')
+			})
 		}
 		// notice
 		else if (arg === 'n' ||  arg === 'notice') {

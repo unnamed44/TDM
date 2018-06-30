@@ -183,7 +183,7 @@
 				if(c[i].command === 'close') _tera_client_proxy_.close()
 				if(c[i].command === 'version') document.getElementById("version").innerHTML = c[i].argument
 				if(c[i].command === 'submit') {
-					document.getElementById("filename").innerHTML = c[i].argument
+					document.getElementById("filename").value = c[i].argument
 					//document.getElementById("rankForm").submit();
 				}
 			}
