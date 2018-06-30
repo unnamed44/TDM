@@ -613,7 +613,12 @@ module.exports = function DPS(d,ctx) {
 	{
 		// save first
 		var json = JSON.stringify(data);
-		fs.writeFile('dps_data.json', json, 'utf8', callback);
+		fs.writeFile('dps_data.json', json, 'utf8', (err) => {  
+		    // throws an error, you could also catch it here
+		    if (err) throw err;
+		    // success case, the file was saved
+		    log('dps data saved!');
+		});
 
 		// summit
 		if(debug)
