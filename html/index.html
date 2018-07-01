@@ -9,7 +9,7 @@
 	var agree = false
 	//var enable_color = 'E69F00',	disable_color = '56B4E9'
 
-	function xhr(url, cb) {
+	function ajax(url, cb) {
 		x = new XMLHttpRequest();
 		pending = true;
 		x.open("GET", "api/" + url, true);
@@ -56,70 +56,70 @@
 	function Whisper() {
 		if(!warningMsg()) return
 		var name = document.getElementById("name").value;
-		xhr("0W"+ name,null)
+		ajax("0W"+ name,null)
 	}
 
 	function ToGuild() {
 		if(!warningMsg()) return
-		xhr("2C",null)
+		ajax("2C",null)
 	}
 
 	function ToParty() {
 		if(!warningMsg()) return
-		xhr("1C",null)
+		ajax("1C",null)
 	}
 
 	function LeaveParty() {
-		xhr("L",null)
+		ajax("L",null)
 	}
 
 	function Reset() {
-		xhr("S",null)
+		ajax("S",null)
 	}
 	function CloseDpsCB() {
 		_tera_client_proxy_.close()
 	}
 	function CloseDps() {
-		xhr("P",CloseDpsCB)
+		ajax("P",CloseDpsCB)
 	}
 
 	// settings
 	function NoticeDamageAdd() {
-		xhr("A",Settings)
+		ajax("A",Settings)
 	}
 
 	function Debug() {
-		xhr("B",Settings)
+		ajax("B",Settings)
 	}
 
 	function Notice() {
-		xhr("N",Settings)
+		ajax("N",Settings)
 	}
 
 	function AllUsers() {
-		xhr("U",Settings)
+		ajax("U",Settings)
 	}
 	function BossOnly() {
-		xhr("O", Settings)
+		ajax("O", Settings)
 	}
 	function HideNames()
 	{
-		xhr("I",Settings)
+		ajax("I",Settings)
 	}
 
 	function Manager()
 	{
-		xhr("M",null)
+		ajax("M",null)
 	}
 
 	function Journal()
 	{
-		xhr("J",null)
+		ajax("J",null)
 	}
 
 	function ReloadTDM()
 	{
-		xhr("X",refreshCB)
+		ajax("X",refreshCB)
 	}
 
 	function UpdateCB()
@@ -129,7 +129,7 @@
 	}
 	function Update()
 	{
-		xhr("Q",UpdateCB)
+		ajax("Q",UpdateCB)
 	}
 
 	function openweb(e) {
@@ -149,7 +149,7 @@
 	}
 
 	function History() {
-		xhr("H",HistoryCB)
+		ajax("H",HistoryCB)
 	}
 
 
@@ -167,7 +167,7 @@
 	}
 
 	function Settings(){
-		xhr("Y",SettingsCB)
+		ajax("Y",SettingsCB)
 	}
 
 	// dps tab
@@ -179,7 +179,7 @@
 	function excuteCCmd(evt,cmd)
 	{
 		//document.getElementById("debug").innerHTML = cmd
-		xhr("4C"+cmd,null)
+		ajax("4C"+cmd,null)
 	}
 
 	function CustomCB()
@@ -195,7 +195,7 @@
 	}
 
 	function Custom(){
-		xhr("3C",CustomCB)
+		ajax("3C",CustomCB)
 	}
 
 	function excuteCommand(c)
@@ -262,7 +262,7 @@
 				clearInterval(i);
 				return
 			}
-			xhr("R",refreshCB)
+			ajax("R",refreshCB)
 		}, 1000);
 	}
 
@@ -271,7 +271,7 @@
 	})
 
 	window.onbeforeunload =  function() {
-		//xhr("P",CloseDpsCB)
+		//ajax("P",CloseDpsCB)
 		return null;
 	}
 
@@ -292,7 +292,7 @@
 
 	function readConfig()
 	{
-		xhr("Z",setStyleCB)
+		ajax("Z",setStyleCB)
 	}
 
 	function useBrowser(url)
@@ -379,9 +379,9 @@
 				<td><button class=btn onclick="HideNames()">HideNames</button></td><td><p id="HideNames"></p></td></tr>
 			<tr><td><button class=btn onclick="AllUsers()">All DPS</button><br></td><td><p id="AllUsers"></p></td>
 				<td><button class=btn onclick="Debug()">Debug</button></td><td><p id="Debug"></p></td></tr>
-			<tr><td><button class=btn onclick="ReloadTDM()">ReloadTDM</button></td><td><button class=btn onclick="Manager()">Manager</button></td>
-				<td><button class=btn onclick="Journal()">Journal</button></td><td><button class=btn onclick="openWebsite('https://discord.gg/JRa7FXd')">Discord</button>(external web browser)</td></tr>
-			<tr><td><button class=btn onclick="openWebsite('https://github.com/xmljson/TDM')">Donate</button></td><td><button class=btn onclick="useBrowser('http://www.youtube.com')">youtube</button></td>
+			<tr><td colspan="2"><button class=btn onclick="Manager()">Module Manager</button></td>
+				<td colspan="2"><button class=btn onclick="openWebsite('https://discord.gg/JRa7FXd')">TDM Discord</button></td></tr>
+			<tr><td><button class=btn onclick="openWebsite('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=C6BU555NMQJD6')">Donate to dev</button></td><td><button class=btn onclick="useBrowser('http://www.youtube.com')">youtube</button></td>
 				<td><button class=btn onclick="useBrowser('https://www.gnu.org/licenses/gpl-3.0-standalone.html')">LICENSE</button></td><td><button class=btn onclick="useBrowserHelp()">Usage</button></td></tr>
 		</table>
 		<br><br><br><br><br><br><br><br>
