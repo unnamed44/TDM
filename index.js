@@ -352,7 +352,7 @@ module.exports = function DPS(d,ctx) {
 		dpsmsg += stripOuterHTML(data[0].monsterBattleInfo) + '\n'
 		for(var i in data){
 			//if(i == 0) continue
-			if(data[i].enraged !== 'undefined' || data[i].command !== 'undefined') continue
+			if(data[i].hasOwnProperty('enraged')|| data[i].hasOwnProperty('command')) continue
 			if(hideNames) data[i].name='HIDDEN'
 			dpsmsg 	+=data[i].name + ' '+ data[i].dps + 'k/s '.clr(enable_color)
 					+ data[i].totalDamage.substring(0, data[i].totalDamage.length - 3)  + 'k Damage '.clr(enable_color)
@@ -367,14 +367,13 @@ module.exports = function DPS(d,ctx) {
 
 		let i = 0
 		var msg = textDPSFormat(dpsjson)
-		let msgs = msg.split('\n')
-
-		let len = msgs.length,
+		let msgs = msg.split('\n'),
 			CounterId = setInterval( () => {
-				if (i < len) {
-					if(typeof where === 'string') d.toServer('C_WHISPER', 1, {"target": where,"message": msgs[i]})
-					if(typeof where === 'number') d.toServer('C_CHAT', 1, {"channel":where,"message": msgs[i]})
-					i++
+				log(msgs)
+				if (msgs.length >0) {
+					if(typeof where === 'string') d.toServer('C_WHISPER', 1, {"target": where,"message": msgs[0]})
+					if(typeof where === 'number') d.toServer('C_CHAT', 1, {"channel":where,"message": msgs[0]})
+					msgs.shift()
 				} else {
 					clearInterval(CounterId)
 					CounterId = -1
@@ -459,6 +458,7 @@ module.exports = function DPS(d,ctx) {
 					}
 				}
 				var dpsdata = membersDps(currentbossId)
+
 				if( sendCommandToUi.length > 0 ) {
 					//log('sendCommandToUi.length ' + sendCommandToUi.length)
 					for(var i in sendCommandToUi) {
@@ -993,9 +993,8 @@ module.exports = function DPS(d,ctx) {
 
 	function membersDps(targetId) // 0 : text,html 2:json
 	{
-		var newLine = '    \n'
 		var endtime = 0
-		var dpsmsg = newLine
+		var dpsmsg = ''
 		var bossIndex = -1
 		var tdamage = new Long(0,0)
 		var dpsJson= []
@@ -1024,7 +1023,7 @@ module.exports = function DPS(d,ctx) {
 
 
 
-		var monsterBattleInfo = NPCs[npcIndex].npcName + ' ' + minutes + ':' + seconds + newLine + '</br>'
+		var monsterBattleInfo = NPCs[npcIndex].npcName + ' ' + minutes + ':' + seconds + '</br>'
 		monsterBattleInfo = monsterBattleInfo.clr(enable_color)
 		if(enraged) monsterBattleInfo = '<img class=enraged />'+monsterBattleInfo
 
