@@ -1,0 +1,9 @@
+{
+	"sp ping":"Ping",
+	"sp config generate":"GenConfig",
+	"sp config save":"SaveConfig",
+	"fps mode 0":"FPS0",
+	"fps mode 1":"FPS1",
+	"fps mode 2":"FPS2",
+	"fps mode 3":"FPS3"
+}

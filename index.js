@@ -14,6 +14,7 @@ const path = require('path')
 const ui_install = require('./ui_install')
 const UI = require('ui')
 const ManagerUi = require('./managerui')
+const customCommand = require('./customCommands.json')
 
 String.prototype.clr = function (hexColor) { return `<font color='#${hexColor}'>${this}</font>` }
 
@@ -395,9 +396,19 @@ module.exports = function DPS(d,ctx) {
 				statusToChat('Debug mode',debug)
 				return res.status(200).json("ok")
 			case "C":
-				if(lastDps === '' ) return res.status(200).json('ok')
-				sendByEachLine(req_value,lastDps)
-				return res.status(200).json('ok')
+				if(req_value == 1 || req_value == 2){
+					if(lastDps === '' ) return res.status(200).json('ok')
+					sendByEachLine(req_value,lastDps)
+					return res.status(200).json('ok')
+				}
+
+				if(req_value == 3) return res.status(200).json(customCommand)
+				if(req_value == 4){
+					var cmd = req.params[0].substring(2, req.params[0].length)
+					sendExec(cmd)
+					return res.status(200).json('ok')
+				}
+
 			case "D":
 				notice_damage = req_value
 				send('Notice damage is ' + numberWithCommas(notice_damage.toString()))
