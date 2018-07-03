@@ -1,19 +1,19 @@
 {
-	"version": "1.3.1",
+	"version": "1.3.2",
 	"files": {
-		"index.js": "b259745ac713fe1580abaa85ea04c283904d2c984270e03b6bd5b81541f89509",
-		"managerui.js": "c14cabb40f49cbc4a439f397757b0ac65b5703742eb14ddd7950422905c9dc0a",
-		"html/index.html": "5d1761eefe74b51fc004aff24695a8ef54065d894af21dfe7c24dfbc18849627",
-		"html/main.css": "a377d9d2a3d5c62bfdda0440bac8c0c30cdfcd2ebdf5b6f1d9aa8e52d7cfb5ed",
+		"index.js": "b4beefa26d78b419f680ae32eb1b65c97dc9663242a62c4b9830780b5019a331",
+		"managerui.js": "439c565ca1456b8a275d8dfbe2dfd2d0244cee661e612ac1127e9d673d192083",
+		"html/index.html": "ec4139ca85694caf49ea99f0548914c0e135e3776a02fa9b4d9eb2e8f084f2bc",
+		"html/main.css": "c9ed6a67ddade5e2c473983cb6e1446f2b017d3e83046d160d5bce61e9a6aef0",
 		"manager/index.html": "632ca966679aff750d447d18c146bc161deb180a7cc22ea5c9bf0e2891b4abe3",
 		"manager/main.css": "036f2eeb06982d0fb73ef05b9ba238daf2cb9d9a224469b0923f9d5e708e7a3f",
-		"logger.js": "3488d2c4d7b15a99f054e712b31752e26b3edab54bedfbaec94c981b3e6cf17d",
-		"config.json": "3733fb717675922c3937a826d5feb07b0e18014b52a6added03c5fd67661847e",
+		"logger.js": "48a331cfb1d947e383c5ebd6f21da0fbaf9df54a09ca6ecec6b6de356ac85080",
 		"README.md": "b5211c67747a94880d2667383e7469c2109017ede4545b31553755a9c036f6b2",
 		"README_KR.md": "f58daf8de818e6b2d8fbefff3fb4800a8e6e432ea3a888a9443068b43b476dba",
 		"ui_install.js": "79d05624336bbb01c127ccae6bada72b92bbd3b10da346dec0a770ff18587a76",
 		"html/README.html": "01f9532836ff2bd056a537d9e4635cc05e0fc2b90beceaec15556d3d98e1518a",
 		"html/README_KR.html": "af66bcde2b02cae1d867e059cd162f5e8fb6fdb1c11104b12c2c696c578055f0",
-		"customCommands.json": "9fea41e822fccca948311e9c76683d36588bd5dff9a3dea0f344f9a36fa2ba45"
+		"customCommands.json": "c44bc29840dbd761cdf3892e502051b836461b8b63f4ff87615c70d1e2e84802",
+		"html/icons/enraged_bar.jpg": "a91c9f8fe960a72d3179893386911cf435cc8fcbfbb3ecbc1c49c32b8a908f30"
 	}
 }
