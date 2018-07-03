@@ -217,10 +217,14 @@
 	{
 		var dpsmsg = ''
 		var c
+		var enragedBar = 0
 
-		dpsmsg += '<table><tr><th colspan="4" >'
+		dpsmsg += '<table>'
+
 		for(var i in data){
 			if(data[i].hasOwnProperty('monsterBattleInfo')) {
+				if(data[i].etimer > 0) enragedBar = data[i].etimer * 100 / 36
+				dpsmsg += '<tr><th colspan="4" style="background: url(\'./icons/enraged_bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar +'% 10%;">'
 				dpsmsg += data[i].enraged
 				dpsmsg += '<br>' + data[i].monsterBattleInfo + '</th></tr>'
 				continue
@@ -229,7 +233,7 @@
 				c=i
 				continue
 			}
-			dpsmsg 	+='<tr><td> ' + data[i].name  + ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">'//`<td style="background: url('./icons/bar.jpg'); background-repeat: no-repeat; background-size: ${data[i].percentage}% 20%;"> `
+			dpsmsg 	+='<tr><td> ' + data[i].name  + ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">'
 					+ data[i].dps + 'k/s '.clr('E69F00') + ' </td>'
 					+ '<td> ' + data[i].percentage  + '%'.clr('E69F00') + ' </td>'
 					+ '<td class=graph> ' +  data[i].crit  + '%'.clr('E69F00') + ' </td></tr>'
