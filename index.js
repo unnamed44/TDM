@@ -45,25 +45,20 @@ module.exports = function DPS(d,ctx) {
 	myplayerId= '',
 	myclass='',
 	myname='',
+  Boss = new Object(),
 	gzoneId = new Array(),
 	gmonsterId = new Array(),
-	boss = new Set(),
 	NPCs = new Array(),
 	party = new Array(),
 	BAMHistory = new Object(),
 	lastDps= new Array(),
 	currentZone='',
 	currentbossId = '',
-	subHp = new Long(0,0),
 	missingDamage = new Long(0,0),
-	enraged = false,
-	estatus = '',
 	timeout = 0,
 	timeoutCounter = 0,
 	allUsers = false,
 	maxSize = false,
-	nextEnrage = 0,
-	hpPer = 0,
 	doc = null,
 	odoc = null,
 	hideNames = false,
@@ -288,43 +283,8 @@ module.exports = function DPS(d,ctx) {
 			{
 				if(mon[j].getAttribute("id") == Number(NPCs[npcIndex].templateId)) {
 					NPCs[npcIndex].npcName = mon[j].getAttribute("name")
-					mon[j].getAttribute("isBoss")==="True" ? NPCs[npcIndex].isBoss = true : NPCs[npcIndex].isBoss = false
+					//mon[j].getAttribute("isBoss")==="True" ? NPCs[npcIndex].isBoss = true : NPCs[npcIndex].isBoss = false
 					overrideIsBoss(gId)
-					break
-				}
-			}
-		}
-		catch(err){
-			return false
-		}
-		return true
-	}
-
-
-	function overrideIsBoss(gId)
-	{
-		var zone,mon
-		var npcIndex = getNPCIndex(gId)
-
-		if (!odoc) return false
-
-		if (npcIndex < 0) return false
-		try{
-			var zone = odoc.getElementsByTagName("Zone")
-			for(var i in zone)
-			{
-				if(zone[i].getAttribute("id") == Number(NPCs[npcIndex].huntingZoneId)) {
-					//NPCs[npcIndex].zoneName = zone[i].getAttribute("name")
-					break
-				}
-			}
-
-			var mon = zone[i].getElementsByTagName("Monster")
-			for(var j in mon)
-			{
-				if(mon[j].getAttribute("id") == Number(NPCs[npcIndex].templateId)) {
-					//NPCs[npcIndex].npcName = mon[j].getAttribute("name")
-					mon[j].getAttribute("isBoss")==="True" ? NPCs[npcIndex].isBoss = true : NPCs[npcIndex].isBoss = false
 					break
 				}
 			}
@@ -541,19 +501,30 @@ module.exports = function DPS(d,ctx) {
 
 	d.hook('S_BOSS_GAGE_INFO',3, (e) => {
 		// notified boss before battle
+    var id = e.id.toString()
 		var hpMax = e.maxHp
 		var hpCur = e.curHp
-		subHp = e.maxHp.sub(e.curHp) // Long
-		hpPer = Number(hpCur.multiply(100).div(hpMax))
-		nextEnrage = (hpPer > 10) ? (hpPer - 10) : 0
-		if(hpMax.equals(hpCur)) setBoss(e.id.toString())
+    if(!isBoss(id)) setBoss(id)
+		Boss[id].hpPer = Number(hpCur.multiply(100).div(hpMax))
+    Boss[id].nextEnrage = (Boss[id].hpPer > 10) ? (Boss[id].hpPer - 10) : 0
 	})
 
 	function setBoss(id)
 	{
-		for(var i in NPCs)
-			if(NPCs[i].gameId === id) NPCs[i].isBoss = true
+      Boss[id] = {
+        "enraged" : false,
+        "etimer" : 0,
+        "nextEnrage" : 0,
+        "hpPer" : 0,
+        "estatus" : ''
+      }
 	}
+
+  function isBoss(id)
+  {
+    if(typeof Boss[id] === 'undefined') return false
+    else return true
+  }
 
 	d.hook('S_SPAWN_NPC',8, (e) => {
 		var newNPC = {
@@ -563,7 +534,7 @@ module.exports = function DPS(d,ctx) {
 			'templateId' : e.templateId,
 			'zoneName' : 'unknown',
 			'npcName' : e.npcName,
-			'isBoss' : false,
+			//'isBoss' : false,
 			'battlestarttime' : 0,
 			'battleendtime' : 0,
 			'totalPartyDamage' : '0',
@@ -593,19 +564,16 @@ module.exports = function DPS(d,ctx) {
 		NPCs[npcIndex].battleendtime = Date.now()
 		duration = NPCs[npcIndex].battleendtime - NPCs[npcIndex].battlestarttime
 
-		if(NPCs[npcIndex].isBoss){
-			enraged = false
-			clearTimeout(timeout)
-			clearTimeout(timeoutCounter)
-			timeout = 0
-			timeoutCounter = 0
-			estatus = ''
+		if(isBoss(id)){
+			Boss[id].enraged = false
+			Boss[id].etimer = 0
+      Boss[id].estatus = ''
 		}
 
 		var dpsmsg = membersDps(id)
 
 		// dps history only for boss and non-boss over 1 min
-		if(NPCs[npcIndex].isBoss || duration > 1000 * 60 * 1)
+		if(isBoss(id) || duration > 1000 * 60 * 1)
 		{
 			if(dpsmsg !== '') BAMHistory[id] = dpsmsg
 
@@ -652,20 +620,38 @@ module.exports = function DPS(d,ctx) {
 
 	d.hook('S_NPC_STATUS',1, (e) => {
 		if(!isBoss(e.creature.toString())) return
-		if (e.enraged === 1 && !enraged) {
-			enraged = true
-			timeout = setTimeout(timeRemaining, 26000)
-			estatus = 'Boss Enraged'.clr('FF0000')
-		} else if (e.enraged === 0 && enraged) {
-			if (hpPer === 100) return
-			clearTimeout(timeout)
-			clearTimeout(timeoutCounter)
-			timeout = 0
-			timeoutCounter = 0
-			enraged = false
-			estatus = 'Next enraged at ' + nextEnrage.toString().clr('FF0000') + '%'
+    var id = e.creature.toString()
+    var timeoutCounter,timeout
+		if (e.enraged === 1 && !Boss[id].enraged) {
+      Boss[id].etimer = 36
+      Boss[id].estatus = 'Boss Enraged'.clr('FF0000') + ' ' + `${Boss[id].etimer}`.clr('FFFFFF') + ' seconds left'.clr('FF0000')
+      Boss[id].etimer--
+      timeoutCounter = setInterval( () => {
+                    setEnragedTime(id,timeoutCounter)
+                  }, 1000)
+		} else if (e.enraged === 0 && Boss[id].enraged) {
+			if (Boss[id].hpPer === 100) return //??
+      Boss[id].etimer = 0
+      setEnragedTime(id,timeoutCounter)
+      clearInterval(timeoutCounter)
 		}
 	})
+
+  function setEnragedTime(gId,counter)
+  {
+    log(Boss[gId])
+    if (Boss[gId].etimer > 0) {
+      Boss[gId].enraged = true
+      Boss[gId].estatus = 'Boss Enraged'.clr('FF0000') + ' ' + `${Boss[gId].etimer}`.clr('FFFFFF') + ' seconds left'.clr('FF0000')
+      Boss[gId].etimer--
+    } else {
+      clearInterval(counter)
+      Boss[gId].etimer = 0
+			Boss[gId].enraged = false
+			Boss[gId].estatus = 'Next enraged at ' + Boss[gId].nextEnrage.toString().clr('FF0000') + '%'
+      if(Boss[gId].nextEnrage == 0) Boss[gId].estatus = ''
+    }
+  }
 
 	//party handler
 	d.hook('S_LEAVE_PARTY_MEMBER',2,(e) => {
@@ -793,15 +779,6 @@ module.exports = function DPS(d,ctx) {
 		}
 		return -1
 	}
-
-	function isBoss(gId)
-	{
-		for(var i in NPCs){
-			if(gId===NPCs[i].gameId) return NPCs[i].isBoss
-		}
-		return false
-	}
-
 
 	function getNPCIndex(gId){
 		for(var i in NPCs){
@@ -1025,10 +1002,11 @@ module.exports = function DPS(d,ctx) {
 
 		var monsterBattleInfo = NPCs[npcIndex].npcName + ' ' + minutes + ':' + seconds + '</br>'
 		monsterBattleInfo = monsterBattleInfo.clr(enable_color)
-		if(enraged) monsterBattleInfo = '<img class=enraged />'+monsterBattleInfo
+		if(isBoss(targetId) && Boss[targetId].enraged) monsterBattleInfo = '<img class=enraged />'+monsterBattleInfo
 
 		dpsJson.push({
-			"enraged":estatus,
+			"enraged": isBoss(targetId) ? Boss[targetId].estatus : '',
+      "etimer": isBoss(targetId) ? Boss[targetId].etimer : 0,
 			"monsterBattleInfo" : monsterBattleInfo,
 			"huntingZoneId" : NPCs[npcIndex].huntingZoneId,
 			"templateId" : NPCs[npcIndex].templateId
@@ -1082,7 +1060,7 @@ module.exports = function DPS(d,ctx) {
 
 
 		// To display last msg on ui even if boss removed from list by DESPAWN packet
-		if(bossOnly && NPCs[npcIndex].isBoss ) lastDps = dpsJson
+		if(bossOnly && isBoss(targetId) ) lastDps = dpsJson
 		if(!bossOnly) lastDps = dpsJson
 
 		//return dpsmsg
@@ -1117,22 +1095,6 @@ module.exports = function DPS(d,ctx) {
 
 		return dpsmsg
 	}
-
-	function timeRemaining() {
-		let i = 10
-		timeoutCounter = setInterval( () => {
-			if (enraged && i > 0) {
-				estatus = 'Boss Enraged'.clr('FF0000') + ' ' + `${i}`.clr('FFFFFF') + ' seconds left'.clr('FF0000')
-				i--
-			} else {
-				clearInterval(timeoutCounter)
-				timeoutCounter = -1
-				estatus = ''
-			}
-		}, 1000)
-	}
-
-
 
 	// helper
 	function stripOuterHTML(str) {
