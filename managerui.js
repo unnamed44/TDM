@@ -9,7 +9,7 @@ module.exports = function ModulesManagerUi(d,ctx) {
 
 	// awesomnium web browser UI
 	ui.use(UI.static(__dirname + '/manager'))
-	ui.get(`/api2/*`, api.bind(ctx))
+	ui.get(`/manager/*`, api.bind(ctx))
 
 	const { lstatSync, readdirSync ,renameSync} = require('fs')
 	const { join } = require('path')

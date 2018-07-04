@@ -107,6 +107,12 @@
 		ajax("I",Settings)
 	}
 
+	function RankSystem()
+	{
+		ajax("2R",Settings)
+	}
+
+
 	function Manager()
 	{
 		ajax("M",null)
@@ -161,6 +167,7 @@
 		document.getElementById("Notice").innerHTML = TDMSettings.notice
 		document.getElementById("BossOnly").innerHTML = TDMSettings.bossOnly
 		document.getElementById("HideNames").innerHTML = TDMSettings.hideNames
+		document.getElementById("RankSystem").innerHTML = TDMSettings.rankSystem
 		document.getElementById("AllUsers").innerHTML = TDMSettings.allUsers
 		document.getElementById("Debug").innerHTML = TDMSettings.debug
 		document.getElementById("debug").innerHTML = 'party:'+ TDMSettings.partyLengh + '| NPCs:' + TDMSettings.NPCsLength + '| BAMHistory:' + TDMSettings.BAMHistoryLength
@@ -381,6 +388,8 @@
 				<td><button class=btn onclick="Notice()">Notice</button></td><td><p id="Notice"></p></td></tr>
 			<tr><td><button class=btn onclick="BossOnly()">bossOnly</button></td><td><p id="BossOnly"></p></td>
 				<td><button class=btn onclick="HideNames()">HideNames</button></td><td><p id="HideNames"></p></td></tr>
+			<tr><td><button class=btn onclick="RankSystem()">RankSystem</button></td><td><p id="RankSystem"></p></td>
+				<td></td></tr>
 			<tr><td><button class=btn onclick="AllUsers()">All DPS</button><br></td><td><p id="AllUsers"></p></td>
 				<td><button class=btn onclick="Debug()">Debug</button></td><td><p id="Debug"></p></td></tr>
 			<tr><td colspan="2"><button class=btn onclick="Manager()">Module Manager</button></td>

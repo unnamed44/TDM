@@ -7,7 +7,7 @@
 	function xhr(url, cb) {
 		x = new XMLHttpRequest();
 		pending = true;
-		x.open("GET", "api2/" + url, true);
+		x.open("GET", "manager/" + url, true);
 		x.onload = cb;
 		x.send();
 		return;
