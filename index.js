@@ -693,7 +693,7 @@ module.exports = function DPS(d,ctx) {
 		e.members.forEach(member => {
 			var newPartyMember = {
 				'gameId' : member.gameId.toString(),
-				'serverId' : e.member.serverId,
+				'serverId' : member.serverId,
 				'playerId' : member.playerId.toString(),
 				'name' : member.name.toString(),
 				'class' : member.class.toString()
