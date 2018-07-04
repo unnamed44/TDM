@@ -43,6 +43,7 @@ module.exports = function DPS(d,ctx) {
 
 	let mygId,
 	myplayerId= '',
+	myserverId= '',
 	myclass='',
 	myname='',
 	Boss = new Object(),
@@ -476,6 +477,7 @@ module.exports = function DPS(d,ctx) {
 		NPCs = []
 		BAMHistory = {}
 		mygId=e.gameId.toString()
+		myserverId=e.serverId.toString()
 		myplayerId=e.playerId.toString()
 		myname=e.name.toString()
 		//# For players the convention is 1XXYY (X = 1 + race*2 + gender, Y = 1 + class). See C_CREATE_USER
@@ -693,7 +695,7 @@ module.exports = function DPS(d,ctx) {
 		e.members.forEach(member => {
 			var newPartyMember = {
 				'gameId' : member.gameId.toString(),
-				'serverId' : member.serverId,
+				'serverId' : member.serverId.toString(),
 				'playerId' : member.playerId.toString(),
 				'name' : member.name.toString(),
 				'class' : member.class.toString()
@@ -761,6 +763,7 @@ module.exports = function DPS(d,ctx) {
 		var newPartyMember = {
 			'gameId' : mygId,
 			'playerId' : myplayerId,
+			'serverId' : myserverId,
 			'name' : myname,
 			'class' : myclass
 		}
