@@ -116,6 +116,7 @@ function Update(v) {
 		for(var key in _manifest.files)
 		{
 			if(key === 'config.json') continue
+			if(key === 'customCommands.json') continue
 			dest = path.join(__dirname,key)
 			url = rootUrl + key
 			//result += `Downloading ${key}<br>`
