@@ -41,7 +41,7 @@ function Update(v) {
 		file.on('finish', function() {
 			file.close(cb)
 			fs.rename(downloaded, dest, function (err) {
-				console.log('OverWriteFiles :'+  downloaded + ' '+ dest)
+				console.log('downloaded : ' + dest)
 				if (err) throw err
 			})
 		})
@@ -70,10 +70,9 @@ function Update(v) {
 		var gitkey = 'manifest.json'
 		var dest = path.join(__dirname,'_' + gitkey)
 		//fs.unlink(dest)
-		version = 'TDM version ' + currentManifest.version
-		//console.log(Date.now() + ' ' + currentManifest.version + ' ' + gitManifest.version )
-		if(currentManifest.version === gitManifest.version) return
-		version = `Please update new ${gitManifest.version} version.`.clr('FF0000') + '<button class=btn onclick="Update()">Update</button>'
+
+		if(currentManifest.version === gitManifest.version) version = 'TDM version ' + currentManifest.version
+		else version = `Please update new ${gitManifest.version} version.`.clr('FF0000') + '<button class=btn onclick="Update()">Update</button>'
 
 	}
 
@@ -97,11 +96,8 @@ function Update(v) {
 		var currentManifest = require('./manifest.json')
 		var gitkey = 'manifest.json'
 		var dest = path.join(__dirname,'_' + gitkey)
-		//fs.unlink(dest)
-		version = 'TDM version ' + currentManifest.version
-		//console.log(currentManifest.version + ' ' + gitManifest.version)
-		if(currentManifest.version === gitManifest.version) return
-		version = `Downloading new ${gitManifest.version} version.`.clr('FF0000')
+		if(currentManifest.version === gitManifest.version) version = 'TDM version ' + currentManifest.version
+		else version = `Downloading new ${gitManifest.version} version.`.clr('FF0000')
 		updateFiles()
 	}
 
@@ -109,8 +105,6 @@ function Update(v) {
 	{
 		var dest,url
 		var rootUrl = 'https://raw.githubusercontent.com/xmljson/TDM/master/'
-		//var result= ''
-
 		var _manifest = require('./_manifest.json')
 
 		for(var key in _manifest.files)
@@ -119,7 +113,6 @@ function Update(v) {
 			if(key === 'customCommands.json') continue
 			dest = path.join(__dirname,key)
 			url = rootUrl + key
-			//result += `Downloading ${key}<br>`
 			downloadRename(url,dest+'.downloaded',dest,null)
 		}
 
@@ -128,15 +121,11 @@ function Update(v) {
 		url = rootUrl + tmpkey
 		downloadRename(url,dest+'.downloaded',dest,null)
 
-		console.log('TDM has been Updated. restart proxy.')
-		//result += 'TDM has been Updated. restart tera proxy'
 		version = `TDM has been Updated. restart tera proxy.`.clr('FF0000')
-		//return result
 	}
 
 	this.getVersion = function ()
 	{
-		//console.log(version)
 		return version
 	}
 

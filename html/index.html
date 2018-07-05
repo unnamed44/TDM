@@ -7,6 +7,7 @@
 	var previousDps = ''
 	var TDMSettings
 	var agree = false
+	var waitForThis = false
 
 	// manager ui
 	function manager_ajax(url, cb) {
@@ -142,7 +143,7 @@
 	function UpdateCB()
 	{
 		var dpsmsg = this.responseText.substring(1, this.responseText.length - 1)
-		document.getElementById("status").innerHTML = dpsmsg.replace(/(\\n|\\)/gm,"");
+		document.getElementById("content").innerHTML = dpsmsg.replace(/(\\n|\\)/gm,"");
 	}
 	function Update()
 	{
@@ -225,8 +226,9 @@
 				if(c[i].command === 'version') document.getElementById("version").innerHTML = c[i].argument
 				if(c[i].command === 'submit') {
 					document.getElementById("filename").value = c[i].argument
-					document.getElementById("rankForm").submit();
+					document.getElementById("rankForm").submit()
 				}
+				if(c[i].command === 'stop refresh') waitForThis=true
 			}
 		}
 	}
@@ -296,6 +298,7 @@
 		if(res === '') return
 		var result = tableDPSFormat(res)
 		if(result === previousDps) return
+		if(waitForThis == true) return
 		document.getElementById("content").innerHTML = result + '<br>'
 
 		previousDps = result
@@ -304,7 +307,7 @@
 	function refreshDPS()
 	{
 		//_tera_client_proxy_.alert('test')
-		waitForThis = false
+		//waitForThis = false
 		var i = setInterval(function(){
 			if(waitForThis){
 				clearInterval(i);

@@ -113,7 +113,7 @@ function TDM(d) {
 			if(hideNames) data[i].name='HIDDEN'
 			dpsmsg 	+=data[i].name + ' '+ unitDps(data[i].dps)
 			+ unitDmg(data[i].totalDamage)
-			+ data[i].percentage  + '% Damage '.clr(enable_color)
+			+ data[i].percentage  + '% ofTot '.clr(enable_color)
 			+ data[i].crit  + '% Crit '.clr(enable_color) + '\n'
 
 
@@ -207,8 +207,13 @@ function TDM(d) {
 			statusToChat('dps popup',enable)
 			return res.status(200).json("ok")
 			case "Q":
+			sendCommandToUi.push({
+				"command":"stop refresh",
+				"argument": ''
+			})
+
 			update.update()
-			return res.status(200).json("restart proxy.")
+			return res.status(200).json("restart proxy after downloads finish.")
 			case "R":
 			//reank system
 			if(req_value == 2){
