@@ -6,33 +6,26 @@ const Command = require('command')
 const Long = require("long")
 const config = require('./config.json')
 const manifest = require('./manifest.json')
-const logger = require('./logger')
-const xmldom = require('xmldom')
-var https = require('https');
 const fs = require('fs')
 const path = require('path')
 const ui_install = require('./ui_install')
 const UI = require('ui')
 const ManagerUi = require('./managerui')
 const customCommand = require('./customCommands.json')
+const Update = require('./update.js')
+const MonsterInfo = require('./monsterinfo')
 
 String.prototype.clr = function (hexColor) { return `<font color='#${hexColor}'>${this}</font>` }
-
-// slower than Long div
-Long.prototype.divTen = function() {
-	return this.multiply(0x1999999A).shr(32)
-}
 
 Long.prototype.divThousand = function() {
 	var stringValue = this.toString()
 	return stringValue.substring(0, stringValue.length - 3)
 }
 
-module.exports = function DPS(d,ctx) {
+function TDM(d) {
 
 	const command = Command(d)
 	const ui = UI(d)
-	const manager = ManagerUi(d,ctx)
 	let enable = config.enable,
 	notice = config.notice,
 	notice_damage = config.notice_damage,
@@ -40,6 +33,7 @@ module.exports = function DPS(d,ctx) {
 	leaving_msg = config.party_leaving_msg,
 	bossOnly = config.bossOnly,
 	region = config.region
+
 
 	let mygId,
 	myplayerId= '',
@@ -60,246 +54,21 @@ module.exports = function DPS(d,ctx) {
 	timeoutCounter = 0,
 	allUsers = false,
 	maxSize = false,
-	doc = null,
-	odoc = null,
 	hideNames = false,
-	versionMsg = '',
-	classIcon = false,
 	sendCommandToUi = new Array(),
 	rankSystem = true
 
 	let enable_color = 'E69F00',
 	disable_color = '56B4E9'
-
-	if(region === 'EU') region = 'EU-EN'
-	let monsterfile = path.join(__dirname, '/monsters-'+ region + '.xml')
-	let override = path.join(__dirname, '/monsters-override.xml')
-
-	if (fs.existsSync(path.join(__dirname,'/html/class-icons'))) {
-		classIcon = true
-	}
-
-	checkUpdate()
-
-	function download(url, dest, cb) {
-		var file = fs.createWriteStream(dest);
-		var request = https.get(url, function(response) {
-			response.pipe(file);
-		}).on('error', function(err) { // Handle errors
-			fs.unlink(dest); // Delete the file async. (But we don't check the result)
-			if (err) throw err
-		})
-
-		file.on('finish', function() {
-			file.close(cb);
-		});
-
-		file.on('error', function (err) {
-			fs.unlink(dest);
-			console.log(err);
-		});
-	}
-
-	function downloadRename(url, downloaded, dest, cb) {
-		var file = fs.createWriteStream(downloaded);
-		var request = https.get(url, function(response) {
-			response.pipe(file);
-		}).on('error', function(err) {
-			fs.unlink(downloaded)
-			if (err) throw err
-		})
-		file.on('finish', function() {
-			file.close(cb);
-			fs.rename(downloaded, dest, function (err) {
-				log('OverWriteFiles :'+  downloaded + ' '+ dest)
-				if (err) throw err
-			})
-		});
-
-		file.on('error', function (err) {
-			fs.unlink(downloaded);
-			console.log(err);
-		});
-	}
-
-	function checkUpdate()
-	{
-		var dest,url
-		var rootUrl = `https://raw.githubusercontent.com/xmljson/TDM/master/`
-		// check manifest
-		var gitkey = 'manifest.json'
-		dest = path.join(__dirname,'_' + gitkey)
-		url = rootUrl + gitkey
-		download(url,dest,getVersionCB)
-	}
-
-	function getVersionCB()
-	{
-		var gitManifest = require('./_manifest.json')
-		var currentManifest = require('./manifest.json')
-		var gitkey = 'manifest.json'
-		var dest = path.join(__dirname,'_' + gitkey)
-		//fs.unlink(dest)
-		versionMsg = 'TDM version ' + currentManifest.version
-		//log(Date.now() + ' ' + currentManifest.version + ' ' + gitManifest.version )
-		if(currentManifest.version === gitManifest.version) return
-		versionMsg = `Please update new ${gitManifest.version} version.`.clr('FF0000') + '<button class=btn onclick="Update()">Update</button>'
-	}
-
-	function update()
-	{
-		var dest,url
-		var rootUrl = `https://raw.githubusercontent.com/xmljson/TDM/master/`
-		// check manifest
-		var gitkey = 'manifest.json'
-		dest = path.join(__dirname,'_' + gitkey)
-		url = rootUrl + gitkey
-		download(url,dest,checkVersionCB)
-	}
-
-	function checkVersionCB()
-	{
-		var gitManifest = require('./_manifest.json')
-		var currentManifest = require('./manifest.json')
-		var gitkey = 'manifest.json'
-		var dest = path.join(__dirname,'_' + gitkey)
-		//fs.unlink(dest)
-		versionMsg = 'TDM version ' + currentManifest.version
-		log(currentManifest.version + ' ' + gitManifest.version)
-		if(currentManifest.version === gitManifest.version) return
-		versionMsg = `Downloading new ${gitManifest.version} version.`.clr('FF0000')
-		updateFiles()
-	}
-
-	function updateFiles()
-	{
-		var dest,url
-		var rootUrl = 'https://raw.githubusercontent.com/xmljson/TDM/master/'
-		var result= ''
-
-		var _manifest = require('./_manifest.json')
-
-		for(var key in _manifest.files)
-		{
-			if(key === 'config.json') continue
-			dest = path.join(__dirname,key)
-			url = rootUrl + key
-			result += `Downloading ${key}<br>`
-			downloadRename(url,dest+'.downloaded',dest,null)
-		}
-
-		var tmpkey = 'manifest.json'
-		dest = path.join(__dirname,tmpkey)
-		url = rootUrl + tmpkey
-		downloadRename(url,dest+'.downloaded',dest,null)
-
-		log('TDM has been Updated. restart proxy.')
-		result += 'TDM has been Updated. restart tera proxy'
-		versionMsg = `TDM has been Updated. restart tera proxy.`.clr('FF0000')
-		//return result
-	}
-
-
-	if (!fs.existsSync(monsterfile)|| !fs.existsSync(override)) {
-		var monsterUrl = `https://raw.githubusercontent.com/neowutran/TeraDpsMeterData/master/monsters/monsters-${region}.xml`
-		var monsteroverrideUrl = `https://raw.githubusercontent.com/neowutran/TeraDpsMeterData/master/monsters/monsters-${region}.xml`
-
-		download(monsterUrl,monsterfile,createXmlDoc)
-		download(monsteroverrideUrl,override,createXmlODoc)
-	}
-	else {
-		createXmlDoc()
-		//createXmlODoc()
-	}
-
-	// moster xml file
-	const errorHandler = {
-		warning(msg) {
-			logger.warn({ err: msg }, 'xml parser warning')
-		},
-
-		error(msg) {
-			logger.error({ err: msg }, 'xml parser error')
-		},
-
-		fatalError(msg) {
-			logger.error({ err: msg }, 'xml parser fatal error')
-		},
-	}
-
-
-	function createXmlDoc() // async
-	{
-		fs.readFile(monsterfile, "utf-8", function (err,data)
-		{
-			if (err) {
-				return log(err)
-			}
-			const parser = new xmldom.DOMParser({ errorHandler })
-			doc = parser.parseFromString(data, 'text/xml')
-			if (!doc) {
-				log('ERROR xml doc :' + monsterfile)
-				return
-			}
-			//log(findZoneMonster(152,2003)) //학살의 사브라니악
-		})
-
-	}
-	function createXmlODoc() // async
-	{
-		//override.xml
-		fs.readFile(override, "utf-8", function (err,data)
-		{
-			if (err) {
-				return log(err)
-			}
-			const oparser = new xmldom.DOMParser({ errorHandler })
-			odoc = oparser.parseFromString(data, 'text/xml')
-			if (!odoc) {
-				log('ERROR xml odoc :' + override)
-				return
-			}
-		})
-	}
-
-	function getNPCInfoFromXml(gId)
-	{
-		var zone,mon
-		var npcIndex = getNPCIndex(gId)
-		if (npcIndex < 0) return false
-
-		if (!doc) return false
-
-		try{
-			var zone = doc.getElementsByTagName("Zone")
-			for(var i in zone)
-			{
-				if(zone[i].getAttribute("id") == Number(NPCs[npcIndex].huntingZoneId)) {
-					NPCs[npcIndex].zoneName = zone[i].getAttribute("name")
-					break
-				}
-			}
-
-			var mon = zone[i].getElementsByTagName("Monster")
-			for(var j in mon)
-			{
-				if(mon[j].getAttribute("id") == Number(NPCs[npcIndex].templateId)) {
-					NPCs[npcIndex].npcName = mon[j].getAttribute("name")
-					//mon[j].getAttribute("isBoss")==="True" ? NPCs[npcIndex].isBoss = true : NPCs[npcIndex].isBoss = false
-					overrideIsBoss(gId)
-					break
-				}
-			}
-		}
-		catch(err){
-			return false
-		}
-		return true
-	}
+	var update = new Update('version')
+	var monInfo = new MonsterInfo(region,update)
+	var managerUi = new ManagerUi(d)
+	update.checkUpdate()
+	monInfo.checkFiles()
 
 	// awesomnium web browser UI
 	ui.use(UI.static(__dirname + '/html'))
-	ui.get(`/api/*`, api.bind(ctx))
+	var router = require('./router/main')(ui,api,managerUi.api)
 
 	function getData(param) {
 		var paramRegex = /(\d*)(\D)/
@@ -472,7 +241,7 @@ module.exports = function DPS(d,ctx) {
 	}
 
 	// packet handle
-	d.hook('S_LOGIN',10, (e) => {
+	function sLogin(e){
 		party = []
 		NPCs = []
 		BAMHistory = {}
@@ -483,9 +252,9 @@ module.exports = function DPS(d,ctx) {
 		//# For players the convention is 1XXYY (X = 1 + race*2 + gender, Y = 1 + class). See C_CREATE_USER
 		myclass = Number((e.templateId - 1).toString().slice(-2)).toString()
 		putMeInParty()
-	})
+	}
 
-	d.hook('S_SPAWN_ME',2, (e) => {
+	function sSpawnMe(e){
 		mygId=e.gameId.toString()
 		currentbossId = ''
 		NPCs = []
@@ -494,23 +263,24 @@ module.exports = function DPS(d,ctx) {
 		ui.open()
 		sendCommandToUi.push({
 			"command":"version",
-			"argument": versionMsg
+			"argument": update.getVersion()
 		})
-	})
+	}
 
-	d.hook('S_LOAD_TOPO',3, (e) => {
+
+	function sLoadTopo(e){
 		currentZone = e.zone
-	})
+	}
 
-	d.hook('S_ANSWER_INTERACTIVE', 2, (e) => {
+	function sAnswerInteractive(e){
 		if(debug){
 			d.send('C_REQUEST_USER_PAPERDOLL_INFO', 1, {
 				name: e.name
 			})
 		}
-	})
+	}
 
-	d.hook('S_BOSS_GAGE_INFO',3, (e) => {
+	function sBossGageInfo(e){
 		// notified boss before battle
 		var id = e.id.toString()
 		var hpMax = e.maxHp
@@ -518,7 +288,7 @@ module.exports = function DPS(d,ctx) {
 		if(!isBoss(id)) setBoss(id)
 		Boss[id].hpPer = Number(hpCur.multiply(100).div(hpMax))
 		Boss[id].nextEnrage = (Boss[id].hpPer > 10) ? (Boss[id].hpPer - 10) : 0
-	})
+	}
 
 	function setBoss(id)
 	{
@@ -537,7 +307,7 @@ module.exports = function DPS(d,ctx) {
 		else return true
 	}
 
-	d.hook('S_SPAWN_NPC',8, (e) => {
+	function sSpawnNpc(e){
 		var newNPC = {
 			'gameId' : e.gameId.toString(),
 			'owner' : e.owner.toString(),
@@ -545,7 +315,6 @@ module.exports = function DPS(d,ctx) {
 			'templateId' : e.templateId,
 			'zoneName' : 'unknown',
 			'npcName' : e.npcName,
-			//'isBoss' : false,
 			'battlestarttime' : 0,
 			'battleendtime' : 0,
 			'totalPartyDamage' : '0',
@@ -554,12 +323,13 @@ module.exports = function DPS(d,ctx) {
 		if(getNPCIndex(e.gameId.toString()) < 0)
 		{
 			if(NPCs.length >= 50) NPCs.shift()
+			monInfo.getNPCInfoFromXml(newNPC)
 			NPCs.push(newNPC)
-			getNPCInfoFromXml(e.gameId.toString())
+			//log('sSpawnNpc '+newNPC.zoneName)
 		}
-	})
+	}
 
-	d.hook('S_DESPAWN_NPC',3, (e) => {
+	function sDespawnNpc(e){
 		var id = e.gameId.toString()
 		var npcIndex = getNPCIndex(id)
 		var duration = 0
@@ -599,47 +369,46 @@ module.exports = function DPS(d,ctx) {
 		if(Object.keys(BAMHistory).length >= 10){
 			for(var key in BAMHistory) {
 				delete BAMHistory[key]
-				break;
+				break
 			}
 		}
 
 		// S_SPAWN_ME clears NPC data
 		// S_LEAVE_PARTY clears party and battle infos
-	})
+	}
 
 	function sendDPSData(data)
 	{
 		log(data)
-		var request = require('request');
+		var request = require('request')
 		request.post({
 			headers: {'content-type': 'application/json'},
 			url: 'http://tera.dvcoa.com.au:3000/uploadDps/test',
 			form: data
 		}, function(error, response, body){
 			log(body)
-		});
+		})
 	}
 
 	function saveDpsData(data)
 	{
 		// save first
-		var json = JSON.stringify(data);
+		var json = JSON.stringify(data)
 
 		var filename = path.join(__dirname,'history',Date.now()+'.json')
 
-		if (!fs.existsSync(path.join(__dirname,'history'))) fs.mkdirSync(path.join(__dirname,'history'));
+		if (!fs.existsSync(path.join(__dirname,'history'))) fs.mkdirSync(path.join(__dirname,'history'))
 
 		fs.writeFile(filename, json, 'utf8', (err) => {
 			// throws an error, you could also catch it here
-			if (err) throw err;
+			if (err) throw err
 			// success case, the file was saved
-			log('dps data saved!');
-		});
+			log('dps data saved!')
+		})
 
 	}
 
-
-	d.hook('S_NPC_STATUS',1, (e) => {
+	function sNpcStatus(e){
 		if(!isBoss(e.creature.toString())) return
 		var id = e.creature.toString()
 		var timeoutCounter,timeout
@@ -655,7 +424,7 @@ module.exports = function DPS(d,ctx) {
 			setEnragedTime(id,timeoutCounter)
 			clearInterval(timeoutCounter)
 		}
-	})
+	}
 
 	function setEnragedTime(gId,counter)
 	{
@@ -674,20 +443,19 @@ module.exports = function DPS(d,ctx) {
 	}
 
 	//party handler
-	d.hook('S_LEAVE_PARTY_MEMBER',2,(e) => {
+	function sLeavePartyMember(e){
 		var id = e.playerId.toString()
 		for(var i in party){
 			if(id===party[i].playerId) party.splice(i,1)
 		}
-	})
+	}
 
-	d.hook('S_LEAVE_PARTY',1, (e) => {
+	function sLeaveparty(e){
 		party = []
 		putMeInParty()
-	})
+	}
 
-
-	d.hook('S_PARTY_MEMBER_LIST',6,(e) => {
+	function sPartyMemberList(e){
 		allUsers = false
 		statusToChat('Count all users dps ',allUsers)
 		party = []
@@ -704,17 +472,17 @@ module.exports = function DPS(d,ctx) {
 				party.push(newPartyMember)
 			}
 		})
-	})
+	}
 
-	d.hook('S_DESPAWN_USER', 3, e => {
+	function sDespawnUser(e){
 		if(!allUsers) return
 		var id = e.gameId.toString()
 		for(var i in party){
 			if(id===party[i].gameId) party.splice(i,1)
 		}
-	})
+	}
 
-	d.hook('S_SPAWN_USER',12, (e) => {
+	function sSpawnUser(e){
 		if(!allUsers) return
 		var uclass = Number((e.templateId - 1).toString().slice(-2)).toString()
 		var newPartyMember = {
@@ -727,7 +495,7 @@ module.exports = function DPS(d,ctx) {
 			//if(party.length >= 30) party.shift()
 			party.push(newPartyMember)
 		}
-	})
+	}
 
 	function removeAllPartyDPSdata()
 	{
@@ -755,7 +523,7 @@ module.exports = function DPS(d,ctx) {
 				"message": leaving_msg
 			})
 		}
-		setTimeout(function(){ d.toServer('C_LEAVE_PARTY', 1, { }) }, 1000);
+		setTimeout(function(){ d.toServer('C_LEAVE_PARTY', 1, { }) }, 1000)
 	}
 
 	function putMeInParty()
@@ -820,7 +588,7 @@ module.exports = function DPS(d,ctx) {
 		currentbossId = gid
 	}
 	// damage handler : Core
-	d.hook('S_EACH_SKILL_RESULT',d.base.majorPatchVersion < 74 ? 7:9, (e) => {
+	function sEachSkillResult(e){
 		// first hit must be myself to set this values
 		if(party.length == 0)
 		{
@@ -906,7 +674,7 @@ module.exports = function DPS(d,ctx) {
 				}
 			}
 		}
-	})
+	}
 
 	function addMemberDamage(id,target,damage,crit,skill)
 	{
@@ -1049,7 +817,7 @@ module.exports = function DPS(d,ctx) {
 			if(hideNames) cname='HIDDEN'
 			if(party[i].gameId===mygId) cname=cname.clr('00FF00')
 			var cimg = ''
-			if(classIcon) cimg = '<img class=class' +party[i].class + ' />'
+			cimg = '<img class=class' +party[i].class + ' />'
 			cname = cname + cimg
 
 			tdamage = Long.fromString(party[i][targetId].damage)
@@ -1162,7 +930,7 @@ module.exports = function DPS(d,ctx) {
 			ui.open()
 			sendCommandToUi.push({
 				"command":"version",
-				"argument": versionMsg
+				"argument": update.getVersion()
 			})
 		}
 		else if (arg == 'nd' || arg=='notice_damage') {
@@ -1187,4 +955,22 @@ module.exports = function DPS(d,ctx) {
 		command.remove('dps')
 		command.remove('manager')
 	}
+
+
+	d.hook('S_LOGIN',10, sLogin)
+	d.hook('S_SPAWN_ME',2, sSpawnMe)
+	d.hook('S_LOAD_TOPO',3, sLoadTopo)
+	d.hook('S_ANSWER_INTERACTIVE', 2, sAnswerInteractive)
+	d.hook('S_BOSS_GAGE_INFO',3, sBossGageInfo)
+	d.hook('S_SPAWN_NPC',8, sSpawnNpc)
+	d.hook('S_DESPAWN_NPC',3, sDespawnNpc)
+	d.hook('S_LEAVE_PARTY_MEMBER',2,sLeavePartyMember)
+	d.hook('S_LEAVE_PARTY',1, sLeaveparty)
+	d.hook('S_PARTY_MEMBER_LIST',6,sPartyMemberList)
+	d.hook('S_DESPAWN_USER', 3, sDespawnUser)
+	d.hook('S_SPAWN_USER',12, sSpawnUser)
+	d.hook('S_NPC_STATUS',1, sNpcStatus)
+	d.hook('S_EACH_SKILL_RESULT',d.base.majorPatchVersion < 74 ? 7:9, sEachSkillResult)
 }
+
+module.exports = TDM

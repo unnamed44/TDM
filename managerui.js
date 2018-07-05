@@ -2,14 +2,9 @@
 const Command = require('command');
 const UI = require('ui')
 
-module.exports = function ModulesManagerUi(d,ctx) {
+function ModulesManagerUi(d) {
 	const command = Command(d);
-	const ui = UI(d)
 	let modules,htmls
-
-	// awesomnium web browser UI
-	ui.use(UI.static(__dirname + '/manager'))
-	ui.get(`/manager/*`, api.bind(ctx))
 
 	const { lstatSync, readdirSync ,renameSync} = require('fs')
 	const { join } = require('path')
@@ -20,11 +15,6 @@ module.exports = function ModulesManagerUi(d,ctx) {
 	var moduleDir = join(__dirname, '..')
 
 	loadModulebuttons()
-
-	for(var i in modules){
-
-
-	}
 
 	function loadModulebuttons()
 	{
@@ -41,7 +31,7 @@ module.exports = function ModulesManagerUi(d,ctx) {
 		}
 	}
 
-	function getData(param) {
+	function getData(param){
 		var paramRegex = /(\d*)(\D)/
 		var data = param.match(paramRegex)
 		if(data==null) return ''
@@ -49,7 +39,7 @@ module.exports = function ModulesManagerUi(d,ctx) {
 		return data
 	}
 
-	function api(req, res) {
+	this.api = function (req, res){
 		const api = getData(req.params[0])
 		var req_value = Number(api[0])
 		var moduleName = req.params[0].substring(2, req.params[0].length)
@@ -74,9 +64,6 @@ module.exports = function ModulesManagerUi(d,ctx) {
 			case "E":
 				Enable(moduleName)
 				return res.status(200).json('ok')
-			case "T":
-				TDM(moduleName)
-				return res.status(200).json('ok')
 			case "C":
 				Commands(moduleName)
 				return res.status(200).json('ok')
@@ -84,10 +71,6 @@ module.exports = function ModulesManagerUi(d,ctx) {
 		}
 
 	function sendExec(msg) { command.exec([...arguments].join('\n  - '.clr('FFFFFF'))) }
-
-	command.add('manager', m => {
-		ui.open()
-	});
 
 	function Unload(m)
 	{
@@ -104,11 +87,6 @@ module.exports = function ModulesManagerUi(d,ctx) {
 		sendExec(`reload ${m}`)
 	}
 
-	function TDM(m)
-	{
-		sendExec(`dps ${m}`)
-	}
-
 	function Commands(m)
 	{
 		sendExec(`${m}`)
@@ -119,14 +97,16 @@ module.exports = function ModulesManagerUi(d,ctx) {
 		renameSync(join(moduleDir,m),join(moduleDir,newFoldername))
 		loadModulebuttons()
 		Load(newFoldername)
-		ui.open()
+		sendExec('dps u')
 	}
 	function Disable(m){
 		Unload(m)
 		var newFoldername = '_' + m
 		renameSync(join(moduleDir,m),join(moduleDir,newFoldername))
 		loadModulebuttons()
-		ui.open()
+		sendExec('dps u')
 	}
 
 };
+
+module.exports = ModulesManagerUi

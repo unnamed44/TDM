@@ -3,20 +3,43 @@
 	<title> Test ui</title>
 	<link rel="stylesheet" href="main.css" />
 	<script>
-	var x
+
 	var previousDps = ''
 	var TDMSettings
 	var agree = false
-	//var enable_color = 'E69F00',	disable_color = '56B4E9'
 
+	// manager ui
+	function manager_ajax(url, cb) {
+		var x = new XMLHttpRequest();
+		pending = true;
+		x.open("GET", "manager/" + url, true);
+		x.onload = cb;
+		x.send();
+		return;
+	}
+	function onClick(val)
+	{
+		manager_ajax(val,null)
+	}
+	function ManagerCB()
+	{
+		document.getElementById("manager").innerHTML = this.responseText.substring(1, this.responseText.length - 1)
+	}
+	function Manager()
+	{
+		manager_ajax("R",ManagerCB)
+	}
+
+	// TDM ui
 	function ajax(url, cb) {
-		x = new XMLHttpRequest();
+		var x = new XMLHttpRequest();
 		pending = true;
 		x.open("GET", "api/" + url, true);
 		x.onload = cb;
 		x.send();
 		return;
 	}
+
 
 	function stripOuterHTML(str) {
 		return str.replace(/\'|^<[^>]+>|<\/[^>]+><[^\/][^>]*>|<\/[^>]+>$/g, '')
@@ -111,18 +134,6 @@
 	{
 		ajax("2R",Settings)
 	}
-
-
-	function Manager()
-	{
-		ajax("M",null)
-	}
-
-	function Journal()
-	{
-		ajax("J",null)
-	}
-
 	function ReloadTDM()
 	{
 		ajax("X",refreshCB)
@@ -397,6 +408,8 @@
 			<tr><td><button class=btn onclick="openWebsite('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=C6BU555NMQJD6')">Donate to dev</button></td><td><button class=btn onclick="useBrowser('http://tera.dvcoa.com.au:3000')">Rank</button></td>
 				<td><button class=btn onclick="useBrowser('https://www.gnu.org/licenses/gpl-3.0-standalone.html')">LICENSE</button></td><td><button class=btn onclick="useBrowserHelp()">Usage</button></td></tr>
 		</table>
+		<br>
+		<div id='manager'></div>
 		<br><br><br><br><br><br><br><br>
 		<div style="position:relative;width:267px;height:25px;overflow:hidden;">
 			<div style="position:absolute;top:-276px;left:-5px">
