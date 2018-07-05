@@ -127,7 +127,7 @@ function Update(v) {
 		url = rootUrl + tmpkey
 		downloadRename(url,dest+'.downloaded',dest,null)
 
-		log('TDM has been Updated. restart proxy.')
+		console.log('TDM has been Updated. restart proxy.')
 		//result += 'TDM has been Updated. restart tera proxy'
 		version = `TDM has been Updated. restart tera proxy.`.clr('FF0000')
 		//return result
