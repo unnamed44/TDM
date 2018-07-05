@@ -179,7 +179,7 @@ function TDM(d) {
 			statusToChat('dps popup',enable)
 			return res.status(200).json("ok")
 			case "Q":
-			update()
+			update.update()
 			return res.status(200).json("restart proxy.")
 			case "R":
 			//reank system
