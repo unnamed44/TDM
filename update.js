@@ -6,6 +6,8 @@ const path = require('path')
 
 let version = ''
 
+String.prototype.clr = function (hexColor) { return `<font color='#${hexColor}'>${this}</font>` }
+
 function Update(v) {
 	version = v
 
