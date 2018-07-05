@@ -952,8 +952,7 @@ function TDM(d) {
 	})
 
 	this.destructor = () => {
-		command.remove('dps')
-		command.remove('manager')
+		command.remove('dps')		
 	}
 
 
