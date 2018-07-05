@@ -177,23 +177,9 @@ function TDM(d) {
 			hideNames = !hideNames
 			statusToChat('hideNames',hideNames)
 			return res.status(200).json("ok")
-			case "J":
-			if(!debug) {
-				toChat('This button is only for debug mode')
-				return res.status(200).json("no")
-			}
-			sendExec('journal ui')
-			return res.status(200).json("ok")
 			case "L":
 			leaveParty()
 			return res.status(200).json('ok')
-			case "M":
-			if(!debug) {
-				toChat('This button is only for debug mode')
-				return res.status(200).json("no")
-			}
-			sendExec('manager')
-			return res.status(200).json("ok")
 			case "N":
 			notice = !notice
 			statusToChat('notice damage',notice)
