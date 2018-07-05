@@ -806,6 +806,8 @@ function TDM(d) {
 			"enraged": isBoss(targetId) ? Boss[targetId].estatus : '',
 			"etimer": isBoss(targetId) ? Boss[targetId].etimer : 0,
 			"monsterBattleInfo" : monsterBattleInfo,
+			"battleDuration" : battledurationbysec,
+			"totalPartyDamage " : totalPartyDamage.toString(),
 			"huntingZoneId" : NPCs[npcIndex].huntingZoneId,
 			"templateId" : NPCs[npcIndex].templateId
 		})
