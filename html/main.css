@@ -33,6 +33,11 @@ img {
 	height: 17px;
 }
 
+textarea {
+ background-color: #2E3440;
+ font-size: 1em;
+}
+
 .enraged {
 	content:url("./icons/enraged.png")
 }
