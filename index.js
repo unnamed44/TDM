@@ -77,6 +77,32 @@ function TDM(d) {
 		return data
 	}
 
+	function unitDps(dps)
+	{
+		if(dps.length <= 5) return numberWithCommas(dps) + ' /s '
+		if(dps.length > 5 && dps.length < 10) {
+			 var kdps= dps.substring(0, dps.length - 3)
+			 return numberWithCommas(kdps) + 'k/s '
+		}
+		if(dps.length >= 10) {
+			var mdps= dps.substring(0, dps.length - 6)
+			return numberWithCommas(mdps) + 'm/s '
+		}
+	}
+
+	function unitDmg(dps)
+	{
+		if(dps.length <= 5) return numberWithCommas(dps) + ' Dmg '
+		if(dps.length > 5 && dps.length < 10) {
+			 var kdps= dps.substring(0, dps.length - 3)
+			 return numberWithCommas(kdps) + 'k Dmg '
+		}
+		if(dps.length >= 10) {
+			var mdps= dps.substring(0, dps.length - 6)
+			return numberWithCommas(mdps) + 'm Dmg '
+		}
+	}
+
 	function textDPSFormat(data)
 	{
 		var dpsmsg = ''
@@ -85,10 +111,12 @@ function TDM(d) {
 			//if(i == 0) continue
 			if(data[i].hasOwnProperty('enraged')|| data[i].hasOwnProperty('command')) continue
 			if(hideNames) data[i].name='HIDDEN'
-			dpsmsg 	+=data[i].name + ' '+ data[i].dps + 'k/s '.clr(enable_color)
-			+ data[i].totalDamage.substring(0, data[i].totalDamage.length - 3)  + 'k Damage '.clr(enable_color)
+			dpsmsg 	+=data[i].name + ' '+ unitDps(data[i].dps)
+			+ unitDmg(data[i].totalDamage)
 			+ data[i].percentage  + '% Damage '.clr(enable_color)
 			+ data[i].crit  + '% Crit '.clr(enable_color) + '\n'
+
+
 		}
 		return dpsmsg
 	}
@@ -100,7 +128,7 @@ function TDM(d) {
 		var msg = textDPSFormat(dpsjson)
 		let msgs = msg.split('\n'),
 		CounterId = setInterval( () => {
-			log(msgs)
+			//log(msgs)
 			if (msgs.length >0) {
 				if(typeof where === 'string') d.toServer('C_WHISPER', 1, {"target": where,"message": msgs[0]})
 				if(typeof where === 'number') d.toServer('C_CHAT', 1, {"channel":where,"message": msgs[0]})
@@ -595,6 +623,7 @@ function TDM(d) {
 			mygId=e.source.toString()
 			myplayerId='NODEF'
 			myname='_ME'
+			myserverId='500'
 			//# For players the convention is 1XXYY (X = 1 + race*2 + gender, Y = 1 + class). See C_CREATE_USER
 			myclass = Number((e.templateId - 1).toString().slice(-2)).toString()
 			log('S_EACH_SKILL_RESULT ' + mygId)
@@ -821,7 +850,7 @@ function TDM(d) {
 			cname = cname + cimg
 
 			tdamage = Long.fromString(party[i][targetId].damage)
-			dps = numberWithCommas(tdamage.div(battledurationbysec).divThousand())
+			dps = tdamage.div(battledurationbysec).toString()
 			var percentage = tdamage.multiply(100).div(totalPartyDamage).toString()
 
 			// the smallest gap size from highest damage (sorted)
@@ -952,7 +981,7 @@ function TDM(d) {
 	})
 
 	this.destructor = () => {
-		command.remove('dps')		
+		command.remove('dps')
 	}
 
 
