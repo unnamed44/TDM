@@ -858,6 +858,7 @@ function TDM(d) {
 
 			dpsJson.push({
 				"name": cname,
+				"class":party[i].class,
 				"serverId": party[i].serverId,
 				"totalDamage":tdamage.toString(),
 				"dps":dps,
