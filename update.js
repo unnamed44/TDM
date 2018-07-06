@@ -16,7 +16,7 @@ function Update(v) {
 		var request = https.get(url, function(response) {
 			response.pipe(file)
 		}).on('error', function(err) { // Handle errors
-			fs.unlink(dest) // Delete the file async. (But we don't check the result)
+			fs.unlinkSync(dest) // Delete the file async. (But we don't check the result)
 			if (err) throw err
 		})
 
@@ -25,7 +25,7 @@ function Update(v) {
 		})
 
 		file.on('error', function (err) {
-			fs.unlink(dest)
+			fs.unlinkSync(dest)
 			console.log(err)
 		})
 	}
@@ -35,7 +35,7 @@ function Update(v) {
 		var request = https.get(url, function(response) {
 			response.pipe(file)
 		}).on('error', function(err) {
-			fs.unlink(downloaded)
+			fs.unlinkSync(downloaded)
 			if (err) throw err
 		})
 		file.on('finish', function() {
@@ -47,7 +47,7 @@ function Update(v) {
 		})
 
 		file.on('error', function (err) {
-			fs.unlink(downloaded)
+			fs.unlinkSync(downloaded)
 			console.log(err)
 		})
 	}
@@ -69,7 +69,7 @@ function Update(v) {
 		var currentManifest = require('./manifest.json')
 		var gitkey = 'manifest.json'
 		var dest = path.join(__dirname,'_' + gitkey)
-		//fs.unlink(dest)
+		//fs.unlinkSync(dest)
 
 		if(currentManifest.version === gitManifest.version) version = 'TDM version ' + currentManifest.version
 		else version = `Please update new ${gitManifest.version} version.`.clr('FF0000') + '<button class=btn onclick="Update()">Update</button>'
