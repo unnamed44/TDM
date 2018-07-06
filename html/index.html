@@ -147,6 +147,7 @@
 	}
 	function Update()
 	{
+		waitForThis = true
 		ajax("Q",UpdateCB)
 	}
 
@@ -217,20 +218,15 @@
 		ajax("3C",CustomCB)
 	}
 
-	function excuteCommand(c)
+	function getVersionCB()
 	{
-		for (var i in c) {
-			if(c[i].hasOwnProperty('command')) {
-				//_tera_client_proxy_.alert(c[i].command)
-				if(c[i].command === 'close') _tera_client_proxy_.close()
-				if(c[i].command === 'version') document.getElementById("version").innerHTML = c[i].argument
-				if(c[i].command === 'submit') {
-					document.getElementById("filename").value = c[i].argument
-					document.getElementById("rankForm").submit()
-				}
-				if(c[i].command === 'stop refresh') waitForThis=true
-			}
-		}
+		var c = JSON.parse(this.responseText)
+		document.getElementById("version").innerHTML = c[0]
+	}
+
+	function getVersion()
+	{
+		ajax("V",getVersionCB)
 	}
 
 	function numberWithCommas(x) {
@@ -262,7 +258,6 @@
 	function tableDPSFormat(data)
 	{
 		var dpsmsg = ''
-		var c
 		var enragedBar = 0
 
 		dpsmsg += '<table>'
@@ -275,17 +270,14 @@
 				dpsmsg += '<br>' + data[i].monsterBattleInfo + '</th></tr>'
 				continue
 			}
-			if(data[i].hasOwnProperty('command')) {
-				c=i
-				continue
-			}
-			dpsmsg 	+='<tr><td> ' + data[i].name  + ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">'
+			dpsmsg 	+='<tr><td> ' + data[i].name
+					+ '<img class=class' +data[i].class + ' />'
+					+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">'
 					+ unitDps(data[i].dps) + ' </td>'
 					+ '<td> ' + data[i].percentage  + '%'.clr('E69F00') + ' </td>'
-					+ '<td class=graph> ' +  data[i].crit  + '%'.clr('E69F00') + ' </td></tr>'
+					+ '<td> ' +  data[i].crit  + '%'.clr('E69F00') + ' </td></tr>'
 		}
 		dpsmsg += '</table>'
-		if( c != null ) excuteCommand(data)
 		return dpsmsg
 	}
 
@@ -392,6 +384,7 @@
 		_tera_client_proxy_.set_title('Tera DPS Monitor')
 		readConfig()
 		refreshDPS()
+		getVersion()
 	}
 
 	</script>

@@ -55,7 +55,6 @@ function TDM(d) {
 	allUsers = false,
 	maxSize = false,
 	hideNames = false,
-	sendCommandToUi = new Array(),
 	rankSystem = true
 
 	let enable_color = 'E69F00',
@@ -109,7 +108,7 @@ function TDM(d) {
 		dpsmsg += stripOuterHTML(data[0].monsterBattleInfo) + '\n'
 		for(var i in data){
 			//if(i == 0) continue
-			if(data[i].hasOwnProperty('enraged')|| data[i].hasOwnProperty('command')) continue
+			if(data[i].hasOwnProperty('enraged')) continue
 			if(hideNames) data[i].name='HIDDEN'
 			dpsmsg 	+=data[i].name + ' '+ unitDps(data[i].dps)
 			+ unitDmg(data[i].totalDamage)
@@ -180,6 +179,7 @@ function TDM(d) {
 			case "L":
 			leaveParty()
 			return res.status(200).json('ok')
+			return
 			case "N":
 			notice = !notice
 			statusToChat('notice damage',notice)
@@ -193,11 +193,6 @@ function TDM(d) {
 			statusToChat('dps popup',enable)
 			return res.status(200).json("ok")
 			case "Q":
-			sendCommandToUi.push({
-				"command":"stop refresh",
-				"argument": ''
-			})
-
 			update.update()
 			return res.status(200).json("restart proxy after downloads finish.")
 			case "R":
@@ -207,23 +202,8 @@ function TDM(d) {
 				statusToChat('rankSystem',rankSystem)
 				return res.status(200).json("ok")
 			}
-
 			// Refresh DPS window
-			// clean previous command
-			for(var i in lastDps) {
-				if(lastDps[i].hasOwnProperty('command')) {
-					lastDps.splice(i,1)
-				}
-			}
 			var dpsdata = membersDps(currentbossId)
-
-			if( sendCommandToUi.length > 0 ) {
-				//log('sendCommandToUi.length ' + sendCommandToUi.length)
-				for(var i in sendCommandToUi) {
-					dpsdata.push(sendCommandToUi[i])
-				}
-				sendCommandToUi = []
-			}
 			return res.status(200).json(dpsdata)
 			case "S":
 			removeAllPartyDPSdata()
@@ -237,6 +217,10 @@ function TDM(d) {
 			ui.open()
 			statusToChat('Count all dps',allUsers)
 			return res.status(200).json("ok")
+			case "V":
+			var ver = []
+			ver.push(update.getVersion())
+			return res.status(200).json(ver)
 			case "W":
 			var wname = req.params[0].substring(2, req.params[0].length)
 			if(wname === '' || lastDps === '' ) return res.status(200).json('ok')
@@ -280,10 +264,6 @@ function TDM(d) {
 		if (!enable) return
 		// empty command
 		ui.open()
-		sendCommandToUi.push({
-			"command":"version",
-			"argument": update.getVersion()
-		})
 	}
 
 
@@ -838,9 +818,7 @@ function TDM(d) {
 			cname=party[i].name
 			if(hideNames) cname='HIDDEN'
 			if(party[i].gameId===mygId) cname=cname.clr('00FF00')
-			var cimg = ''
-			cimg = '<img class=class' +party[i].class + ' />'
-			cname = cname + cimg
+
 
 			tdamage = Long.fromString(party[i][targetId].damage)
 			dps = tdamage.div(battledurationbysec).toString()
@@ -951,20 +929,12 @@ function TDM(d) {
 			enable = true
 			statusToChat('dps popup',enable)
 			ui.open()
-			sendCommandToUi.push({
-				"command":"version",
-				"argument": update.getVersion()
-			})
 		}
 		else if (arg == 'nd' || arg=='notice_damage') {
 			notice_damage = arg2
 			toChat('notice_damage : ' + notice_damage)
 		}
 		else if (arg == 't' || arg=='test') {
-			sendCommandToUi.push({
-				"command":"submit",
-				"argument": path.join(__dirname, 'dps_data.json')
-			})
 		}
 		// notice
 		else if (arg === 'n' ||  arg === 'notice') {
