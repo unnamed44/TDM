@@ -44,20 +44,12 @@ MonsterInfo.prototype.createXmlDoc = function() // async
 {
 
 	// moster xml file
-	fs.readFile(monsterfile, "utf-8", function (err,data)
-	{
-		if (err) {
-			return console.log(err)
-		}
-		const parser = new xmldom.DOMParser({ errorHandler })
-		doc = parser.parseFromString(data, 'text/xml')
-		if (!doc) {
-			console.log('ERROR xml doc :' + monsterfile)
-			return
-		}
-		//console.log('createXmlDoc'  + monsterfile)
-	})
-
+	const parser = new xmldom.DOMParser({ errorHandler })
+	doc = parser.parseFromString(fs.readFileSync(monsterfile, "utf-8"), 'text/xml')
+	if (!doc) {
+		console.log('ERROR xml doc :' + monsterfile)
+		return
+	}
 }
 
 MonsterInfo.prototype.getNPCInfoFromXml = function (npc)
