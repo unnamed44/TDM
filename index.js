@@ -55,6 +55,7 @@ function TDM(d) {
 	allUsers = false,
 	maxSize = false,
 	hideNames = false,
+	skillLog = false,
 	rankSystem = true
 
 	let enable_color = 'E69F00',
@@ -176,6 +177,12 @@ function TDM(d) {
 			statusToChat('hideNames',hideNames)
 			return res.status(200).json("ok")
 			case "L":
+			if(req_value == 1) // skill Log enable/disable
+			{
+				skillLog = !skillLog
+				statusToChat('skillLog',skillLog)
+				return res.status(200).json("ok")
+			}
 			if(req_value == 2) // skill Log
 			{
 				var name = req.params[0].substring(2, req.params[0].length)
@@ -673,7 +680,7 @@ function TDM(d) {
 					if(crit) critDamage = damage
 					else critDamage = "0"
 					// reset skill log
-					if(debug) party[i].skillLog = []
+					if(skillLog && bossOnly &&!allUsers && isBoss(targetId)) party[i].skillLog = []
 					party[i].NPCInfo[targetId] = {
 						'battlestarttime' : Date.now(),
 						'damage' : damage,
@@ -691,7 +698,7 @@ function TDM(d) {
 					//log('addMemberDamage true ' + party[i].NPCInfo[targetId].damage)
 				}
 
-				if(!allUsers){
+				if(skillLog && bossOnly &&!allUsers && isBoss(targetId)){
 					var skilldata = {
 						'skillId' : skill,
 						'Time' : Date.now(),
@@ -714,6 +721,7 @@ function TDM(d) {
 			"notice" : notice ? 'notice'.clr(enable_color) : 'notice'.strike().clr(disable_color),
 			"bossOnly" : bossOnly ? 'Boss Only'.clr(enable_color) : 'Boss Only'.strike().clr(disable_color),
 			"hideNames" : hideNames ? 'hideNames'.clr(enable_color) : 'hideNames'.strike().clr(disable_color),
+			"skillLog" : skillLog ? 'skillLog'.clr(enable_color) : 'skillLog'.strike().clr(disable_color),
 			"rankSystem" : rankSystem ? 'rankSystem'.clr(enable_color) : 'rankSystem'.strike().clr(disable_color),
 			"allUsers" : allUsers ? 'allUsers'.clr(enable_color) : 'allUsers'.strike().clr(disable_color),
 			"debug" : debug ? 'debug'.clr(enable_color) : 'debug'.strike().clr(disable_color),
