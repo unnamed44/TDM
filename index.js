@@ -327,7 +327,7 @@ function TDM(d) {
 				var removed = NPCs.shift()
 
 				for(var i in party)
-				if(typeof party[i][removed.gameId] !== 'undefined') delete party[i][removed.gameId]
+				if(typeof party[i].NPCInfo[removed.gameId] !== 'undefined') delete party[i].NPCInfo[removed.gameId]
 			}
 			monInfo.getNPCInfoFromXml(newNPC)
 			NPCs.push(newNPC)
