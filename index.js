@@ -176,6 +176,16 @@ function TDM(d) {
 			statusToChat('hideNames',hideNames)
 			return res.status(200).json("ok")
 			case "L":
+			if(req_value == 2) // skill Log
+			{
+				var name = req.params[0].substring(2, req.params[0].length)
+				for(var i in party)
+				{
+					if(party[i].name === name) {
+						return res.status(200).json(party[i].skillLog)
+					}
+				}
+			}
 			leaveParty()
 			return res.status(200).json('ok')
 			return
@@ -244,7 +254,7 @@ function TDM(d) {
 
 	// packet handle
 	function sLogin(e){
-		party = []
+		//party = []
 		NPCs = []
 		BAMHistory = {}
 		mygId=e.gameId.toString()
@@ -339,7 +349,7 @@ function TDM(d) {
 
 	function sendDPSData(data)
 	{
-		log(data)
+		//log(data)
 		var request = require('request')
 		request.post({
 			headers: {'content-type': 'application/json'},
@@ -347,13 +357,14 @@ function TDM(d) {
 			form: data
 		}, function(error, response, body){
 			log(body)
+			if(typeof body === 'undefined') log(error)
 		})
 	}
 
 	function saveDpsData(data)
 	{
 		// save first
-		var json = JSON.stringify(data)
+		var json = JSON.stringify(data, null, '\t')
 
 		var filename = path.join(__dirname,'history',Date.now()+'.json')
 
@@ -404,15 +415,15 @@ function TDM(d) {
 
 	//party handler
 	function sLeavePartyMember(e){
-		var id = e.playerId.toString()
-		for(var i in party){
-			if(id===party[i].playerId) party.splice(i,1)
-		}
+		//var id = e.playerId.toString()
+		//for(var i in party){
+		//	if(id===party[i].playerId) party.splice(i,1)
+		//}
 	}
 
 	function sLeaveparty(e){
-		party = []
-		putMeInParty()
+		//party = []
+		//putMeInParty()
 	}
 
 	function sPartyMemberList(e){
@@ -671,7 +682,6 @@ function TDM(d) {
 						'crit' : crit
 					}
 					//log('addMemberDamage true new monster')
-					return true
 				}
 				else {
 					party[i].NPCInfo[targetId].damage = Long.fromString(damage).add(party[i].NPCInfo[targetId].damage).toString()
@@ -679,10 +689,9 @@ function TDM(d) {
 					party[i].NPCInfo[targetId].hit += 1
 					if(crit) party[i].NPCInfo[targetId].crit +=1
 					//log('addMemberDamage true ' + party[i].NPCInfo[targetId].damage)
-					return true
 				}
 
-				if(debug && !allUsers){
+				if(!allUsers){
 					var skilldata = {
 						'skillId' : skill,
 						'Time' : Date.now(),
@@ -691,6 +700,7 @@ function TDM(d) {
 					}
 					party[i].skillLog.push(skilldata)
 				}
+				return true
 			}
 		}
 		//log('addMemberDamage false')
