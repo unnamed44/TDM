@@ -264,7 +264,8 @@
 	function skillLogCB()
 	{
 		var slog = JSON.parse(this.responseText)
-		var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><br><table><tr><td>Time</td><td>Damage</td><td>Crit</td><td>skill ID</td></tr>'
+		var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><br>'
+		html += '<table><tr><td>Time</td><td>skill ID</td><td>Damage</td><td>Crit</td></tr>'
 		for(var i in slog){
 				html+='<tr>'
 				html+='<td>' +(new Date(slog[i].Time)).toLocaleString().slice(0,24)+ '</td>'
