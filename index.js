@@ -427,6 +427,7 @@ function TDM(d) {
 				'playerId' : member.playerId.toString(),
 				'name' : member.name.toString(),
 				'class' : member.class.toString(),
+				'NPCInfo' : new Array(),
 				'skillLog' : new Array()
 			}
 			if(!isPartyMember(member.gameId.toString())) {
@@ -739,8 +740,8 @@ function TDM(d) {
 		if (battleduration < 1000) battleduration = 1000
 		var battledurationbysec = Math.floor((battleduration) / 1000)
 
-		var minutes = "0" + Math.floor(sec / 60);
-		var seconds = "0" + (sec - minutes * 60);
+		var minutes = "0" + Math.floor(battledurationbysec / 60);
+		var seconds = "0" + (battledurationbysec - minutes * 60);
 		var monsterBattleInfo = NPCs[npcIndex].npcName + ' ' + minutes.substr(-2) + ":" + seconds.substr(-2) + '</br>'
 		monsterBattleInfo = monsterBattleInfo.clr(enable_color)
 		if(isBoss(targetId) && Boss[targetId].enraged) monsterBattleInfo = '<img class=enraged />'+monsterBattleInfo
