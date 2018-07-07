@@ -750,6 +750,7 @@ function TDM(d) {
 			"etimer": isBoss(targetId) ? Boss[targetId].etimer : 0,
 			"monsterBattleInfo" : monsterBattleInfo,
 			"battleDuration" : battledurationbysec,
+			"battleendtime" : 0,
 			"totalPartyDamage " : totalPartyDamage.toString(),
 			"huntingZoneId" : NPCs[npcIndex].huntingZoneId,
 			"templateId" : NPCs[npcIndex].templateId
@@ -845,10 +846,11 @@ function TDM(d) {
 		// dps history only for boss and non-boss over 1 min
 		if(isBoss(id) || duration > 1000 * 60 * 1)
 		{
-			if(dpsmsg !== '') BAMHistory[id] = dpsmsg
-
+			if(dpsmsg !== '') {
+				dpsmsg[0].battleendtime = NPCs[npcIndex].battleendtime
+				BAMHistory[id] = dpsmsg
+			}
 			if(debug) saveDpsData(dpsmsg)
-
 			if(rankSystem) sendDPSData(dpsmsg)
 		}
 
