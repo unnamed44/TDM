@@ -128,10 +128,9 @@ function TDM(d) {
 		let msgs = msg.split('\n'),
 		CounterId = setInterval( () => {
 			//log(msgs)
-			if (msgs.length >0) {
-				if(typeof where === 'string') d.toServer('C_WHISPER', 1, {"target": where,"message": msgs[0]})
-				if(typeof where === 'number') d.toServer('C_CHAT', 1, {"channel":where,"message": msgs[0]})
-				msgs.shift()
+			if (msgs.length > 0) {
+				if(typeof where === 'string') d.toServer('C_WHISPER', 1, {"target": where,"message": msgs.shift()})
+				if(typeof where === 'number') d.toServer('C_CHAT', 1, {"channel":where,"message": msgs.shift()})
 			} else {
 				clearInterval(CounterId)
 				CounterId = -1
@@ -269,6 +268,8 @@ function TDM(d) {
 
 	function sLoadTopo(e){
 		currentZone = e.zone
+		// gg reset
+		if(e.zone === 9714) d.toServer('C_RESET_ALL_DUNGEON', 1, {})
 	}
 
 	function sAnswerInteractive(e){
@@ -321,60 +322,20 @@ function TDM(d) {
 		}
 		if(getNPCIndex(e.gameId.toString()) < 0)
 		{
-			if(NPCs.length >= 50) NPCs.shift()
+			if(NPCs.length >= 50)
+			{
+				var removed = NPCs.shift()
+
+				for(var i in party)
+				if(typeof party[i][removed.gameId] !== 'undefined') delete party[i][removed.gameId]
+			}
 			monInfo.getNPCInfoFromXml(newNPC)
 			NPCs.push(newNPC)
 			//log('sSpawnNpc '+newNPC.zoneName)
 		}
 	}
 
-	function sDespawnNpc(e){
-		var id = e.gameId.toString()
-		var npcIndex = getNPCIndex(id)
-		var duration = 0
-		if(npcIndex <0) return
-		// removing NPC which has battle
-		if(NPCs[npcIndex].battlestarttime == 0) {
-			NPCs.splice(npcIndex,1)
-			//log('NPC removed : '+ NPCs[npcIndex].npcName)
-			return
-		}
-		if(NPCs[npcIndex].battleendtime != 0) return // 길리안 두번
 
-		NPCs[npcIndex].battleendtime = Date.now()
-		duration = NPCs[npcIndex].battleendtime - NPCs[npcIndex].battlestarttime
-
-		if(isBoss(id)){
-			Boss[id].enraged = false
-			Boss[id].etimer = 0
-			Boss[id].estatus = ''
-		}
-
-		var dpsmsg = membersDps(id)
-
-		// dps history only for boss and non-boss over 1 min
-		if(isBoss(id) || duration > 1000 * 60 * 1)
-		{
-			if(dpsmsg !== '') BAMHistory[id] = dpsmsg
-
-			if(debug) saveDpsData(dpsmsg)
-
-			if(rankSystem) sendDPSData(dpsmsg)
-		}
-
-		NPCs[npcIndex].dpsmsg = dpsmsg
-
-		//History limit 10
-		if(Object.keys(BAMHistory).length >= 10){
-			for(var key in BAMHistory) {
-				delete BAMHistory[key]
-				break
-			}
-		}
-
-		// S_SPAWN_ME clears NPC data
-		// S_LEAVE_PARTY clears party and battle infos
-	}
 
 	function sendDPSData(data)
 	{
@@ -465,7 +426,8 @@ function TDM(d) {
 				'serverId' : member.serverId.toString(),
 				'playerId' : member.playerId.toString(),
 				'name' : member.name.toString(),
-				'class' : member.class.toString()
+				'class' : member.class.toString(),
+				'skillLog' : new Array()
 			}
 			if(!isPartyMember(member.gameId.toString())) {
 				party.push(newPartyMember)
@@ -486,9 +448,12 @@ function TDM(d) {
 		var uclass = Number((e.templateId - 1).toString().slice(-2)).toString()
 		var newPartyMember = {
 			'gameId' : e.gameId.toString(),
+			'serverId' : e.serverId.toString(),
 			'playerId' : e.playerId.toString(),
 			'name' : e.name.toString(),
-			'class' : uclass
+			'class' : uclass,
+			'NPCInfo': new Array(),
+			'skillLog' : new Array()
 		}
 		if(!isPartyMember(e.gameId.toString()) ) {
 			//if(party.length >= 30) party.shift()
@@ -501,11 +466,8 @@ function TDM(d) {
 		BAMHistory = {}
 		lastDps =''
 		for(var i in party ){
-			for(var key in party[i]) {
-				if(key !== 'gameId' && key !== 'playerId' && key !== 'name' && key !== 'class'){
-					delete party[i][key]
-				}
-			}
+			party[i].skillLog = []
+			party[i].NPCInfo = []
 		}
 
 		for(var key in NPCs){
@@ -532,7 +494,9 @@ function TDM(d) {
 			'playerId' : myplayerId,
 			'serverId' : myserverId,
 			'name' : myname,
-			'class' : myclass
+			'class' : myclass,
+			'NPCInfo': new Array(),
+			'skillLog': new Array()
 		}
 
 		if(!isPartyMember(mygId)) {
@@ -676,10 +640,10 @@ function TDM(d) {
 		}
 	}
 
-	function addMemberDamage(id,target,damage,crit,skill)
+	function addMemberDamage(id,targetId,damage,crit,skill)
 	{
 		//log('addMemberDamage ' + id + ' ' + target + ' ' + damage + ' ' + crit)
-		var npcIndex = getNPCIndex(target)
+		var npcIndex = getNPCIndex(targetId)
 		if(npcIndex <0) return false
 		if(NPCs[npcIndex].battlestarttime == 0){
 			NPCs[npcIndex].battlestarttime = Date.now()
@@ -691,40 +655,40 @@ function TDM(d) {
 		for(var i in party){
 			if(id===party[i].gameId) {
 				//new monster
-				if(typeof party[i][target] === 'undefined')
+				if(typeof party[i].NPCInfo[targetId] === 'undefined')
 				{
 					var critDamage
 					if(crit) critDamage = damage
 					else critDamage = "0"
-					party[i][target] = {
+					// reset skill log
+					if(debug) party[i].skillLog = []
+					party[i].NPCInfo[targetId] = {
 						'battlestarttime' : Date.now(),
 						'damage' : damage,
 						'critDamage' : critDamage,
 						'hit' : 1,
 						'crit' : crit
 					}
-
 					//log('addMemberDamage true new monster')
 					return true
 				}
 				else {
-					party[i][target].damage = Long.fromString(damage).add(party[i][target].damage).toString()
-					if(crit) party[i][target].critDamage = Long.fromString(party[i][target].critDamage).add(damage).toString()
-					party[i][target].hit += 1
-					if(crit) party[i][target].crit +=1
-					//log('addMemberDamage true ' + party[i][target].damage)
+					party[i].NPCInfo[targetId].damage = Long.fromString(damage).add(party[i].NPCInfo[targetId].damage).toString()
+					if(crit) party[i].NPCInfo[targetId].critDamage = Long.fromString(party[i].NPCInfo[targetId].critDamage).add(damage).toString()
+					party[i].NPCInfo[targetId].hit += 1
+					if(crit) party[i].NPCInfo[targetId].crit +=1
+					//log('addMemberDamage true ' + party[i].NPCInfo[targetId].damage)
 					return true
 				}
 
-				if(debug && mygId === party[i].gameId){
+				if(debug && !allUsers){
 					var skilldata = {
 						'skillId' : skill,
 						'Time' : Date.now(),
 						'damage' : damage,
 						'crit' : crit
 					}
-					//log(skilldata)
-					party[i][target].skillLog.push(skilldata)
+					party[i].skillLog.push(skilldata)
 				}
 			}
 		}
@@ -760,7 +724,9 @@ function TDM(d) {
 		if(targetId==='') return lastDps
 		var npcIndex = getNPCIndex(targetId)
 		if(npcIndex < 0) return lastDps
+		// new NPC but battle not started
 		if( NPCs[npcIndex].battlestarttime == 0 ) return  lastDps
+		// for despawned NPC
 		if( NPCs[npcIndex].dpsmsg !== '' ) return NPCs[npcIndex].dpsmsg
 
 		var totalPartyDamage = Long.fromString(NPCs[npcIndex].totalPartyDamage)
@@ -795,9 +761,9 @@ function TDM(d) {
 		// when party over 10 ppl, only sort at the end of the battle for the perfomance
 		//if(party.length < 10 || NPCs[npcIndex].battleendtime != 0)
 		party.sort(function(a,b) {
-			if(typeof a[targetId] === 'undefined' || typeof b[targetId] === 'undefined') return 0
-			if(Long.fromString(a[targetId].damage).gt(b[targetId].damage)) return -1
-			else if(Long.fromString(b[targetId].damage).gt(a[targetId].damage)) return 1
+			if(typeof a.NPCInfo[targetId] === 'undefined' || typeof b.NPCInfo[targetId] === 'undefined') return 0
+			if(Long.fromString(a.NPCInfo[targetId].damage).gt(b.NPCInfo[targetId].damage)) return -1
+			else if(Long.fromString(b.NPCInfo[targetId].damage).gt(a.NPCInfo[targetId].damage)) return 1
 			else return 0
 		})
 
@@ -814,13 +780,13 @@ function TDM(d) {
 		var fill_size = 0
 
 		for(var i in party){
-			if(totalPartyDamage.equals(0) || battleduration <= 0 || typeof party[i][targetId] === 'undefined') continue
+			if(totalPartyDamage.equals(0) || battleduration <= 0 || typeof party[i].NPCInfo[targetId] === 'undefined') continue
 			cname=party[i].name
 			if(hideNames) cname='HIDDEN'
 			if(party[i].gameId===mygId) cname=cname.clr('00FF00')
 
 
-			tdamage = Long.fromString(party[i][targetId].damage)
+			tdamage = Long.fromString(party[i].NPCInfo[targetId].damage)
 			dps = tdamage.div(battledurationbysec).toString()
 			var percentage = tdamage.multiply(100).div(totalPartyDamage).toString()
 
@@ -831,8 +797,8 @@ function TDM(d) {
 			var graph_size = percentage //+ fill_size
 
 			var crit
-			if(party[i][targetId].crit == 0 || party[i][targetId].hit == 0) crit = 0
-			else crit = Math.floor(party[i][targetId].crit * 100 / party[i][targetId].hit)
+			if(party[i].NPCInfo[targetId].crit == 0 || party[i].NPCInfo[targetId].hit == 0) crit = 0
+			else crit = Math.floor(party[i].NPCInfo[targetId].crit * 100 / party[i].NPCInfo[targetId].hit)
 
 			dpsJson.push({
 				"name": cname,
@@ -855,6 +821,54 @@ function TDM(d) {
 		return dpsJson
 	}
 
+	function sDespawnNpc(e){
+		var id = e.gameId.toString()
+		var npcIndex = getNPCIndex(id)
+		var duration = 0
+		if(npcIndex <0) return
+		// removing NPC which has battle
+		if(NPCs[npcIndex].battlestarttime == 0) {
+			NPCs.splice(npcIndex,1)
+			//log('NPC removed : '+ NPCs[npcIndex].npcName)
+			return
+		}
+		if(NPCs[npcIndex].battleendtime != 0) return // 길리안 두번
+
+		NPCs[npcIndex].battleendtime = Date.now()
+		duration = NPCs[npcIndex].battleendtime - NPCs[npcIndex].battlestarttime
+
+		if(isBoss(id)){
+			Boss[id].enraged = false
+			Boss[id].etimer = 0
+			Boss[id].estatus = ''
+		}
+
+		var dpsmsg = membersDps(id)
+
+		// dps history only for boss and non-boss over 1 min
+		if(isBoss(id) || duration > 1000 * 60 * 1)
+		{
+			if(dpsmsg !== '') BAMHistory[id] = dpsmsg
+
+			if(debug) saveDpsData(dpsmsg)
+
+			if(rankSystem) sendDPSData(dpsmsg)
+		}
+
+		NPCs[npcIndex].dpsmsg = dpsmsg
+
+		//History limit 10
+		if(Object.keys(BAMHistory).length >= 10){
+			for(var key in BAMHistory) {
+				delete BAMHistory[key]
+				break
+			}
+		}
+
+		// S_SPAWN_ME clears NPC data
+		// S_LEAVE_PARTY clears party and battle infos
+	}
+
 	function noticeDps(i,damage,targetId)
 	{
 
@@ -873,11 +887,11 @@ function TDM(d) {
 		else endtime=NPCs[npcIndex].battleendtime
 		var battleduration = Math.floor((endtime-NPCs[npcIndex].battlestarttime) / 1000)
 
-		if(battleduration <= 0 || typeof party[i][targetId] === 'undefined'){
+		if(battleduration <= 0 || typeof party[i].NPCInfo[targetId] === 'undefined'){
 			return
 		}
 
-		tdamage = Long.fromString(party[i][targetId].damage)
+		tdamage = Long.fromString(party[i].NPCInfo[targetId].damage)
 		dps = numberWithCommas(tdamage.div(battleduration).divThousand())
 		dpsmsg = numberWithCommas(damage.divThousand()) + ' k '.clr(enable_color) + dps + ' k/s '.clr(enable_color)
 
@@ -935,6 +949,7 @@ function TDM(d) {
 			toChat('notice_damage : ' + notice_damage)
 		}
 		else if (arg == 't' || arg=='test') {
+			d.toClient('S_NPC_MENU_SELECT', 1, {type:28})
 		}
 		// notice
 		else if (arg === 'n' ||  arg === 'notice') {

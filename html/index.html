@@ -413,24 +413,34 @@
 	<div  id="custom" class="tabcontent">
 	</div>
 	<div  id="settings" class="tabcontent">
-		<div id='status'><br><br>
+		<div id='status'>
 		</div>
-
-		<table class=tablehide bordercolor="#2E3440">
-			<tr><td><button class=btn onclick="NoticeDamageAdd()">Notice value</button></td><td><p id="NoticeDamageAdd"></p></td>
-				<td><button class=btn onclick="Notice()">Notice</button></td><td><p id="Notice"></p></td></tr>
-			<tr><td><button class=btn onclick="BossOnly()">bossOnly</button></td><td><p id="BossOnly"></p></td>
-				<td><button class=btn onclick="HideNames()">HideNames</button></td><td><p id="HideNames"></p></td></tr>
-			<tr><td><button class=btn onclick="RankSystem()">RankSystem</button></td><td><p id="RankSystem"></p></td>
-				<td><button class=btn onclick="Update()">Update</button></td></tr>
-			<tr><td><button class=btn onclick="AllUsers()">All DPS</button><br></td><td><p id="AllUsers"></p></td>
-				<td><button class=btn onclick="Debug()">Debug</button></td><td><p id="Debug"></p></td></tr>
-			<tr><td colspan="2"><button class=btn onclick="Manager()">Module Manager</button></td>
-				<td colspan="2"><button class=btn onclick="openWebsite('https://discord.gg/JRa7FXd')">TDM Discord</button></td></tr>
-			<tr><td><button class=btn onclick="openWebsite('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=C6BU555NMQJD6')">Donate to dev</button></td><td><button class=btn onclick="useBrowser('http://tera.dvcoa.com.au:3000')">Rank</button></td>
-				<td><button class=btn onclick="useBrowser('https://www.gnu.org/licenses/gpl-3.0-standalone.html')">LICENSE</button></td><td><button class=btn onclick="useBrowserHelp()">Usage</button></td></tr>
-		</table>
+		<button class=btn onclick="Update()">Update TDM</button>
+		<button class=btn onclick="useBrowser('http://tera.dvcoa.com.au:3000')"> Rank System</button>
+		<button class=btn onclick="openWebsite('https://discord.gg/JRa7FXd')">TDM Discord</button>
 		<br>
+		<button class=btn onclick="openWebsite('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=C6BU555NMQJD6')">Donate to dev</button>
+		<button class=btn onclick="useBrowser('https://www.gnu.org/licenses/gpl-3.0-standalone.html')">LICENSE</button>
+		<button class=btn onclick="useBrowserHelp()">Usage</button>
+		<br><br>
+		<table>
+			<tr>
+				<td><button class=btn onclick="NoticeDamageAdd()">Notice value</button></td><td><p id="NoticeDamageAdd"></p></td>
+				<td><button class=btn onclick="Notice()">Notice</button></td><td><p id="Notice"></p></td></tr>
+			<tr>
+				<td><button class=btn onclick="BossOnly()">bossOnly</button></td><td><p id="BossOnly"></p></td>
+				<td><button class=btn onclick="HideNames()">HideNames</button></td><td><p id="HideNames"></p></td></tr>
+			<tr>
+				<td><button class=btn onclick="RankSystem()">SendDataTo</button></td><td><p id="RankSystem"></p></td>
+				<td><button class=btn onclick="AllUsers()">All DPS</button><br></td><td><p id="AllUsers"></p></td>
+			</tr>
+			<tr>
+				<td><button class=btn onclick="Debug()">Debug</button></td><td><p id="Debug"></p></td>
+				<td></td><td></td>
+			</tr>
+		</table>
+		<br><br>
+		<button class=btn onclick="Manager()">Module Manager</button><br>
 		<div id='manager'></div>
 		<br><br><br><br><br><br><br><br>
 		<br><br><br><br><br><br><br><br>
