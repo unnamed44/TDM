@@ -5,7 +5,6 @@
 const Command = require('command')
 const Long = require("long")
 const config = require('./config.json')
-const manifest = require('./manifest.json')
 const fs = require('fs')
 const path = require('path')
 const ui_install = require('./ui_install')
@@ -344,7 +343,7 @@ function TDM(d) {
 				var removed = NPCs.shift()
 
 				for(var i in party)
-				if(typeof party[i].NPCInfo[removed.gameId] !== 'undefined') delete party[i].NPCInfo[removed.gameId]
+				if(typeof party[i].NPCInfo[removed.gameId] !== 'undefined') clean(party[i].NPCInfo[removed.gameId])
 			}
 			monInfo.getNPCInfoFromXml(newNPC)
 			NPCs.push(newNPC)
@@ -571,21 +570,22 @@ function TDM(d) {
 	}
 	// damage handler : Core
 	function sEachSkillResult(e){
-		// first hit must be myself to set this values
-		if(party.length == 0)
-		{
-			mygId=e.source.toString()
-			myplayerId='NODEF'
-			myname='_ME'
-			myserverId='500'
-			//# For players the convention is 1XXYY (X = 1 + race*2 + gender, Y = 1 + class). See C_CREATE_USER
-			myclass = Number((e.templateId - 1).toString().slice(-2)).toString()
-			log('S_EACH_SKILL_RESULT ' + mygId)
-			putMeInParty()
+		if(!enable) return
+		// read from saved : for reloading TDM
+		if(party.length == 0) {
+			readParty()
+			mygId=party[0].gameId
+			myserverId=party[0].serverId
+			myplayerId=party[0].playerId
+			myname=party[0].name
+			myclass = party[0].class
+			log(party)
+			log('mygId :'+ mygId)
 		}
 
-		//log('[DPS] : ' + e.damage + ' target : ' + e.target.toString())
+		//log('mygId :'+ mygId + '->'+ e.source.toString() +' ->'+ e.owner.toString())
 
+		//log('[DPS] : ' + e.damage + ' target : ' + e.target.toString())
 		var memberIndex = getPartyMemberIndex(e.source.toString())
 		var sourceId = e.source.toString()
 		var target = e.target.toString()
@@ -878,7 +878,7 @@ function TDM(d) {
 		//History limit 10
 		if(Object.keys(BAMHistory).length >= 10){
 			for(var key in BAMHistory) {
-				delete BAMHistory[key]
+				clean(BAMHistory[key])
 				break
 			}
 		}
@@ -917,6 +917,38 @@ function TDM(d) {
 	}
 
 	// helper
+    let writing = false
+    function writeParty() {
+        // if being written, don't retry
+        if (!writing) {
+            writing = true
+            fs.writeFile(path.join(__dirname,'_party.json'), JSON.stringify(party, null, '\t'), (err) => {
+                writing = false
+                if (err) return
+                log('_party.json written')
+            })
+        }
+    }
+
+    function readParty() {
+	   log('_party.json read')
+       var data = fs.readFileSync(path.join(__dirname,'_party.json'),"utf-8")
+	  party = JSON.parse(data)
+    }
+
+    function clean(obj) {
+        for (let key in obj) {
+            if (obj[key] && typeof obj[key] === "object") {
+                if (Object.keys(obj[key]).length !== 0) {
+                    clean(obj[key])
+                }
+                if (Object.keys(obj[key]).length === 0) {
+                    delete obj[key]
+                }
+            }
+        }
+    }
+
 	function stripOuterHTML(str) {
 		return str.replace(/^<[^>]+>|<\/[^>]+><[^\/][^>]*>|<\/[^>]+>$/g, '')
 	}
@@ -943,7 +975,7 @@ function TDM(d) {
 	function sendExec(msg) { command.exec([...arguments].join('\n  - '.clr('FFFFFF'))) }
 
 	function log(msg) {
-		if(debug) console.log(msg)
+		if(debug) console.log(`[${(new Date).toTimeString().slice(0,8)}] `, msg)
 	}
 
 	function statusToChat(tag,val)
@@ -978,6 +1010,7 @@ function TDM(d) {
 	})
 
 	this.destructor = () => {
+		writeParty()
 		command.remove('dps')
 	}
 
@@ -987,7 +1020,7 @@ function TDM(d) {
 	d.hook('S_LOAD_TOPO',3, sLoadTopo)
 	d.hook('S_ANSWER_INTERACTIVE', 2, sAnswerInteractive)
 	d.hook('S_BOSS_GAGE_INFO',3, sBossGageInfo)
-	d.hook('S_SPAWN_NPC',8, sSpawnNpc)
+	d.hook('S_SPAWN_NPC',8,{order: 200}, sSpawnNpc)
 	d.hook('S_DESPAWN_NPC',3, sDespawnNpc)
 	d.hook('S_LEAVE_PARTY_MEMBER',2,sLeavePartyMember)
 	d.hook('S_LEAVE_PARTY',1, sLeaveparty)
@@ -995,7 +1028,7 @@ function TDM(d) {
 	d.hook('S_DESPAWN_USER', 3, sDespawnUser)
 	d.hook('S_SPAWN_USER',12, sSpawnUser)
 	d.hook('S_NPC_STATUS',1, sNpcStatus)
-	d.hook('S_EACH_SKILL_RESULT',d.base.majorPatchVersion < 74 ? 7:9, sEachSkillResult)
+	d.hook('S_EACH_SKILL_RESULT',d.base.majorPatchVersion < 74 ? 7:9, {order: 200}, sEachSkillResult)
 }
 
 module.exports = TDM
