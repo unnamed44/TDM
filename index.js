@@ -574,6 +574,7 @@ function TDM(d) {
 		// read from saved : for reloading TDM
 		if(party.length == 0) {
 			readParty()
+			if(party.length == 0) return
 			mygId=party[0].gameId
 			myserverId=party[0].serverId
 			myplayerId=party[0].playerId
@@ -849,7 +850,10 @@ function TDM(d) {
 			//log('NPC removed : '+ NPCs[npcIndex].npcName)
 			return
 		}
-		if(NPCs[npcIndex].battleendtime != 0) return // 길리안 두번
+		if(NPCs[npcIndex].battleendtime != 0) {
+			log('DOUBLE sDespawnNpc ERROR' + NPCs[npcIndex].npcName)
+			return
+		}
 
 		NPCs[npcIndex].battleendtime = Date.now()
 		duration = NPCs[npcIndex].battleendtime - NPCs[npcIndex].battlestarttime
@@ -862,8 +866,22 @@ function TDM(d) {
 
 		var dpsmsg = membersDps(id)
 
-		// dps history only for boss and non-boss over 1 min
-		if(isBoss(id) || duration > 1000 * 60 * 1)
+		// dps history
+		if(isBoss(id) && Boss[id].hpPer > 0)
+			log('temp zone :' + NPCs[npcIndex].templateId +':'+ NPCs[npcIndex].huntingZoneId + ' HP :' + Boss[id].hpPer)
+		// GG
+		if(NPCs[npcIndex].huntingZoneId === '713' && NPCs[npcIndex].templateId === '81301' && Boss[id].hpPer <= 20){
+			Boss[id].hpPer = 0
+		}
+		// 듀리안
+		if(NPCs[npcIndex].huntingZoneId === '468' && NPCs[npcIndex].templateId === '2000' && Boss[id].hpPer <= 10){
+			Boss[id].hpPer = 0
+		}
+		if(NPCs[npcIndex].huntingZoneId === '768' && NPCs[npcIndex].templateId === '2000' && Boss[id].hpPer <= 10){
+			Boss[id].hpPer = 0
+		}
+
+		if(isBoss(id) && Boss[id].hpPer <= 0)
 		{
 			if(dpsmsg !== '') {
 				dpsmsg[0].battleendtime = NPCs[npcIndex].battleendtime
