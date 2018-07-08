@@ -870,14 +870,14 @@ function TDM(d) {
 		if(isBoss(id) && Boss[id].hpPer > 0)
 			log('temp zone :' + NPCs[npcIndex].templateId +':'+ NPCs[npcIndex].huntingZoneId + ' HP :' + Boss[id].hpPer)
 		// GG
-		if(NPCs[npcIndex].huntingZoneId === '713' && NPCs[npcIndex].templateId === '81301' && Boss[id].hpPer <= 20){
+		if(NPCs[npcIndex].huntingZoneId === 713 && NPCs[npcIndex].templateId === 81301 && Boss[id].hpPer <= 20){
 			Boss[id].hpPer = 0
 		}
 		// 듀리안
-		if(NPCs[npcIndex].huntingZoneId === '468' && NPCs[npcIndex].templateId === '2000' && Boss[id].hpPer <= 10){
+		if(NPCs[npcIndex].huntingZoneId === 468 && NPCs[npcIndex].templateId === 2000 && Boss[id].hpPer <= 10){
 			Boss[id].hpPer = 0
 		}
-		if(NPCs[npcIndex].huntingZoneId === '768' && NPCs[npcIndex].templateId === '2000' && Boss[id].hpPer <= 10){
+		if(NPCs[npcIndex].huntingZoneId === 768 && NPCs[npcIndex].templateId === 2000 && Boss[id].hpPer <= 10){
 			Boss[id].hpPer = 0
 		}
 
