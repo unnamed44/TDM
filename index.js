@@ -34,21 +34,13 @@ function TDM(d) {
 	region = config.region
 
 
-	let mygId,
-	myplayerId= '',
-	myserverId= '',
-	myclass='',
-	myname='',
+	let me,
 	Boss = new Object(),
-	gzoneId = new Array(),
-	gmonsterId = new Array(),
 	NPCs = new Array(),
 	party = new Array(),
 	BAMHistory = new Object(),
 	lastDps= new Array(),
-	currentZone='',
 	currentbossId = '',
-	missingDamage = new Long(0,0),
 	timeout = 0,
 	timeoutCounter = 0,
 	allUsers = false,
@@ -263,17 +255,20 @@ function TDM(d) {
 		//party = []
 		NPCs = []
 		BAMHistory = {}
-		mygId=e.gameId.toString()
-		myserverId=e.serverId.toString()
-		myplayerId=e.playerId.toString()
-		myname=e.name.toString()
-		//# For players the convention is 1XXYY (X = 1 + race*2 + gender, Y = 1 + class). See C_CREATE_USER
-		myclass = Number((e.templateId - 1).toString().slice(-2)).toString()
-		putMeInParty()
+		me = {
+			"gameId":e.gameId.toString(),
+			"serverId":e.serverId.toString(),
+			"playerId":e.playerId.toString(),
+			"templateId":e.templateId.toString(),
+			"name":e.name.toString(),
+			"class":Number((e.templateId - 1).toString().slice(-2)).toString()
+		}
+		putMeInParty(me)
+		writeBackup()
 	}
 
 	function sSpawnMe(e){
-		mygId=e.gameId.toString()
+		me.gameId=e.gameId.toString()
 		currentbossId = ''
 		NPCs = []
 		if (!enable) return
@@ -283,7 +278,6 @@ function TDM(d) {
 
 
 	function sLoadTopo(e){
-		currentZone = e.zone
 		// gg reset
 		if(e.zone === 9714) d.toServer('C_RESET_ALL_DUNGEON', 1, {})
 	}
@@ -442,6 +436,7 @@ function TDM(d) {
 				'gameId' : member.gameId.toString(),
 				'serverId' : member.serverId.toString(),
 				'playerId' : member.playerId.toString(),
+				'templateId' : member.templateId.toString(),
 				'name' : member.name.toString(),
 				'class' : member.class.toString(),
 				'NPCInfo' : new Array(),
@@ -505,19 +500,20 @@ function TDM(d) {
 		setTimeout(function(){ d.toServer('C_LEAVE_PARTY', 1, { }) }, 1000)
 	}
 
-	function putMeInParty()
+	function putMeInParty(m)
 	{
 		var newPartyMember = {
-			'gameId' : mygId,
-			'playerId' : myplayerId,
-			'serverId' : myserverId,
-			'name' : myname,
-			'class' : myclass,
+			'gameId' : m.gameId,
+			'playerId' : m.playerId,
+			'serverId' : m.serverId,
+			'templateId' : m.templateId,
+			'name' : m.name,
+			'class' : m.class,
 			'NPCInfo': new Array(),
 			'skillLog': new Array()
 		}
 
-		if(!isPartyMember(mygId)) {
+		if(!isPartyMember(me.gameId)) {
 			party.push(newPartyMember)
 		}
 	}
@@ -573,18 +569,21 @@ function TDM(d) {
 		if(!enable) return
 		// read from saved : for reloading TDM
 		if(party.length == 0) {
-			readParty()
+			readBackup()
 			if(party.length == 0) return
-			mygId=party[0].gameId
-			myserverId=party[0].serverId
-			myplayerId=party[0].playerId
-			myname=party[0].name
-			myclass = party[0].class
+			me = {
+				"gameId":party[0].gameId,
+				"serverId":party[0].serverId,
+				"playerId":party[0].playerId,
+				"templateId":party[0].templateId,
+				"name":party[0].name,
+				"class":party[0].class
+			}
 			log(party)
-			log('mygId :'+ mygId)
+			log('me.gameId :'+ party[0].gameId)
 		}
 
-		//log('mygId :'+ mygId + '->'+ e.source.toString() +' ->'+ e.owner.toString())
+		//log('me.gameId :'+ me.gameId + '->'+ e.source.toString() +' ->'+ e.owner.toString())
 
 		//log('[DPS] : ' + e.damage + ' target : ' + e.target.toString())
 		var memberIndex = getPartyMemberIndex(e.source.toString())
@@ -595,11 +594,11 @@ function TDM(d) {
 		if(e.damage.gt(0)){// && !e.blocked){
 			if(memberIndex >= 0){
 				// notice damage
-				if(mygId===sourceId){
+				if(me.gameId===sourceId){
 					setCurBoss(target)
 					//currentbossId = target
 					if(e.damage.gt(notice_damage)) {
-						toNotice(noticeDps(memberIndex,e.damage,target))
+						noticeDps(e.damage.toString(),skill)
 					}
 				}
 				// members damage
@@ -613,16 +612,16 @@ function TDM(d) {
 				if(ownerIndex >= 0) {
 					var sourceId = e.owner.toString()
 					// notice damage
-					if(mygId===sourceId){
+					if(me.gameId===sourceId){
 						setCurBoss(target)
 						//currentbossId = target
 						if(e.damage.gt(notice_damage)) {
-							toNotice(noticeDps(ownerIndex,e.damage,target))
+							noticeDps(e.damage.toString(),skill)
 						}
 					}
 					if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit,skill)){
 						//log('[DPS] : unhandled projectile damage ' + e.damage + ' target : ' + target)
-						//log('[DPS] : srcId : ' + sourceId + ' mygId : ' + mygId)
+						//log('[DPS] : srcId : ' + sourceId + ' me.gameId : ' + me.gameId)
 						//log(e)
 					}
 
@@ -634,16 +633,16 @@ function TDM(d) {
 					if(petIndex >= 0) {
 						var sourceId = party[petIndex].gameId
 						// notice damage
-						if(mygId===sourceId){
+						if(me.gameId===sourceId){
 							setCurBoss(target)
 							//currentbossId = target
 							if(e.damage.gt(notice_damage)) {
-								toNotice(noticeDps(petIndex,e.damage,target))
+								noticeDps(e.damage.toString(),skill)
 							}
 						}
 						if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit,skill)){
 							//log('[DPS] : unhandled pet damage ' + e.damage + ' target : ' + target)
-							//log('[DPS] : srcId : ' + sourceId + ' mygId : ' + mygId)
+							//log('[DPS] : srcId : ' + sourceId + ' me.gameId : ' + me.gameId)
 							//log(e)
 						}
 
@@ -788,7 +787,7 @@ function TDM(d) {
 		// remove lowest dps member if over 30
 		if(allUsers){
 			for(;party.length >= 30;) {
-				if(party[party.length -1].gameId === mygId) party.splice(party.length -2,1)
+				if(party[party.length -1].gameId === me.gameId) party.splice(party.length -2,1)
 				else party.pop()
 			}
 		}
@@ -801,7 +800,7 @@ function TDM(d) {
 			if(totalPartyDamage.equals(0) || battleduration <= 0 || typeof party[i].NPCInfo[targetId] === 'undefined') continue
 			cname=party[i].name
 			if(hideNames) cname='HIDDEN'
-			if(party[i].gameId===mygId) cname=cname.clr('00FF00')
+			if(party[i].gameId===me.gameId) cname=cname.clr('00FF00')
 
 
 			tdamage = Long.fromString(party[i].NPCInfo[targetId].damage)
@@ -905,53 +904,64 @@ function TDM(d) {
 		// S_LEAVE_PARTY clears party and battle infos
 	}
 
-	function noticeDps(i,damage,targetId)
+	/*
+	000,000 => 000 k
+	0,000,000 => 0,000 k
+	000,000,000 => 000,000 k
+	0,000,000,000 => 0,000 m*/
+	function unitDps(dps)
 	{
-
-		var endtime = 0
-		var dpsmsg = ''
-		var bossIndex = -1
-		var tdamage = new Long(0,0)
-		var totalPartyDamage  = new Long(0,0)
-		var dps=0
-
-		var npcIndex = getNPCIndex(targetId)
-
-		if(npcIndex < 0) return
-
-		if( NPCs[npcIndex].battleendtime == 0) endtime=Date.now()
-		else endtime=NPCs[npcIndex].battleendtime
-		var battleduration = Math.floor((endtime-NPCs[npcIndex].battlestarttime) / 1000)
-
-		if(battleduration <= 0 || typeof party[i].NPCInfo[targetId] === 'undefined'){
-			return
+		if(dps.length <= 5) return numberWithCommas(dps)
+		if(dps.length > 5 && dps.length < 10) {
+			 var kdps= dps.substring(0, dps.length - 3)
+			 return numberWithCommas(kdps) + 'K'.clr('000000')
 		}
+		if(dps.length >= 10) {
+			var mdps= dps.substring(0, dps.length - 6)
+			return numberWithCommas(mdps) + 'M'.clr('000000')
+		}
+	}
 
-		tdamage = Long.fromString(party[i].NPCInfo[targetId].damage)
-		dps = numberWithCommas(tdamage.div(battleduration).divThousand())
-		dpsmsg = numberWithCommas(damage.divThousand()) + ' k '.clr(enable_color) + dps + ' k/s '.clr(enable_color)
-
-		return dpsmsg
+	function noticeDps(damage,skill)
+	{
+		if(!notice) return
+		var msg = ''
+		msg = unitDps(damage)
+		//log(skill + ':' + skill.slice(1,skill.length))
+		d.send('S_DUNGEON_EVENT_MESSAGE', 1, {
+			message: `<img src="img://skill__0__${me.templateId}__${skill.slice(1,skill.length)}" width="48" height="48" />&nbsp;${msg}`,
+			unk1: 70, //70 : 2,
+			unk2: 0,
+			unk3: 0
+		})
+		return msg
 	}
 
 	// helper
-    let writing = false
-    function writeParty() {
-        // if being written, don't retry
-        if (!writing) {
-            writing = true
-            fs.writeFile(path.join(__dirname,'_party.json'), JSON.stringify(party, null, '\t'), (err) => {
-                writing = false
-                if (err) return
-                log('_party.json written')
-            })
-        }
+    function writeBackup() {
+		fs.writeFileSync(path.join(__dirname,'_Boss.json'), JSON.stringify(Boss, null, '\t'))
+		log('_Boss.json written')
+		fs.writeFileSync(path.join(__dirname,'_NPCs.json'), JSON.stringify(NPCs, null, '\t'))
+		log('_NPCs.json written')
+		fs.writeFileSync(path.join(__dirname,'_party.json'), JSON.stringify(party, null, '\t'))
+		log('_party.json written')
     }
 
-    function readParty() {
-	   log('_party.json read')
-       var data = fs.readFileSync(path.join(__dirname,'_party.json'),"utf-8")
-	  party = JSON.parse(data)
+    function readBackup() {
+		var data = fs.readFileSync(path.join(__dirname,'_Boss.json'),"utf-8")
+		Boss = []
+		Boss = JSON.parse(data)
+		log('_Boss.json read')
+
+		data = fs.readFileSync(path.join(__dirname,'_NPCs.json'),"utf-8")
+		NPCs = []
+		NPCs = JSON.parse(data)
+		log('_NPCs.json read')
+
+		data = fs.readFileSync(path.join(__dirname,'_party.json'),"utf-8")
+		party = []
+		party = JSON.parse(data)
+		log('_party.json read')
     }
 
     function clean(obj) {
@@ -1028,10 +1038,9 @@ function TDM(d) {
 	})
 
 	this.destructor = () => {
-		writeParty()
+		writeBackup()
 		command.remove('dps')
 	}
-
 
 	d.hook('S_LOGIN',10, sLogin)
 	d.hook('S_SPAWN_ME',2, sSpawnMe)

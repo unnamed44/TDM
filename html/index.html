@@ -236,16 +236,11 @@
 	function numberWithCommas(x) {
 		return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
 	}
-/*	0
-	00
-	000
-	000,0
-	000,00
+	/*
 	000,000 => 000 k
 	0,000,000 => 0,000 k
 	000,000,000 => 000,000 k
 	0,000,000,000 => 0,000 m*/
-
 	function unitDps(dps)
 	{
 		if(dps.length <= 5) return numberWithCommas(dps) + '/s'.clr('E69F00')
