@@ -13,8 +13,9 @@ const ManagerUi = require('./managerui')
 const customCommand = require('./customCommands.json')
 const Update = require('./update.js')
 const MonsterInfo = require('./monsterinfo')
+const SkillInfo = require('./skillInfo')
 
-String.prototype.clr = function (hexColor) { return `<font color='#${hexColor}'>${this}</font>` }
+String.prototype.color = function (hexColor) { return `<font color='#${hexColor}'>${this}</font>` }
 
 Long.prototype.divThousand = function() {
 	var stringValue = this.toString()
@@ -46,15 +47,17 @@ function TDM(d) {
 	allUsers = false,
 	maxSize = false,
 	hideNames = false,
-	skillLog = false,
+	skillLog = true,
 	rankSystem = true
 
 	let enable_color = 'E69F00',
 	disable_color = '56B4E9'
 	var update = new Update('version')
+	var skillInfo = new SkillInfo(region,update)
 	var monInfo = new MonsterInfo(region,update)
 	var managerUi = new ManagerUi(d)
 	update.checkUpdate()
+	skillInfo.checkFiles()
 	monInfo.checkFiles()
 
 	// awesomnium web browser UI
@@ -104,8 +107,8 @@ function TDM(d) {
 			if(hideNames) data[i].name='HIDDEN'
 			dpsmsg 	+=data[i].name + ' '+ unitDps(data[i].dps)
 			+ unitDmg(data[i].totalDamage)
-			+ data[i].percentage  + '% ofTot '.clr(enable_color)
-			+ data[i].crit  + '% Crit '.clr(enable_color) + '\n'
+			+ data[i].percentage  + '% ofTot '.color(enable_color)
+			+ data[i].crit  + '% Crit '.color(enable_color) + '\n'
 
 
 		}
@@ -213,8 +216,13 @@ function TDM(d) {
 			var dpsdata = membersDps(currentbossId)
 			return res.status(200).json(dpsdata)
 			case "S":
-			removeAllPartyDPSdata()
-			return res.status(200).json('ok')
+			//reset
+			if(req_value == 100){
+				removeAllPartyDPSdata()
+				return res.status(200).json('ok')
+			}
+			// skill info
+			return res.status(200).json(skillInfo.getSkillsJson(classIdToName(req_value)))
 			case "U":
 			if(!debug) {
 				toChat('This button is only for debug mode')
@@ -402,13 +410,13 @@ function TDM(d) {
 		//log(Boss[gId])
 		if (Boss[gId].etimer > 0) {
 			Boss[gId].enraged = true
-			Boss[gId].estatus = 'Boss Enraged'.clr('FF0000') + ' ' + `${Boss[gId].etimer}`.clr('FFFFFF') + ' seconds left'.clr('FF0000')
+			Boss[gId].estatus = 'Boss Enraged'.color('FF0000') + ' ' + `${Boss[gId].etimer}`.color('FFFFFF') + ' seconds left'.color('FF0000')
 			Boss[gId].etimer--
 		} else {
 			clearInterval(counter)
 			Boss[gId].etimer = 0
 			Boss[gId].enraged = false
-			Boss[gId].estatus = 'Next enraged at ' + Boss[gId].nextEnrage.toString().clr('FF0000') + '%'
+			Boss[gId].estatus = 'Next enraged at ' + Boss[gId].nextEnrage.toString().color('FF0000') + '%'
 			if(Boss[gId].nextEnrage == 0) Boss[gId].estatus = ''
 		}
 	}
@@ -717,14 +725,14 @@ function TDM(d) {
 	function getSettings()
 	{
 		var settings = {
-			"noticeDamage" : notice ? numberWithCommas(notice_damage.toString()).clr(enable_color) : numberWithCommas(notice_damage.toString()).strike().clr(disable_color),
-			"notice" : notice ? 'notice'.clr(enable_color) : 'notice'.strike().clr(disable_color),
-			"bossOnly" : bossOnly ? 'Boss Only'.clr(enable_color) : 'Boss Only'.strike().clr(disable_color),
-			"hideNames" : hideNames ? 'hideNames'.clr(enable_color) : 'hideNames'.strike().clr(disable_color),
-			"skillLog" : skillLog ? 'skillLog'.clr(enable_color) : 'skillLog'.strike().clr(disable_color),
-			"rankSystem" : rankSystem ? 'rankSystem'.clr(enable_color) : 'rankSystem'.strike().clr(disable_color),
-			"allUsers" : allUsers ? 'allUsers'.clr(enable_color) : 'allUsers'.strike().clr(disable_color),
-			"debug" : debug ? 'debug'.clr(enable_color) : 'debug'.strike().clr(disable_color),
+			"noticeDamage" : notice ? numberWithCommas(notice_damage.toString()).color(enable_color) : numberWithCommas(notice_damage.toString()).strike().color(disable_color),
+			"notice" : notice ? 'notice'.color(enable_color) : 'notice'.strike().color(disable_color),
+			"bossOnly" : bossOnly ? 'Boss Only'.color(enable_color) : 'Boss Only'.strike().color(disable_color),
+			"hideNames" : hideNames ? 'hideNames'.color(enable_color) : 'hideNames'.strike().color(disable_color),
+			"skillLog" : skillLog ? 'skillLog'.color(enable_color) : 'skillLog'.strike().color(disable_color),
+			"rankSystem" : rankSystem ? 'rankSystem'.color(enable_color) : 'rankSystem'.strike().color(disable_color),
+			"allUsers" : allUsers ? 'allUsers'.color(enable_color) : 'allUsers'.strike().color(disable_color),
+			"debug" : debug ? 'debug'.color(enable_color) : 'debug'.strike().color(disable_color),
 			"partyLengh" : party.length,
 			"NPCsLength" : NPCs.length,
 			"BAMHistoryLength" : Object.keys(BAMHistory).length
@@ -761,7 +769,7 @@ function TDM(d) {
 		var minutes = "0" + Math.floor(battledurationbysec / 60);
 		var seconds = "0" + (battledurationbysec - minutes * 60);
 		var monsterBattleInfo = NPCs[npcIndex].npcName + ' ' + minutes.substr(-2) + ":" + seconds.substr(-2) + '</br>'
-		monsterBattleInfo = monsterBattleInfo.clr(enable_color)
+		monsterBattleInfo = monsterBattleInfo.color(enable_color)
 		if(isBoss(targetId) && Boss[targetId].enraged) monsterBattleInfo = '<img class=enraged />'+monsterBattleInfo
 
 		dpsJson.push({
@@ -800,7 +808,7 @@ function TDM(d) {
 			if(totalPartyDamage.equals(0) || battleduration <= 0 || typeof party[i].NPCInfo[targetId] === 'undefined') continue
 			cname=party[i].name
 			if(hideNames) cname='HIDDEN'
-			if(party[i].gameId===me.gameId) cname=cname.clr('00FF00')
+			if(party[i].gameId===me.gameId) cname=cname.color('00FF00')
 
 
 			tdamage = Long.fromString(party[i].NPCInfo[targetId].damage)
@@ -914,11 +922,11 @@ function TDM(d) {
 		if(dps.length <= 5) return numberWithCommas(dps)
 		if(dps.length > 5 && dps.length < 10) {
 			 var kdps= dps.substring(0, dps.length - 3)
-			 return numberWithCommas(kdps) + 'K'.clr('000000')
+			 return numberWithCommas(kdps) + 'K'.color('000000')
 		}
 		if(dps.length >= 10) {
 			var mdps= dps.substring(0, dps.length - 6)
-			return numberWithCommas(mdps) + 'M'.clr('000000')
+			return numberWithCommas(mdps) + 'M'.color('000000')
 		}
 	}
 
@@ -935,6 +943,23 @@ function TDM(d) {
 			unk3: 0
 		})
 		return msg
+	}
+
+	function classIdToName(id)
+	{
+		if(id == 0) return 'Warrior'
+		if(id == 1) return 'Lancer'
+		if(id == 2) return 'Slayer'
+		if(id == 3) return 'Berserker'
+		if(id == 4) return 'Sorcerer'
+		if(id == 5) return 'Archer'
+		if(id == 6) return 'Priest'
+		if(id == 7) return 'Mystic'
+		if(id == 8) return 'Reaper'
+		if(id == 9) return 'Gunner'
+		if(id == 10) return 'Brawler'
+		if(id == 12) return 'Valkyrie'
+		return ''
 	}
 
 	// helper
@@ -999,8 +1024,8 @@ function TDM(d) {
 		})
 	}
 
-	function send(msg) { command.message(`[DPS] : ` + [...arguments].join('\n  - '.clr('FFFFFF'))) }
-	function sendExec(msg) { command.exec([...arguments].join('\n  - '.clr('FFFFFF'))) }
+	function send(msg) { command.message(`[DPS] : ` + [...arguments].join('\n  - '.color('FFFFFF'))) }
+	function sendExec(msg) { command.exec([...arguments].join('\n  - '.color('FFFFFF'))) }
 
 	function log(msg) {
 		if(debug) console.log(`[${(new Date).toTimeString().slice(0,8)}] `, msg)
@@ -1008,7 +1033,7 @@ function TDM(d) {
 
 	function statusToChat(tag,val)
 	{
-		send(`${tag} ${val ? 'enabled'.clr(enable_color) : 'disabled'.clr(disable_color)}`)
+		send(`${tag} ${val ? 'enabled'.color(enable_color) : 'disabled'.color(disable_color)}`)
 	}
 	// command
 	command.add('dps', (arg, arg2,arg3) => {
@@ -1034,7 +1059,7 @@ function TDM(d) {
 			notice = !notice
 			statusToChat('notice',notice)
 		}
-		else send(`Invalid argument.`.clr('FF0000') + ' dps or dps u/h/n/s or dps nd 1000000')
+		else send(`Invalid argument.`.color('FF0000') + ' dps or dps u/h/n/s or dps nd 1000000')
 	})
 
 	this.destructor = () => {

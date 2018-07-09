@@ -9,6 +9,7 @@
 	var agree = false
 	var waitForThis = false
 	var slog
+	var skillInfo
 
 	// manager ui
 	function manager_ajax(url, cb) {
@@ -47,7 +48,7 @@
 		return str.replace(/\'|^<[^>]+>|<\/[^>]+><[^\/][^>]*>|<\/[^>]+>$/g, '')
 	}
 
-	String.prototype.clr = function (hexColor) {
+	String.prototype.color = function (hexColor) {
 		return '<font color="#' +hexColor+'">'+ this +'</font>'
 	}
 
@@ -101,7 +102,7 @@
 	}
 
 	function Reset() {
-		ajax("S",null)
+		ajax("100S",null)
 	}
 	function CloseDpsCB() {
 		if(typeof _tera_client_proxy_ !== 'undefined') {
@@ -248,20 +249,30 @@
 	0,000,000,000 => 0,000 m*/
 	function unitDps(dps)
 	{
-		if(dps.length <= 5) return numberWithCommas(dps) + '/s'.clr('E69F00')
+		if(dps.length <= 5) return numberWithCommas(dps) + '/s'.color('E69F00')
 		if(dps.length > 5 && dps.length < 10) {
 			 var kdps= dps.substring(0, dps.length - 3)
-			 return numberWithCommas(kdps) + 'k/s'.clr('E69F00')
+			 return numberWithCommas(kdps) + 'k/s'.color('E69F00')
 		}
 		if(dps.length >= 10) {
 			var mdps= dps.substring(0, dps.length - 6)
-			return numberWithCommas(mdps) + 'm/s'.clr('E69F00')
+			return numberWithCommas(mdps) + 'm/s'.color('E69F00')
 		}
 	}
 
 	function BigInt(n)
 	{
 		return Number(n)
+	}
+
+	function skillIdToName(id)
+	{
+		var sid = id.slice(1,id.length)
+		for(var i in skillInfo)
+		{
+			if(skillInfo[i].id === sid)
+				return skillInfo[i].skillName
+		}
 	}
 
 	function dpsStastic()
@@ -316,7 +327,7 @@
 		for(var i in s){
 				var t = s[i].wDamage + s[i].rDamage
 				html+='<tr>'
-				html+='<td>' +s[i].skillId + '</td>'
+				html+='<td>' + skillIdToName(s[i].skillId) + '</td>'
 				html+='<td>' +s[i].wDamage + '</td>'
 				html+='<td>' +s[i].rDamage + '</td>'
 				html+='<td>' + t + '</td>'
@@ -331,13 +342,13 @@
 	{
 		slog = []
 		slog = JSON.parse(this.responseText)
-		console.log(slog)
+		//console.log(slog)
 		var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="dpsStastic()">Stastic</button><br>'
 		html += '<table><tr><td>Time</td><td>skill ID</td><td>Damage</td><td>Crit</td></tr>'
 		for(var i in slog){
 				html+='<tr>'
 				html+='<td>' +(new Date(slog[i].Time)).toLocaleString().slice(0,24)+ '</td>'
-				html+='<td>' +slog[i].skillId+ '</td>'
+				html+='<td>' +skillIdToName(slog[i].skillId)+ '</td>'
 				html+='<td>' +slog[i].damage+ '</td>'
 				html+='<td>' +slog[i].crit+ '</td>'
 				html+='</tr>'
@@ -346,9 +357,17 @@
 		document.getElementById("content").innerHTML = html
 	}
 
-	function skillLog(n)
+	function getSkillInfoCB()
+	{
+		skillInfo = []
+		skillInfo = JSON.parse(this.responseText)
+	}
+
+	function skillLog(n,c)
 	{
 		waitForThis = true
+		ajax(c+"S",getSkillInfoCB)
+
 		ajax("2L"+n,skillLogCB)
 	}
 
@@ -368,11 +387,11 @@
 				continue
 			}
 			dpsmsg 	+='<tr><td> ' + data[i].name
-					+ '<img onclick="skillLog(\''+ stripOuterHTML(data[i].name) +'\')" class=class' +data[i].class + ' />'
+					+ '<img onclick="skillLog(\''+ stripOuterHTML(data[i].name) +'\', '+data[i].class+')" class=class' +data[i].class + ' />'
 					+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">'
 					+ unitDps(data[i].dps) + ' </td>'
-					+ '<td> ' + data[i].percentage  + '%'.clr('E69F00') + ' </td>'
-					+ '<td> ' +  data[i].crit  + '%'.clr('E69F00') + ' </td></tr>'
+					+ '<td> ' + data[i].percentage  + '%'.color('E69F00') + ' </td>'
+					+ '<td> ' +  data[i].crit  + '%'.color('E69F00') + ' </td></tr>'
 		}
 		dpsmsg += '</table>'
 		return dpsmsg

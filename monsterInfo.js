@@ -40,7 +40,7 @@ const errorHandler = {
 }
 
 
-MonsterInfo.prototype.createXmlDoc = function() // async
+MonsterInfo.prototype.createXmlDoc = function()
 {
 
 	// moster xml file
