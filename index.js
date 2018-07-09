@@ -48,6 +48,7 @@ function TDM(d) {
 	maxSize = false,
 	hideNames = false,
 	skillLog = true,
+	popup = true,
 	rankSystem = true
 
 	let enable_color = 'E69F00',
@@ -164,7 +165,7 @@ function TDM(d) {
 			notice_damage = req_value
 			send('Notice damage is ' + numberWithCommas(notice_damage.toString()))
 			return res.status(200).json(notice_damage.toString())
-			case "E":			
+			case "E":
 			return res.status(200).json(require('../ui/config.json'))
 			case "H":
 			return res.status(200).json(BAMHistory)
@@ -200,8 +201,8 @@ function TDM(d) {
 			statusToChat('boss Only',bossOnly)
 			return res.status(200).json("ok")
 			case "P":
-			enable = false
-			statusToChat('dps popup',enable)
+			popup = false
+			statusToChat('dps popup',popup)
 			return res.status(200).json("ok")
 			case "Q":
 			update.update()
@@ -280,7 +281,7 @@ function TDM(d) {
 		me.gameId=e.gameId.toString()
 		currentbossId = ''
 		NPCs = []
-		if (!enable) return
+		if (!popup) return
 		// empty command
 		ui.open()
 	}
@@ -1039,11 +1040,11 @@ function TDM(d) {
 		// toggle
 		if (!arg) {
 			enable = true
-			statusToChat('dps popup',enable)
+			statusToChat('dps calulation ',enable)
 		}
 		else if (arg == 'u' || arg=='ui') {
-			enable = true
-			statusToChat('dps popup',enable)
+			popup = true
+			statusToChat('dps popup',popup)
 			ui.open()
 		}
 		else if (arg == 'nd' || arg=='notice_damage') {
