@@ -8,8 +8,10 @@
 	var TDMSettings
 	var agree = false
 	var waitForThis = false
-	var slog
-	var skillInfo
+	var slog = []
+	var skillInfo = []
+	var 	name = ''
+	var	classId = ''
 
 	// manager ui
 	function manager_ajax(url, cb) {
@@ -83,8 +85,8 @@
 
 	function Whisper() {
 		if(!warningMsg()) return
-		var name = document.getElementById("name").value;
-		ajax("0W"+ name,null)
+		var n = document.getElementById("name").value;
+		ajax("0W"+ n,null)
 	}
 
 	function ToGuild() {
@@ -322,7 +324,9 @@
 		})
 
 
-		var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><br>'
+		//var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><br>'
+		var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="skillLog(\''+name+'\',\''+classId+'\')">Skill Log</button><br>'
+
 		html += '<table><tr><td>skill ID</td><td>White Dmg</td><td>Red Dmg</td><td>Total Dmg</td></tr>'
 		for(var i in s){
 				var t = s[i].wDamage + s[i].rDamage
@@ -365,9 +369,10 @@
 
 	function skillLog(n,c)
 	{
+		name = n
+		classId = c
 		waitForThis = true
-		ajax(c+"S",getSkillInfoCB)
-
+		if(skillInfo.length == 0) ajax(c+"S",getSkillInfoCB)
 		ajax("2L"+n,skillLogCB)
 	}
 
@@ -414,7 +419,6 @@
 
 	function refreshDPS()
 	{
-		//_tera_client_proxy_.alert('test')
 		previousDps = 'NEW'
 		waitForThis = false
 		var i = setInterval(function(){
