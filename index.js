@@ -164,6 +164,8 @@ function TDM(d) {
 			notice_damage = req_value
 			send('Notice damage is ' + numberWithCommas(notice_damage.toString()))
 			return res.status(200).json(notice_damage.toString())
+			case "E":			
+			return res.status(200).json(require('../ui/config.json'))
 			case "H":
 			return res.status(200).json(BAMHistory)
 			case "I":

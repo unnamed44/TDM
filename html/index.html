@@ -241,6 +241,18 @@
 		ajax("V",getVersionCB)
 	}
 
+	function ExtUICB()
+	{
+		console.log(this.responseText)
+		var c = JSON.parse(this.responseText)
+		openWebsite('http://' + c.host + ':'+ c.port)
+	}
+
+	function ExtUI()
+	{
+		ajax("E",ExtUICB)
+	}
+
 	function numberWithCommas(x) {
 		return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
 	}
@@ -516,6 +528,7 @@
 	    if(tabName === 'history') History()
 	    if(tabName === 'settings') Settings()
 	    if(tabName === 'custom') Custom()
+	    if(tabName === 'manager') Manager()
 	}
 
 	function nullClientProxy () {
@@ -548,7 +561,7 @@
 		<button class="tablinks active" onclick="openTab(event,'wrapper')">DPS</button>
 		<button class="tablinks" onclick="openTab(event,'history')">History</button>
 		<button class="tablinks"  onclick="openTab(event,'settings')">Settings</button>
-		<button class="tablinks" onclick="openTab(event,'custom')">Custom</button>
+		<button class="tablinks" onclick="ExtUI()">ExtUI</button>
 		<button class="tablinks" onclick="CloseDps()">Close</button>
 	</div>
 	<div  id="wrapper" class="tabcontent">
@@ -567,6 +580,8 @@
 	<div  id="history" class="tabcontent">
 	</div>
 	<div  id="custom" class="tabcontent">
+	</div>
+	<div  id="manager" class="tabcontent">
 	</div>
 	<div  id="settings" class="tabcontent">
 		<div id='status'>
@@ -598,8 +613,7 @@
 			</tr>
 		</table>
 		<br><br>
-		<button class=btn onclick="Manager()">Module Manager</button><br>
-		<div id='manager'></div>
+		<button class=btn onclick="openTab(event,'manager')">Module Manager</button><button class=btn onclick="openTab(event,'custom')">Custom Commands</button><br>
 		<br><br><br><br><br><br><br><br>
 		<br><br><br><br><br><br><br><br>
 		<textarea id="debug" maxLength="2000" rows="14" cols="50" style="background-color: #2E3440;"></textarea>

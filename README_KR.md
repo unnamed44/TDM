@@ -31,8 +31,6 @@ Tera-proxy\bin\node_modules\
 
 모듈 메니져 [manager](https://github.com/Mathicha/manager)
 
-infinity journal
-
 ## 사용법
 
 던전에서 스폰 할 때 자동으로 팝업됩니다.
@@ -40,6 +38,8 @@ infinity journal
 UI를 열려면 "!dps u"를 입력하십시오.
 
 config.json에서 region 설정
+
+외부 ui를 사용 하시려면 `Tera-proxy\bin\node_modules\ui\config.json`에서  port number 를 세팅 해주세요.(예: "port" : 9000)
 
 ## 기능들
 
@@ -53,4 +53,6 @@ UI에 DPS history가 표시됩니다.
 
 가장 최근의 dps를 귓속말,파티,길드로 보내기
 
-UI에 대한 분노한 통보
+UI에 대한 분노한 몬스터 통보
+
+외부 UI

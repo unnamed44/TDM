@@ -39,6 +39,8 @@ For those who have a problem with reset data upon dying
 - Type "!dps u" if you want to open UI
 - Set region in config.json
 
+- For exteral ui, you need to set port number in `Tera-proxy\bin\node_modules\ui\config.json` ("port" : 9000)
+
 ## Functions
 
 - If you don't want the dps meter to pop up, press Close button. (X button on title is not the same)
@@ -47,6 +49,7 @@ For those who have a problem with reset data upon dying
 - DPS history is shown in the UI
 - To whisper the lastest dps to a user, type one's name in the input then press the button
 - Enraged notifier on UI
+- External UI (default web browser)
 
 ## Credits
 
