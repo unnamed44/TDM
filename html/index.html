@@ -347,7 +347,7 @@
 		html += '<table><tr><td>Time</td><td>skill ID</td><td>Damage</td><td>Crit</td></tr>'
 		for(var i in slog){
 				html+='<tr>'
-				html+='<td>' +(new Date(slog[i].Time)).toLocaleString().slice(0,24)+ '</td>'
+				html+='<td>' +(new Date).toTimeString().slice(0,8)+ '</td>'
 				html+='<td>' +skillIdToName(slog[i].skillId)+ '</td>'
 				html+='<td>' +slog[i].damage+ '</td>'
 				html+='<td>' +slog[i].crit+ '</td>'
