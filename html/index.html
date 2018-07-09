@@ -8,6 +8,7 @@
 	var TDMSettings
 	var agree = false
 	var waitForThis = false
+	var slog
 
 	// manager ui
 	function manager_ajax(url, cb) {
@@ -72,7 +73,9 @@
 	function warningMsg()
 	{
 		if(agree) return true
-		_tera_client_proxy_.alert("Please remember TDM is not for mocking others. It is at your own risk to get banned by sending dps data. Press again if you agree with this.");
+		if(typeof _tera_client_proxy_ !== 'undefined') {
+			_tera_client_proxy_.alert("Please remember TDM is not for mocking others. It is at your own risk to get banned by sending dps data. Press again if you agree with this.");
+		}
 		agree = true
 		return false
 	}
@@ -101,7 +104,9 @@
 		ajax("S",null)
 	}
 	function CloseDpsCB() {
-		_tera_client_proxy_.close()
+		if(typeof _tera_client_proxy_ !== 'undefined') {
+			_tera_client_proxy_.close()
+		}
 	}
 	function CloseDps() {
 		ajax("P",CloseDpsCB)
@@ -254,16 +259,80 @@
 		}
 	}
 
-/*
-'skillId' : skill,
-'Time' : Date.now(),
-'damage' : damage,
-'crit' : crit
-*/
+	function BigInt(n)
+	{
+		return Number(n)
+	}
+
+	function dpsStastic()
+	{
+		var s= []
+		for(var i in slog)
+		{
+			var t=slog[i]
+			var id = t.skillId
+			var damage = BigInt(t.damage)
+			var c = t.crit
+
+			var found = false
+
+			// search skill id and insert data
+			for (var j in s)
+			{
+				if(s[j].skillId === id)
+				{
+					s[j].wDamage = c ? s[j].wDamage : BigInt(s[j].wDamage) + damage
+					s[j].rDamage = c ? BigInt(s[j].rDamage) + damage : s[j].rDamage
+
+					//console.log( s[j].wDamage + ' ' + s[j].wDamage)
+					found = true
+					break
+				}
+			}
+
+			// not found push a new entity
+			if(!found){
+				var d = {
+					'skillId' : id,
+					'wDamage' : c ? BigInt(0) : (damage),
+					'rDamage' : c ? (damage) : BigInt(0)
+				}
+
+				s.push(d)
+				//console.log('pushed ' + id)
+			}
+		}
+		//console.log(s)
+		// sort by total damage
+		s.sort(function(a,b) {
+			if(a.wDamage + a.rDamage > b.wDamage + b.rDamage) return -1
+			else if(a.wDamage + a.rDamage < b.wDamage + b.rDamage) return 1
+			else return 0
+		})
+
+
+		var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><br>'
+		html += '<table><tr><td>skill ID</td><td>White Dmg</td><td>Red Dmg</td><td>Total Dmg</td></tr>'
+		for(var i in s){
+				var t = s[i].wDamage + s[i].rDamage
+				html+='<tr>'
+				html+='<td>' +s[i].skillId + '</td>'
+				html+='<td>' +s[i].wDamage + '</td>'
+				html+='<td>' +s[i].rDamage + '</td>'
+				html+='<td>' + t + '</td>'
+				html+='</tr>'
+		}
+		html+='</table>'
+		document.getElementById("content").innerHTML = html
+
+	}
+
 	function skillLogCB()
 	{
-		var slog = JSON.parse(this.responseText)
-		var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><br>'
+		slog = []
+		slog = JSON.parse(this.responseText)
+		console.log(slog)
+		var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="dpsStastic()">Stastic</button><br>'
 		html += '<table><tr><td>Time</td><td>skill ID</td><td>Damage</td><td>Crit</td></tr>'
 		for(var i in slog){
 				html+='<tr>'
@@ -339,7 +408,9 @@
 	}
 
 	window.addEventListener('error', function(e) {
-		_tera_client_proxy_.alert('Error: ' + e.message)
+		if(typeof _tera_client_proxy_ !== 'undefined') {
+			_tera_client_proxy_.alert('Error: ' + e.message)
+		}
 	})
 
 	window.onbeforeunload =  function() {
@@ -349,6 +420,7 @@
 
 	function setStyleCB()
 	{
+		if(typeof _tera_client_proxy_ === 'undefined') return
 		document.getElementById("debug").innerHTML = this.responseText
 		var data = this.responseText.substring(1, this.responseText.length - 1)
 		var size = data.split(',')
@@ -369,23 +441,35 @@
 
 	function useBrowser(url)
 	{
-		_tera_client_proxy_.resize_to(1024, 768)
+		if(typeof _tera_client_proxy_ !== 'undefined') {
+			_tera_client_proxy_.resize_to(1024, 768)
+		}
 		window.location.href=url
 	}
 
 	function useBrowserHelp()
 	{
-		var locale = _tera_client_proxy_.get_locale()
+		var locale = ''
+		if(typeof _tera_client_proxy_ !== 'undefined') {
+			locale = _tera_client_proxy_.get_locale()
+		}
 		//_tera_client_proxy_.alert(locale);
 		var url = ''
 		if(locale === 'kr') url = './README_KR.html'
 		else url = './README.html'
-		_tera_client_proxy_.resize_to(1024, 768)
+		if(typeof _tera_client_proxy_ !== 'undefined') {
+			_tera_client_proxy_.resize_to(1024, 768)
+		}
 		window.location.href=url
 	}
 	function openWebsite(url)
 	{
-		_tera_client_proxy_.open_web_direct(url)
+		if(typeof _tera_client_proxy_ !== 'undefined') {
+			_tera_client_proxy_.open_web_direct(url)
+		}
+		else{
+			window.location.href=url
+		}
 	}
 
 	function openTab(evt, tabName) {
@@ -407,10 +491,24 @@
 	    if(tabName === 'custom') Custom()
 	}
 
+	function nullClientProxy () {
+	    this.set_title = function (t){
+		    document.title = t
+	    }
+	    function alert(m) {alert(m)}
+	    this.get_locale = function() {}
+	    this.open_web_direct = function (url){
+		    window.location.href=url
+	    }
+	    this.close = 0;
+	}
 
 	window.onload = function() {
-		_tera_client_proxy_.resize_to(320, 250)
-		_tera_client_proxy_.set_title('Tera DPS Monitor')
+
+		if(typeof _tera_client_proxy_ !== 'undefined') {
+			_tera_client_proxy_.resize_to(320, 250)
+			_tera_client_proxy_.set_title('Tera DPS Monitor')
+		}
 		readConfig()
 		refreshDPS()
 		getVersion()
