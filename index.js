@@ -444,7 +444,6 @@ function TDM(d) {
 				'gameId' : member.gameId.toString(),
 				'serverId' : member.serverId.toString(),
 				'playerId' : member.playerId.toString(),
-				'templateId' : member.templateId.toString(),
 				'name' : member.name.toString(),
 				'class' : member.class.toString(),
 				'NPCInfo' : new Array(),
