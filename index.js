@@ -436,7 +436,6 @@ function TDM(d) {
 
 	function sPartyMemberList(e){
 		allUsers = false
-		statusToChat('Count all users dps ',allUsers)
 		party = []
 
 		e.members.forEach(member => {
