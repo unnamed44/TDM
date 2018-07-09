@@ -323,8 +323,6 @@
 			else return 0
 		})
 
-
-		//var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><br>'
 		var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="skillLog(\''+name+'\',\''+classId+'\')">Skill Log</button><br>'
 
 		html += '<table><tr><td>skill ID</td><td>White Dmg</td><td>Red Dmg</td><td>Total Dmg</td></tr>'
@@ -416,6 +414,7 @@
 		document.getElementById("content").innerHTML = result + '<br>'
 
 		previousDps = result
+
 	}
 
 	function refreshDPS()
@@ -444,11 +443,13 @@
 
 	function setStyleCB()
 	{
-		if(typeof _tera_client_proxy_ === 'undefined') return
+
 		document.getElementById("debug").innerHTML = this.responseText
 		var data = this.responseText.substring(1, this.responseText.length - 1)
 		var size = data.split(',')
-		_tera_client_proxy_.resize_to(Number(size[0]), Number(size[1]))
+		if(typeof _tera_client_proxy_ !== 'undefined') {
+			_tera_client_proxy_.resize_to(Number(size[0]), Number(size[1]))
+		}
 		var divhight = 'height:' + (Number(size[1]) - 55) + 'px'
 		document.getElementById('content').setAttribute("style",divhight);
 		var wrapperdivhight = 'height:' + size[1] + 'px'
@@ -456,6 +457,8 @@
 		document.getElementById('history').setAttribute("style",divhight);
 		document.getElementById('settings').setAttribute("style",divhight);
 		document.getElementById('wrapper').style.display = "block";
+
+
 	}
 
 	function readConfig()

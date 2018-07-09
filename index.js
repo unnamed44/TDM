@@ -189,7 +189,6 @@ function TDM(d) {
 			}
 			leaveParty()
 			return res.status(200).json('ok')
-			return
 			case "N":
 			notice = !notice
 			statusToChat('notice damage',notice)
