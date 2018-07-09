@@ -386,6 +386,23 @@
 		ajax("2L"+n,skillLogCB)
 	}
 
+	function classIdToName(id)
+	{
+		if(id == 0) return 'Warrior'
+		if(id == 1) return 'Lancer'
+		if(id == 2) return 'Slayer'
+		if(id == 3) return 'Berserker'
+		if(id == 4) return 'Sorcerer'
+		if(id == 5) return 'Archer'
+		if(id == 6) return 'Priest'
+		if(id == 7) return 'Mystic'
+		if(id == 8) return 'Reaper'
+		if(id == 9) return 'Gunner'
+		if(id == 10) return 'Brawler'
+		if(id == 12) return 'Valkyrie'
+		return ''
+	}
+
 	function tableDPSFormat(data)
 	{
 		var dpsmsg = ''
@@ -402,7 +419,7 @@
 				continue
 			}
 			dpsmsg 	+='<tr><td> ' + data[i].name
-					+ '<img onclick="skillLog(\''+ stripOuterHTML(data[i].name) +'\', '+data[i].class+')" class=class' +data[i].class + ' />'
+					+ '<img onclick="skillLog(\''+ stripOuterHTML(data[i].name) +'\', '+data[i].class+')" src="./class-icons/'+classIdToName(data[i].class).toLowerCase()+'.png' +'" />'
 					+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">'
 					+ unitDps(data[i].dps) + ' </td>'
 					+ '<td> ' + data[i].percentage  + '%'.color('E69F00') + ' </td>'

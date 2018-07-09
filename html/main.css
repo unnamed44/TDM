@@ -37,50 +37,6 @@ img {
 	content:url("./icons/enraged.png")
 }
 
-.class0 {
-	content:url("./class-icons/warrior.png")
-}
-.class1 {
-	content:url("./class-icons/lancer.png")
-}
-.class2 {
-	content:url("./class-icons/slayer.png")
-}
-.class3 {
-	content:url("./class-icons/berserker.png")
-}
-.class4 {
-	content:url("./class-icons/sorcerer.png")
-}
-.class5 {
-	content:url("./class-icons/archer.png")
-}
-.class6 {
-	content:url("./class-icons/priest.png")
-}
-.class7 {
-	content:url("./class-icons/mystic.png")
-}
-.class8 {
-	content:url("./class-icons/reaper.png")
-}
-.class9 {
-	content:url("./class-icons/gunner.png")
-}
-.class10 {
-	content:url("./class-icons/brawler.png")
-}
-.class11 {
-	content:url("./class-icons/ninja.png")
-}
-.class12 {
-	content:url("./class-icons/valkyrie.png")
-}
-
-.class13 {
-	content:url("./class-icons/common.png")
-}
-
 .ipt {
 	padding: 0 3px;
      border-radius: 3px;
