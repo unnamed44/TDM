@@ -413,7 +413,7 @@ function TDM(d) {
 	{
 		//log(Boss[gId])
 		if (Boss[gId].etimer > 0) {
-			log(Boss[gId].etimer)
+			log(Boss[gId].etimer + ' HP: ' + Boss[gId].hpPer)
 			Boss[gId].enraged = true
 			Boss[gId].estatus = 'Boss Enraged'.color('FF0000') + ' ' + `${Boss[gId].etimer}`.color('FFFFFF') + ' seconds left'.color('FF0000')
 			Boss[gId].etimer--
@@ -965,6 +965,7 @@ function TDM(d) {
 		if(id == 8) return 'Reaper'
 		if(id == 9) return 'Gunner'
 		if(id == 10) return 'Brawler'
+		if(id == 11) return 'Ninja'
 		if(id == 12) return 'Valkyrie'
 		return ''
 	}
