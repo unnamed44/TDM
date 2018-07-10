@@ -246,6 +246,7 @@
 		console.log(this.responseText)
 		var c = JSON.parse(this.responseText)
 		openWebsite('http://' + c.host + ':'+ c.port)
+		CloseDps()
 	}
 
 	function ExtUI()
