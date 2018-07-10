@@ -401,7 +401,7 @@
 				html+='<tr>'
 				html+='<td>' +(new Date(slog[i].Time)).toTimeString().slice(0,8)+ '</td>'
 				html+='<td>' +skillIdToName(slog[i].skillId)+ '</td>'
-				html+='<td>' +slog[i].damage+ '</td>'
+				html+='<td>' +unitDmg(slog[i].damage)+ '</td>'
 				html+='<td>' +slog[i].crit+ '</td>'
 				html+='</tr>'
 		}
