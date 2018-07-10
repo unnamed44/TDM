@@ -10,7 +10,7 @@
 	var waitForThis = false
 	var slog = []
 	var skillInfo = []
-	var 	name = ''
+	var 	_name = ''
 	var	classId = ''
 
 	// manager ui
@@ -295,10 +295,9 @@
 
 	function binarySearchSkillName(d, t, s , e)
 	{
-		var m = Math.floor((s + e)/2);
+		const m = Math.floor((s + e)/2);
 		var target = Number(t)
 		var id = Number(d[m].id)
-		console.log(d[m].skillName)
 		if (target == id) return d[m].skillName;
 		if (e - 1 == s) return 'undefined'
 	  	if (target > id) return binarySearchSkillName(d,t,m,e);
@@ -374,7 +373,7 @@
 			else return 0
 		})
 
-		var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="skillLog(\''+name+'\',\''+classId+'\')">Skill Log</button><br>'
+		var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="skillLog(\''+_name+'\',\''+classId+'\')">Skill Log</button><br>'
 
 		html += '<table><tr><td>Skill Name</td><td>White Dmg</td><td>Red Dmg</td><td>Total Dmg</td></tr>'
 		for(var i in s){
@@ -418,7 +417,7 @@
 
 	function skillLog(n,c)
 	{
-		name = n
+		_name = n
 		classId = c
 		waitForThis = true
 		if(skillInfo.length == 0) ajax(c+"S",getSkillInfoCB)
