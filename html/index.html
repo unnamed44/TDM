@@ -293,14 +293,29 @@
 		return Number(n)
 	}
 
+	function binarySearchSkillName(d, t)
+	{
+		if(!s) s = 0
+		if(!e) e = d.length -1
+		var m = Math.floor((s + e)/2);
+		var target = Number(t)
+		var id = Number(d[m].id)
+		console.log(d[m].skillName)
+		if (target == id) return d[m].skillName;
+		if (e - 1 == s) return 'undefined'
+	  	if (target > id) return binarySearchSkillName(d,t,m,e);
+	  	if (target < id) return binarySearchSkillName(d,t,s,m);
+	}
+
 	function skillIdToName(id)
 	{
 		var sid = id.slice(1,id.length)
-		for(var i in skillInfo)
+		return binarySearchSkillName(skillInfo, sid)
+		/*for(var i in skillInfo)
 		{
 			if(skillInfo[i].id === sid)
 				return skillInfo[i].skillName
-		}
+		}*/
 	}
 
 	function dpsStastic()
