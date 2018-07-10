@@ -42,8 +42,6 @@ function TDM(d) {
 	BAMHistory = new Object(),
 	lastDps= new Array(),
 	currentbossId = '',
-	timeout = 0,
-	timeoutCounter = 0,
 	allUsers = false,
 	maxSize = false,
 	hideNames = false,
@@ -307,7 +305,6 @@ function TDM(d) {
 		var hpCur = e.curHp
 		if(!isBoss(id)) setBoss(id)
 		Boss[id].hpPer = Number(hpCur.multiply(100).div(hpMax))
-		Boss[id].nextEnrage = (Boss[id].hpPer > 10) ? (Boss[id].hpPer - 10) : 0
 	}
 
 	function setBoss(id)
@@ -317,6 +314,7 @@ function TDM(d) {
 			"etimer" : 0,
 			"nextEnrage" : 0,
 			"hpPer" : 0,
+			"enragedTimer" : 0,
 			"estatus" : ''
 		}
 	}
@@ -392,18 +390,22 @@ function TDM(d) {
 	function sNpcStatus(e){
 		if(!isBoss(e.creature.toString())) return
 		var id = e.creature.toString()
-		var timeoutCounter,timeout
+
 		if (e.enraged === 1 && !Boss[id].enraged) {
+			log(Boss[id].hpPer + ' Eraged !! not set yet ' + id + ' '+ e.target)
 			Boss[id].etimer = 36
 			setEnragedTime(id,null)
-			timeoutCounter = setInterval( () => {
-				setEnragedTime(id,timeoutCounter)
+			Boss[id].enragedTimer = setInterval( () => {
+				setEnragedTime(id,Boss[id].enragedTimer)
 			}, 1000)
+		} else if (e.enraged === 1 && Boss[id].enraged) {
+			log(Boss[id].hpPer + ' Eraged but already set ' + id + ' '+ e.target)
 		} else if (e.enraged === 0 && Boss[id].enraged) {
-			if (Boss[id].hpPer === 100) return //??
+			log('Stopped enraged ' + id + ' '+ e.target)
+			if (Boss[id].hpPer === 100) return
 			Boss[id].etimer = 0
-			setEnragedTime(id,timeoutCounter)
-			clearInterval(timeoutCounter)
+			setEnragedTime(id,Boss[id].enragedTimer)
+			clearInterval(Boss[id].enragedTimer)
 		}
 	}
 
@@ -411,6 +413,7 @@ function TDM(d) {
 	{
 		//log(Boss[gId])
 		if (Boss[gId].etimer > 0) {
+			log(Boss[gId].etimer)
 			Boss[gId].enraged = true
 			Boss[gId].estatus = 'Boss Enraged'.color('FF0000') + ' ' + `${Boss[gId].etimer}`.color('FFFFFF') + ' seconds left'.color('FF0000')
 			Boss[gId].etimer--
@@ -418,8 +421,11 @@ function TDM(d) {
 			clearInterval(counter)
 			Boss[gId].etimer = 0
 			Boss[gId].enraged = false
+			Boss[gId].nextEnrage = (Boss[gId].hpPer > 10) ? (Boss[gId].hpPer - 10) : 0
 			Boss[gId].estatus = 'Next enraged at ' + Boss[gId].nextEnrage.toString().color('FF0000') + '%'
 			if(Boss[gId].nextEnrage == 0) Boss[gId].estatus = ''
+			log(Boss[gId].hpPer + ' cleared enraged timer by Timer')
+			log('==========================================================')
 		}
 	}
 
@@ -775,6 +781,7 @@ function TDM(d) {
 		dpsJson.push({
 			"enraged": isBoss(targetId) ? Boss[targetId].estatus : '',
 			"etimer": isBoss(targetId) ? Boss[targetId].etimer : 0,
+			"eCountdown" : isBoss(targetId)&&Boss[targetId].nextEnrage !=0 ? Boss[targetId].hpPer - Boss[targetId].nextEnrage : 0,
 			"monsterBattleInfo" : monsterBattleInfo,
 			"battleDuration" : battledurationbysec,
 			"battleendtime" : 0,
