@@ -412,8 +412,16 @@
 
 		for(var i in data){
 			if(data[i].hasOwnProperty('monsterBattleInfo')) {
-				if(data[i].etimer > 0) enragedBar = data[i].etimer * 100 / 36
-				dpsmsg += '<tr><th colspan="4" style="background: url(\'./icons/enraged_bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar +'% 10%;">'
+				if(data[i].etimer > 0)
+				{
+					enragedBar = data[i].etimer * 100 / 36
+					dpsmsg += '<tr><th colspan="4" style="background: url(\'./icons/enraged_bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar +'% 10%;">'
+				}
+				else {
+					enragedBar = data[i].eCountdown * 10
+					dpsmsg += '<tr><th colspan="4" style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar +'% 10%;">'
+				}
+
 				dpsmsg += data[i].enraged
 				dpsmsg += '<br>' + data[i].monsterBattleInfo + '</th></tr>'
 				continue
