@@ -275,6 +275,19 @@
 		}
 	}
 
+	function unitDmg(dps)
+	{
+		if(dps.length <= 5) return numberWithCommas(dps)
+		if(dps.length > 5 && dps.length < 10) {
+			 var kdps= dps.substring(0, dps.length - 3)
+			 return numberWithCommas(kdps) + 'k'.color('E69F00')
+		}
+		if(dps.length >= 10) {
+			var mdps= dps.substring(0, dps.length - 6)
+			return numberWithCommas(mdps) + 'm'.color('E69F00')
+		}
+	}
+
 	function BigInt(n)
 	{
 		return Number(n)
@@ -349,14 +362,14 @@
 
 		var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="skillLog(\''+name+'\',\''+classId+'\')">Skill Log</button><br>'
 
-		html += '<table><tr><td>skill ID</td><td>White Dmg</td><td>Red Dmg</td><td>Total Dmg</td></tr>'
+		html += '<table><tr><td>Skill Name</td><td>White Dmg</td><td>Red Dmg</td><td>Total Dmg</td></tr>'
 		for(var i in s){
 				var t = s[i].wDamage + s[i].rDamage
 				html+='<tr>'
 				html+='<td>' + s[i].name + '</td>'
-				html+='<td>' +s[i].wDamage + '</td>'
-				html+='<td>' +s[i].rDamage + '</td>'
-				html+='<td>' +s[i].tDamage + '</td>'
+				html+='<td>' +unitDmg(s[i].wDamage.toString()) + '</td>'
+				html+='<td>' +unitDmg(s[i].rDamage.toString()) + '</td>'
+				html+='<td>' +unitDmg(s[i].tDamage.toString()) + '</td>'
 				html+='</tr>'
 		}
 		html+='</table>'
