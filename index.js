@@ -85,14 +85,14 @@ function TDM(d) {
 
 	function unitDmg(dps)
 	{
-		if(dps.length <= 5) return numberWithCommas(dps) + ' Dmg '
+		if(dps.length <= 5) return numberWithCommas(dps) + ' '
 		if(dps.length > 5 && dps.length < 10) {
 			 var kdps= dps.substring(0, dps.length - 3)
-			 return numberWithCommas(kdps) + 'k Dmg '
+			 return numberWithCommas(kdps) + 'k '
 		}
 		if(dps.length >= 10) {
 			var mdps= dps.substring(0, dps.length - 6)
-			return numberWithCommas(mdps) + 'm Dmg '
+			return numberWithCommas(mdps) + 'm '
 		}
 	}
 
@@ -104,8 +104,8 @@ function TDM(d) {
 			//if(i == 0) continue
 			if(data[i].hasOwnProperty('enraged')) continue
 			if(hideNames) data[i].name='HIDDEN'
-			dpsmsg 	+=data[i].name + ' '+ unitDps(data[i].dps)
-			+ unitDmg(data[i].totalDamage)
+			dpsmsg 	+=data[i].name + ' '+ unitDps(data[i].dps) + 'DPS'
+			+ unitDmg(data[i].totalDamage) + 'Dmg'
 			+ data[i].percentage  + '% ofTot '.color(enable_color)
 			+ data[i].crit  + '% Crit '.color(enable_color) + '\n'
 
@@ -919,29 +919,11 @@ function TDM(d) {
 		// S_LEAVE_PARTY clears party and battle infos
 	}
 
-	/*
-	000,000 => 000 k
-	0,000,000 => 0,000 k
-	000,000,000 => 000,000 k
-	0,000,000,000 => 0,000 m*/
-	function unitDps(dps)
-	{
-		if(dps.length <= 5) return numberWithCommas(dps)
-		if(dps.length > 5 && dps.length < 10) {
-			 var kdps= dps.substring(0, dps.length - 3)
-			 return numberWithCommas(kdps) + 'K'.color('000000')
-		}
-		if(dps.length >= 10) {
-			var mdps= dps.substring(0, dps.length - 6)
-			return numberWithCommas(mdps) + 'M'.color('000000')
-		}
-	}
-
 	function noticeDps(damage,skill)
 	{
 		if(!notice) return
 		var msg = ''
-		msg = unitDps(damage)
+		msg = unitDmg(damage)
 		//log(skill + ':' + skill.slice(1,skill.length))
 		d.send('S_DUNGEON_EVENT_MESSAGE', 1, {
 			message: `<img src="img://skill__0__${me.templateId}__${skill.slice(1,skill.length)}" width="48" height="48" />&nbsp;${msg}`,
