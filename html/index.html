@@ -401,7 +401,7 @@
 		slog = JSON.parse(this.responseText)
 		//console.log(slog)
 		var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="dpsStastic()">Stastic</button><br>'
-		html += '<table><tr><td>Time</td><td>skill ID</td><td>Damage</td></tr>'
+		html += '<table><tr><td>Time</td><td>Skill Name</td><td>Damage</td></tr>'
 		for(var i in slog){
 				html+='<tr>'
 				html+='<td>' +(new Date(slog[i].Time)).toTimeString().slice(0,8)+ '</td>'
