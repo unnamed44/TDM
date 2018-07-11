@@ -104,8 +104,8 @@ function TDM(d) {
 			//if(i == 0) continue
 			if(data[i].hasOwnProperty('enraged')) continue
 			if(hideNames) data[i].name='HIDDEN'
-			dpsmsg 	+=data[i].name + ' '+ unitDps(data[i].dps) + 'DPS'
-			+ unitDmg(data[i].totalDamage) + 'Dmg'
+			dpsmsg 	+=data[i].name + ' '+ unitDps(data[i].dps) + 'DPS '
+			+ unitDmg(data[i].totalDamage) + 'Dmg '
 			+ data[i].percentage  + '% ofTot '.color(enable_color)
 			+ data[i].crit  + '% Crit '.color(enable_color) + '\n'
 

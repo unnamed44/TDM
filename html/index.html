@@ -9,9 +9,9 @@
 	var agree = false
 	var waitForThis = false
 	var slog = []
-	var skillInfo = []
+	var _skillInfo = []
 	var 	_name = ''
-	var	classId = ''
+	var	_classId = ''
 
 	// manager ui
 	function manager_ajax(url, cb) {
@@ -306,13 +306,13 @@
 
 	function skillIdToName(id)
 	{
-		if(skillInfo.length == 0) return 'skill tsv missing'
+		if(_skillInfo.length == 0) return 'skill tsv missing'
 		var sid = id.slice(1,id.length)
-		return binarySearchSkillName(skillInfo, sid, 0, skillInfo.length - 1)
-		/*for(var i in skillInfo)
+		return binarySearchSkillName(_skillInfo, sid, 0, _skillInfo.length - 1)
+		/*for(var i in _skillInfo)
 		{
-			if(skillInfo[i].id === sid)
-				return skillInfo[i].skillName
+			if(_skillInfo[i].id === sid)
+				return _skillInfo[i].skillName
 		}*/
 	}
 
@@ -377,7 +377,7 @@
 			else return 0
 		})
 
-		var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="skillLog(\''+_name+'\',\''+classId+'\')">Skill Log</button><br>'
+		var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="skillLog(\''+_name+'\',\''+_classId+'\')">Skill Log</button><br>'
 
 		html += '<table><tr><td>Skill Name</td><td>White Dmg</td><td>Red Dmg</td><td>Total Dmg</td><td>Crit</td></tr>'
 		for(var i in s){
@@ -415,17 +415,16 @@
 
 	function getSkillInfoCB()
 	{
-		skillInfo = []
-		skillInfo = JSON.parse(this.responseText)
+		_skillInfo = JSON.parse(this.responseText)
+		ajax("2L"+_name,skillLogCB)
 	}
 
 	function skillLog(n,c)
 	{
 		_name = n
-		classId = c
+		_classId = c
 		waitForThis = true
-		if(skillInfo.length == 0) ajax(c+"S",getSkillInfoCB)
-		ajax("2L"+n,skillLogCB)
+		ajax(c+"S",getSkillInfoCB)
 	}
 
 	function classIdToName(id)
@@ -482,7 +481,7 @@
 
 	function refreshCB()
 	{
-		skillInfo = []
+		_skillInfo = []
 		var res = JSON.parse(this.responseText)
 
 		//document.getElementById("debug").innerHTML = this.responseText;
