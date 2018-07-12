@@ -103,15 +103,16 @@ function Update() {
 	{
 		const { lstatSync, readdirSync ,renameSync} = require('fs')
 		const isDirectory = source => lstatSync(source).isDirectory()
-		const getFiles = source =>
-			readdirSync(source).map(function(name){ if(!isDirectory(join(source, name))) return name })
+		const getDataFiles = source =>
+			readdirSync(source).map(function(name){
+				if(!isDirectory(join(source, name)) &&( name.includes('.xml') || name.includes('.tsv')))
+					return name
+			})
 
-		const fileNames=getFiles(__dirname)
+		var fileNames = getFiles(__dirname)
 
 		for(var i in fileNames){
 			console.log(fileNames[i])
-			if(fileNames[i].indexOf('.xml') >= 0) unlinkSync(join(__dirname,fileNames[i]))
-			if(fileNames[i].indexOf('.tsv') >= 0) unlinkSync(join(__dirname,fileNames[i]))
 		}
 	}
 
