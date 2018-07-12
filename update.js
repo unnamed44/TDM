@@ -86,7 +86,8 @@ function Update() {
 			var result = await _download(url,dest)
 			//console.log(result)
 		}
-		catch(_){
+		catch(err){
+			throw(err)
 		}
 		if(result !== 'success') return
 		delete require.cache[require.resolve('./_manifest.json')]
@@ -101,15 +102,16 @@ function Update() {
 	function deleteDataFiles()
 	{
 		const { lstatSync, readdirSync ,renameSync} = require('fs')
-		const isDirectory = source => lstatSync(source).isDirectory()		
+		const isDirectory = source => lstatSync(source).isDirectory()
 		const getFiles = source =>
 			readdirSync(source).map(function(name){ if(!isDirectory(join(source, name))) return name })
 
 		const fileNames=getFiles(__dirname)
 
 		for(var i in fileNames){
-			if(fileNames[i].includes('.xml')) unlinkSync(join(__dirname,fileNames[i]))
-			if(fileNames[i].includes('.tsv')) unlinkSync(join(__dirname,fileNames[i]))
+			console.log(fileNames[i])
+			if(fileNames[i].indexOf('.xml') >= 0) unlinkSync(join(__dirname,fileNames[i]))
+			if(fileNames[i].indexOf('.tsv') >= 0) unlinkSync(join(__dirname,fileNames[i]))
 		}
 	}
 
@@ -132,8 +134,7 @@ function Update() {
 			}
 		}
 		catch(err){
-			console.log(err)
-			return
+			throw err
 		}
 		fs.renameSync(join(__dirname,'_manifest.json'), join(__dirname,'manifest.json'))
 		version = `TDM has been Updated. restart tera proxy.`.clr('FF0000')
