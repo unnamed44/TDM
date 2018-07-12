@@ -112,7 +112,7 @@ function Update() {
 		var fileNames = getDataFiles(__dirname)
 
 		for(var i in fileNames){
-			unlinkSync(join(__dirname,fileNames[i]))
+			fs.unlinkSync(join(__dirname,fileNames[i]))
 			console.log('deleted...' + fileNames[i])
 		}
 	}
