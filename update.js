@@ -4,123 +4,122 @@ const https = require('https')
 const fs = require('fs')
 const path = require('path')
 
-let version = ''
+const rootUrl = `https://raw.githubusercontent.com/xmljson/TDM/master/`
 
 String.prototype.clr = function (hexColor) { return `<font color='#${hexColor}'>${this}</font>` }
 
-function Update(v) {
-	version = v
+function Update() {
+
+	var version = '0.0'
 
 	this.download = function (url, dest, cb) {
-		var file = fs.createWriteStream(dest)
-		var request = https.get(url, function(response) {
-			response.pipe(file)
-		}).on('error', function(err) { // Handle errors
-			fs.unlinkSync(dest) // Delete the file async. (But we don't check the result)
-			if (err) throw err
-		})
-
-		file.on('finish', function() {
-			file.close(cb)
-		})
-
-		file.on('error', function (err) {
-			fs.unlinkSync(dest)
-			console.log(err)
-		})
+		return _download(url, dest, cb)
 	}
 
-	function downloadRename(url, downloaded, dest, cb) {
-		var file = fs.createWriteStream(downloaded)
-		var request = https.get(url, function(response) {
-			response.pipe(file)
-		}).on('error', function(err) {
-			fs.unlinkSync(downloaded)
-			if (err) throw err
-		})
-		file.on('finish', function() {
-			file.close(cb)
-			fs.rename(downloaded, dest, function (err) {
-				console.log('downloaded : ' + dest)
-				if (err) throw err
-			})
-		})
+	function _download(url, dest, cb) {
+		return new Promise(resolve  => {
 
-		file.on('error', function (err) {
-			fs.unlinkSync(downloaded)
-			console.log(err)
-		})
+				var file = fs.createWriteStream(dest)
+
+				var request = https.get(url, function(response) {
+					response.pipe(file)
+				}).on('error', function(err) { // Handle errors
+					console.log(err)
+					fs.unlinkSync(dest) // Delete the file async. (But we don't check the result)
+					reject(err)
+				})
+
+				file.on('finish', function() {
+					file.close(cb)
+					console.log('downloaded')
+					resolve('success')
+				})
+
+				file.on('error', function (err) {
+					fs.unlinkSync(dest)
+					console.log(err)
+					reject(err)
+				})
+
+				console.log('downloading... => ' + dest)
+		  });
 	}
 
 	this.checkUpdate = function()
 	{
-		var dest,url
-		var rootUrl = `https://raw.githubusercontent.com/xmljson/TDM/master/`
-		// check manifest
-		var gitkey = 'manifest.json'
-		dest = path.join(__dirname,'_' + gitkey)
-		url = rootUrl + gitkey
-		this.download(url,dest,getVersionCB)
+		asyncCheckUpdate()
 	}
 
-	function getVersionCB()
+	async function asyncCheckUpdate()
 	{
-		var gitManifest = require('./_manifest.json')
-		var currentManifest = require('./manifest.json')
-		var gitkey = 'manifest.json'
-		var dest = path.join(__dirname,'_' + gitkey)
-		//fs.unlinkSync(dest)
-
+		const gitkey = 'manifest.json'
+		const dest = path.join(__dirname,'_' + gitkey)
+		const url = rootUrl + gitkey
+		try{
+			var result = await _download(url,dest)
+			//console.log(result)
+		}
+		catch(_){
+		}
+		if(result !== 'success') return
+		delete require.cache[require.resolve('./_manifest.json')]
+		delete require.cache[require.resolve('./manifest.json')]
+		const gitManifest = require('./_manifest.json')
+		const currentManifest = require('./manifest.json')
+		fs.unlinkSync(dest)
 		if(currentManifest.version === gitManifest.version) version = 'TDM version ' + currentManifest.version
 		else version = `Please update new ${gitManifest.version} version.`.clr('FF0000') + '<button class=btn onclick="Update()">Update</button>'
-
+		console.log(version)
 	}
 
 	this.update = function ()
 	{
-		var dest,url
-		var rootUrl = `https://raw.githubusercontent.com/xmljson/TDM/master/`
-		// check manifest
-		var gitkey = 'manifest.json'
-		dest = path.join(__dirname,'_' + gitkey)
-		url = rootUrl + gitkey
-
-		if (!fs.existsSync(path.join(__dirname,'router'))) fs.mkdirSync(path.join(__dirname,'router'))
-
-		this.download(url,dest,checkVersionCB)
+		asyncUpdate()
 	}
 
-	function checkVersionCB()
+	async function asyncUpdate()
 	{
-		var gitManifest = require('./_manifest.json')
-		var currentManifest = require('./manifest.json')
-		var gitkey = 'manifest.json'
-		var dest = path.join(__dirname,'_' + gitkey)
+		const gitkey = 'manifest.json'
+		const dest = path.join(__dirname,'_' + gitkey)
+		const url = rootUrl + gitkey
+		try{
+			var result = await _download(url,dest)
+			//console.log(result)
+		}
+		catch(_){
+		}
+		if(result !== 'success') return
+		delete require.cache[require.resolve('./_manifest.json')]
+		delete require.cache[require.resolve('./manifest.json')]
+		const gitManifest = require('./_manifest.json')
+		const currentManifest = require('./manifest.json')
 		if(currentManifest.version === gitManifest.version) version = 'TDM version ' + currentManifest.version
 		else version = `Downloading new ${gitManifest.version} version.`.clr('FF0000')
 		updateFiles()
 	}
 
-	function updateFiles()
+	async function updateFiles()
 	{
 		var dest,url
-		var rootUrl = 'https://raw.githubusercontent.com/xmljson/TDM/master/'
-		var _manifest = require('./_manifest.json')
-
-		for(var key in _manifest.files)
-		{
-			if(key === 'config.json') continue
-			if(key === 'customCommands.json') continue
-			dest = path.join(__dirname,key)
-			url = rootUrl + key
-			downloadRename(url,dest+'.downloaded',dest,null)
+		const _manifest = require('./_manifest.json')
+		try{
+			for(var key in _manifest.files)
+			{
+				if(key === 'config.json') continue
+				if(key === 'customCommands.json') continue
+				dest = path.join(__dirname,key)
+				url = rootUrl + key
+				//downloadRename(url,dest+'.downloaded',dest,null)
+				var result = await _download(url,dest+'.downloaded')
+				if(result === 'success') fs.renameSync(dest+'.downloaded', dest)
+				//fs.unlinkSync(dest+'.test')
+			}
 		}
-
-		var tmpkey = 'manifest.json'
-		dest = path.join(__dirname,tmpkey)
-		url = rootUrl + tmpkey
-		downloadRename(url,dest+'.downloaded',dest,null)
-
+		catch(err){
+			console.log(err)
+			return
+		}
+		fs.renameSync(path.join(__dirname,'_manifest.json'), path.join(__dirname,'manifest.json'))
 		version = `TDM has been Updated. restart tera proxy.`.clr('FF0000')
 	}
 
@@ -130,6 +129,5 @@ function Update(v) {
 	}
 
 }
-
 
 module.exports = Update
