@@ -109,10 +109,11 @@ function Update() {
 					return name
 			})
 
-		var fileNames = getFiles(__dirname)
+		var fileNames = getDataFiles(__dirname)
 
 		for(var i in fileNames){
-			console.log(fileNames[i])
+			unlinkSync(join(__dirname,fileNames[i]))
+			console.log('deleted...' + fileNames[i])
 		}
 	}
 
@@ -120,8 +121,8 @@ function Update() {
 	{
 		var dest,url
 		const _manifest = require('./_manifest.json')
+		deleteDataFiles()
 		try{
-			deleteDataFiles()
 			for(var key in _manifest.files)
 			{
 				if(key === 'config.json') continue
