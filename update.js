@@ -16,6 +16,12 @@ function Update() {
 		return _download(url, dest, cb)
 	}
 
+	this.update = function ()
+	{
+		deleteDataFiles()
+		asyncUpdate()
+	}
+
 	function _download(url, dest, cb) {
 		return new Promise(resolve  => {
 
@@ -72,11 +78,7 @@ function Update() {
 		console.log(version)
 	}
 
-	this.update = function ()
-	{
-		deleteDataFiles()
-		asyncUpdate()
-	}
+
 
 	async function asyncUpdate()
 	{
@@ -110,10 +112,13 @@ function Update() {
 					return name
 			})
 
-		var fileNames = getDataFiles(__dirname)
+		var files = getDataFiles(__dirname)
+		var fileNames = files.filter(function( element ) {
+			   return element !== undefined;
+			});
 
 		for(var i in fileNames){
-			fs.unlinkSync(join(__dirname,fileNames[i]))
+			//fs.unlinkSync(join(__dirname,fileNames[i]))
 			console.log('deleted...' + fileNames[i])
 		}
 	}
