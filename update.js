@@ -2,7 +2,7 @@
 
 const https = require('https')
 const fs = require('fs')
-const path = require('path')
+const { join } = require('path')
 
 const rootUrl = `https://raw.githubusercontent.com/xmljson/TDM/master/`
 
@@ -31,7 +31,7 @@ function Update() {
 
 				file.on('finish', function() {
 					file.close(cb)
-					console.log('downloaded')
+					console.log('downloaded...' + dest)
 					resolve('success')
 				})
 
@@ -41,7 +41,7 @@ function Update() {
 					reject(err)
 				})
 
-				console.log('downloading... => ' + dest)
+				console.log('downloading...' + dest)
 		  });
 	}
 
@@ -53,7 +53,7 @@ function Update() {
 	async function asyncCheckUpdate()
 	{
 		const gitkey = 'manifest.json'
-		const dest = path.join(__dirname,'_' + gitkey)
+		const dest = join(__dirname,'_' + gitkey)
 		const url = rootUrl + gitkey
 		try{
 			var result = await _download(url,dest)
@@ -80,7 +80,7 @@ function Update() {
 	async function asyncUpdate()
 	{
 		const gitkey = 'manifest.json'
-		const dest = path.join(__dirname,'_' + gitkey)
+		const dest = join(__dirname,'_' + gitkey)
 		const url = rootUrl + gitkey
 		try{
 			var result = await _download(url,dest)
@@ -98,16 +98,29 @@ function Update() {
 		updateFiles()
 	}
 
+	function deleteDataFiles()
+	{
+		const getFiles = source =>
+			readdirSync(source).map(function(name){ if(!isDirectory(join(source, name))) return name })
+		const fileNames=getFiles(__dirname)
+
+		for(var i in fileNames){
+			if(fileNames[i].includes('.xml')) unlinkSync(join(__dirname,fileNames[i]))
+			if(fileNames[i].includes('.tsv')) unlinkSync(join(__dirname,fileNames[i]))
+		}
+	}
+
 	async function updateFiles()
 	{
 		var dest,url
 		const _manifest = require('./_manifest.json')
 		try{
+			deleteDataFiles()
 			for(var key in _manifest.files)
 			{
 				if(key === 'config.json') continue
 				if(key === 'customCommands.json') continue
-				dest = path.join(__dirname,key)
+				dest = join(__dirname,key)
 				url = rootUrl + key
 				//downloadRename(url,dest+'.downloaded',dest,null)
 				var result = await _download(url,dest+'.downloaded')
@@ -119,7 +132,7 @@ function Update() {
 			console.log(err)
 			return
 		}
-		fs.renameSync(path.join(__dirname,'_manifest.json'), path.join(__dirname,'manifest.json'))
+		fs.renameSync(join(__dirname,'_manifest.json'), join(__dirname,'manifest.json'))
 		version = `TDM has been Updated. restart tera proxy.`.clr('FF0000')
 	}
 
