@@ -74,6 +74,7 @@ function Update() {
 
 	this.update = function ()
 	{
+		deleteDataFiles()
 		asyncUpdate()
 	}
 
@@ -121,7 +122,6 @@ function Update() {
 	{
 		var dest,url
 		const _manifest = require('./_manifest.json')
-		deleteDataFiles()
 		try{
 			for(var key in _manifest.files)
 			{
