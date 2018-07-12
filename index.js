@@ -236,6 +236,7 @@ function TDM(d) {
 			var ver = []
 			ver.push(update.getVersion())
 			return res.status(200).json(ver)
+			ver = []
 			case "W":
 			var wname = req.params[0].substring(2, req.params[0].length)
 			if(wname === '' || lastDps === '' ) return res.status(200).json('ok')
@@ -263,6 +264,7 @@ function TDM(d) {
 		//party = []
 		NPCs = []
 		BAMHistory = {}
+		Boss = {}
 		me = {
 			"gameId":e.gameId.toString(),
 			"serverId":e.serverId.toString(),
@@ -278,10 +280,11 @@ function TDM(d) {
 	function sSpawnMe(e){
 		me.gameId=e.gameId.toString()
 		currentbossId = ''
-		NPCs = []
+		//NPCs = []
 		if (!popup) return
 		// empty command
 		ui.open()
+		log('sSpawnMe')
 	}
 
 
@@ -352,8 +355,103 @@ function TDM(d) {
 			//log('sSpawnNpc '+newNPC.zoneName)
 		}
 	}
+	function BigInt(n)
+	{
+		return Number(n)
+	}
 
+	function binarySearchSkillName(d, t, s , e)
+	{
+		const m = Math.floor((s + e)/2);
+		var target = Number(t)
+		var id = Number(d[m].id)
+		if (target == id) return d[m].skillName;
+		if (e - 1 == s) return 'undefined'
+	  	if (target > id) return binarySearchSkillName(d,t,m,e);
+	  	if (target < id) return binarySearchSkillName(d,t,s,m);
+	}
 
+	function skillIdToName(id,_skillInfo)
+	{
+		if(_skillInfo.length == 0) return 'skill tsv missing'
+		var sid = id.slice(1,id.length)
+		return binarySearchSkillName(_skillInfo, sid, 0, _skillInfo.length - 1)
+	}
+
+	function dpsStastic(slog,sInfo)
+	{
+		var s= []
+
+		// set skill name
+		for (var i in slog)
+		{
+			slog[i]['name'] = skillIdToName(slog[i].skillId,sInfo)
+		}
+
+		for(var i in slog)
+		{
+			var t=slog[i]
+			var id = t.skillId
+			var name = t.name
+			var damage = BigInt(t.damage)
+			var c = t.crit
+
+			var found = false
+			// search skill id and insert data
+			for (var j in s)
+			{
+				if(s[j].name === name)
+				{
+					s[j].wDamage = c ? s[j].wDamage : BigInt(s[j].wDamage) + damage
+					s[j].rDamage = c ? BigInt(s[j].rDamage) + damage : s[j].rDamage
+					s[j].tDamage = BigInt(s[j].rDamage) + BigInt(s[j].wDamage)
+					s[j].crit = c ? s[j].crit + 1 : s[j].crit,
+					s[j].hitCount = s[j].hitCount + 1
+
+					//console.log( s[j].wDamage + ' ' + s[j].wDamage)
+					found = true
+					break
+				}
+			}
+
+			// not found push a new entity
+			if(!found){
+				var d = {
+					'name' : name,
+					'wDamage' : c ? BigInt(0) : (damage),
+					'rDamage' : c ? (damage) : BigInt(0),
+					'tDamage' : damage,
+					'crit' : c ? 1 : 0,
+					'hitCount' : 1
+				}
+
+				s.push(d)
+				//console.log('pushed ' + id)
+			}
+		}
+		//console.log(s)
+		// sort by total damage
+		s.sort(function(a,b) {
+			if(a.tDamage > b.tDamage) return -1
+			else if(a.tDamage < b.tDamage) return 1
+			else return 0
+		})
+
+		var html = '<table><tr><td>Skill Name</td><td>White Dmg</td><td>Red Dmg</td><td>Total Dmg</td><td>Crit</td></tr>'
+		for(var i in s){
+				var t = s[i].wDamage + s[i].rDamage
+				html+='<tr>'
+				html+='<td>' + s[i].name + '</td>'
+				html+='<td>' +unitDmg(s[i].wDamage.toString()) + '<br>Hit : ' + (s[i].hitCount-s[i].crit) + '</td>'
+				html+='<td>' +unitDmg(s[i].rDamage.toString()) + '<br>' + s[i].crit + '</td>'
+				html+='<td>' +unitDmg(s[i].tDamage.toString()) + '<br>' + s[i].hitCount + '</td>'
+				html+='<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>'+s[i].crit+'/'+s[i].hitCount+'</td>'
+				html+='</tr>'
+		}
+		html+='</table>'
+		s = []
+		return html
+	}
 
 	function sendDPSData(data)
 	{
@@ -362,6 +460,7 @@ function TDM(d) {
 		request.post({
 			headers: {'content-type': 'application/json'},
 			url: 'http://tera.dvcoa.com.au:3000/uploadDps/test',
+			//url: 'http://localhost:3000/uploadDps/test',
 			form: data
 		}, function(error, response, body){
 			log(body)
@@ -392,16 +491,16 @@ function TDM(d) {
 		var id = e.creature.toString()
 
 		if (e.enraged === 1 && !Boss[id].enraged) {
-			log(Boss[id].hpPer + ' Eraged !! not set yet ' + id + ' '+ e.target)
+			//log(Boss[id].hpPer + ' Eraged !! not set yet ' + id + ' '+ e.target)
 			Boss[id].etimer = 36
 			setEnragedTime(id,null)
 			Boss[id].enragedTimer = setInterval( () => {
 				setEnragedTime(id,Boss[id].enragedTimer)
 			}, 1000)
 		} else if (e.enraged === 1 && Boss[id].enraged) {
-			log(Boss[id].hpPer + ' Eraged but already set ' + id + ' '+ e.target)
+			//log(Boss[id].hpPer + ' Eraged but already set ' + id + ' '+ e.target)
 		} else if (e.enraged === 0 && Boss[id].enraged) {
-			log('Stopped enraged ' + id + ' '+ e.target)
+			//log('Stopped enraged ' + id + ' '+ e.target)
 			if (Boss[id].hpPer === 100) return
 			Boss[id].etimer = 0
 			setEnragedTime(id,Boss[id].enragedTimer)
@@ -413,7 +512,7 @@ function TDM(d) {
 	{
 		//log(Boss[gId])
 		if (Boss[gId].etimer > 0) {
-			log(Boss[gId].etimer + ' HP: ' + Boss[gId].hpPer)
+			//log(Boss[gId].etimer + ' HP: ' + Boss[gId].hpPer)
 			Boss[gId].enraged = true
 			Boss[gId].estatus = 'Boss Enraged'.color('FF0000') + ' ' + `${Boss[gId].etimer}`.color('FFFFFF') + ' seconds left'.color('FF0000')
 			Boss[gId].etimer--
@@ -424,8 +523,8 @@ function TDM(d) {
 			Boss[gId].nextEnrage = (Boss[gId].hpPer > 10) ? (Boss[gId].hpPer - 10) : 0
 			Boss[gId].estatus = 'Next enraged at ' + Boss[gId].nextEnrage.toString().color('FF0000') + '%'
 			if(Boss[gId].nextEnrage == 0) Boss[gId].estatus = ''
-			log(Boss[gId].hpPer + ' cleared enraged timer by Timer')
-			log('==========================================================')
+			//log(Boss[gId].hpPer + ' cleared enraged timer by Timer')
+			//log('==========================================================')
 		}
 	}
 
@@ -463,6 +562,7 @@ function TDM(d) {
 	}
 
 	function sDespawnUser(e){
+		// only allUsers mode
 		if(!allUsers) return
 		var id = e.gameId.toString()
 		for(var i in party){
@@ -895,12 +995,11 @@ function TDM(d) {
 			Boss[id].hpPer = 0
 		}
 
-		if(isBoss(id) && Boss[id].hpPer <= 0)
+		if(isBoss(id) && Boss[id].hpPer <= 0 && dpsmsg !== '')
 		{
-			if(dpsmsg !== '') {
-				dpsmsg[0].battleendtime = NPCs[npcIndex].battleendtime
-				BAMHistory[id] = dpsmsg
-			}
+			addSkillLog(dpsmsg)
+			dpsmsg[0].battleendtime = NPCs[npcIndex].battleendtime
+			BAMHistory[id] = dpsmsg
 			if(debug) saveDpsData(dpsmsg)
 			if(rankSystem) sendDPSData(dpsmsg)
 		}
@@ -915,8 +1014,35 @@ function TDM(d) {
 			}
 		}
 
-		// S_SPAWN_ME clears NPC data
-		// S_LEAVE_PARTY clears party and battle infos
+		if(Object.keys(Boss).length >= 50){
+			for(var key in Boss) {
+				clean(Boss[key])
+				break
+			}
+		}
+
+		// party clears when join in a new party
+	}
+
+	function getPartyMemberIndexByName(n)
+	{
+		for(var i in party){
+			if(party[i].name === n) return i
+		}
+		return -1
+	}
+
+	function addSkillLog(d)
+	{
+		for(var i in d)
+		{
+			if(d[i].hasOwnProperty('monsterBattleInfo')) continue
+			var index = getPartyMemberIndexByName(stripOuterHTML(d[i].name))
+			if(index < 0) continue
+			var _si = skillInfo.getSkillsJson(classIdToName(Number(party[index].class)))
+			d[i]['stastics'] = dpsStastic(party[index].skillLog,_si)
+			log(d[i]['stastics'])
+		}
 	}
 
 	function noticeDps(damage,skill)
@@ -954,12 +1080,18 @@ function TDM(d) {
 
 	// helper
     function writeBackup() {
+	    if(Object.keys(Boss).length != 0) {
 		fs.writeFileSync(path.join(__dirname,'_Boss.json'), JSON.stringify(Boss, null, '\t'))
 		log('_Boss.json written')
-		fs.writeFileSync(path.join(__dirname,'_NPCs.json'), JSON.stringify(NPCs, null, '\t'))
-		log('_NPCs.json written')
-		fs.writeFileSync(path.join(__dirname,'_party.json'), JSON.stringify(party, null, '\t'))
-		log('_party.json written')
+		}
+		if(NPCs.length != 0) {
+			fs.writeFileSync(path.join(__dirname,'_NPCs.json'), JSON.stringify(NPCs, null, '\t'))
+			log('_NPCs.json written')
+		}
+		if(party.length != 0) {
+			fs.writeFileSync(path.join(__dirname,'_party.json'), JSON.stringify(party, null, '\t'))
+			log('_party.json written')
+		}
     }
 
     function readBackup() {

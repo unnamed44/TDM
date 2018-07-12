@@ -342,6 +342,7 @@
 				{
 					s[j].wDamage = c ? s[j].wDamage : BigInt(s[j].wDamage) + damage
 					s[j].rDamage = c ? BigInt(s[j].rDamage) + damage : s[j].rDamage
+					s[j].tDamage = BigInt(s[j].rDamage) + BigInt(s[j].wDamage)					
 					s[j].crit = c ? s[j].crit + 1 : s[j].crit,
 					s[j].hitCount = s[j].hitCount + 1
 
@@ -368,10 +369,6 @@
 		//console.log(s)
 		// sort by total damage
 		s.sort(function(a,b) {
-
-			a["tDamage"]= a.wDamage + a.rDamage
-			if(typeof b["tDamage"] === 'undefined') b["tDamage"]= b.wDamage + b.rDamage
-
 			if(a.tDamage > b.tDamage) return -1
 			else if(a.tDamage < b.tDamage) return 1
 			else return 0
