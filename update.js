@@ -102,6 +102,7 @@ function Update() {
 	{
 		const getFiles = source =>
 			readdirSync(source).map(function(name){ if(!isDirectory(join(source, name))) return name })
+		const { lstatSync, readdirSync ,renameSync} = require('fs')
 		const fileNames=getFiles(__dirname)
 
 		for(var i in fileNames){
