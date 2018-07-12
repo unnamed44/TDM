@@ -134,12 +134,15 @@ function Update() {
 				if(result === 'success') fs.renameSync(dest+'.downloaded', dest)
 				//fs.unlinkSync(dest+'.test')
 			}
+
+			fs.renameSync(join(__dirname,'_manifest.json'), join(__dirname,'manifest.json'))
+			version = `TDM has been Updated. restart tera proxy.`.clr('FF0000')
+			console.log(version)
 		}
 		catch(err){
 			throw err
 		}
-		fs.renameSync(join(__dirname,'_manifest.json'), join(__dirname,'manifest.json'))
-		version = `TDM has been Updated. restart tera proxy.`.clr('FF0000')
+
 	}
 
 	this.getVersion = function ()
