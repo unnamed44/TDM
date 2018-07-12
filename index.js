@@ -551,7 +551,7 @@ function TDM(d) {
 				'serverId' : member.serverId.toString(),
 				'playerId' : member.playerId.toString(),
 				'name' : member.name.toString(),
-				'class' : member.class.toString(),
+				'class' : member.class,
 				'NPCInfo' : new Array(),
 				'skillLog' : new Array()
 			}
@@ -1039,7 +1039,7 @@ function TDM(d) {
 			if(d[i].hasOwnProperty('monsterBattleInfo')) continue
 			var index = getPartyMemberIndexByName(stripOuterHTML(d[i].name))
 			if(index < 0) continue
-			var _si = skillInfo.getSkillsJson(classIdToName(Number(party[index].class)))
+			var _si = skillInfo.getSkillsJson(classIdToName(party[index].class))
 			d[i]['stastics'] = dpsStastic(party[index].skillLog,_si)
 			log(d[i]['stastics'])
 		}

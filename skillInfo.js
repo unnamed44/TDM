@@ -1,6 +1,7 @@
 'use strict'
 const path = require('path')
 const fs = require('fs')
+const TeraDataUrl = 'https://raw.githubusercontent.com/neowutran/TeraDpsMeterData/master'
 
 let skillsfile
 
@@ -31,8 +32,8 @@ function SkillInfo(r,u){
 SkillInfo.prototype.checkFiles = function(){
 
 	if (!fs.existsSync(skillsfile)) {
-		var skillsfileUrl = `https://raw.githubusercontent.com/neowutran/TeraDpsMeterData/master/skills/skills-${this.region}.tsv`
-		this.update.download(skillsfileUrl,skillsfile,null)
+		var skillsfileUrl = `${TeraDataUrl}/skills/skills-${this.region}.tsv`
+		this.update.download(skillsfileUrl,skillsfile)
 	}
 }
 
