@@ -355,7 +355,7 @@ function TDM(d) {
 		}
 		if(getNPCIndex(e.gameId.toString()) < 0)
 		{
-			if(NPCs.length >= 50)
+			if(NPCs.length >= MAX_NPC)
 			{
 				var removed = NPCs.shift()
 
@@ -568,10 +568,10 @@ function TDM(d) {
 				'skillLog' : new Array()
 			}
 			if(!isPartyMember(member.gameId.toString())) {
-				party.push(newPartyMember)
-				for(;party.length > MAX_PARTY_MEMBER;) {
+				for(;party.length >= MAX_PARTY_MEMBER;) {
 					party.shift()
 				}
+				party.push(newPartyMember)
 			}
 		})
 	}
