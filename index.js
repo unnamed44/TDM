@@ -22,6 +22,11 @@ Long.prototype.divThousand = function() {
 	return stringValue.substring(0, stringValue.length - 3)
 }
 
+const MAX_BAM_HISTORY = 10
+const MAX_PARTY_MEMBER = 30
+const MAX_NPC = 50
+const MAX_BOSS = 50
+
 function TDM(d) {
 
 	const command = Command(d)
@@ -320,8 +325,8 @@ function TDM(d) {
 			"enragedTimer" : 0,
 			"estatus" : ''
 		}
-		
-		if(Object.keys(Boss).length >= 50){
+
+		if(Object.keys(Boss).length >= MAX_BOSS){
 			for(var key in Boss) {
 				clean(Boss[key])
 				break
@@ -564,6 +569,9 @@ function TDM(d) {
 			}
 			if(!isPartyMember(member.gameId.toString())) {
 				party.push(newPartyMember)
+				for(;party.length > MAX_PARTY_MEMBER;) {
+					party.shift()
+				}
 			}
 		})
 	}
@@ -908,7 +916,7 @@ function TDM(d) {
 
 		// remove lowest dps member if over 30
 		if(allUsers){
-			for(;party.length >= 30;) {
+			for(;party.length > MAX_PARTY_MEMBER;) {
 				if(party[party.length -1].gameId === me.gameId) party.splice(party.length -2,1)
 				else party.pop()
 			}
@@ -1014,7 +1022,7 @@ function TDM(d) {
 		NPCs[npcIndex].dpsmsg = dpsmsg
 
 		//History limit 10
-		if(Object.keys(BAMHistory).length >= 10){
+		if(Object.keys(BAMHistory).length >= MAX_BAM_HISTORY){
 			for(var key in BAMHistory) {
 				clean(BAMHistory[key])
 				break
