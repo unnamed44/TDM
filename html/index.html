@@ -342,7 +342,7 @@
 				{
 					s[j].wDamage = c ? s[j].wDamage : BigInt(s[j].wDamage) + damage
 					s[j].rDamage = c ? BigInt(s[j].rDamage) + damage : s[j].rDamage
-					s[j].tDamage = BigInt(s[j].rDamage) + BigInt(s[j].wDamage)					
+					s[j].tDamage = BigInt(s[j].rDamage) + BigInt(s[j].wDamage)
 					s[j].crit = c ? s[j].crit + 1 : s[j].crit,
 					s[j].hitCount = s[j].hitCount + 1
 
@@ -358,6 +358,7 @@
 					'name' : name,
 					'wDamage' : c ? BigInt(0) : (damage),
 					'rDamage' : c ? (damage) : BigInt(0),
+					'tDamage' : damage,
 					'crit' : c ? 1 : 0,
 					'hitCount' : 1
 				}
@@ -377,7 +378,9 @@
 		var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="skillLog(\''+_name+'\',\''+_classId+'\')">Skill Log</button><br>'
 
 		html += '<table><tr><td>Skill Name</td><td>White Dmg</td><td>Red Dmg</td><td>Total Dmg</td><td>Crit</td></tr>'
+		//console.log(s)
 		for(var i in s){
+				//console.log(s[i].wDamage +' '+ s[i].rDamage)
 				var t = s[i].wDamage + s[i].rDamage
 				html+='<tr>'
 				html+='<td>' + s[i].name + '</td>'

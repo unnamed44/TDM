@@ -463,7 +463,7 @@ function TDM(d) {
 			//url: 'http://localhost:3000/uploadDps/test',
 			form: data
 		}, function(error, response, body){
-			log(body)
+			//log(body)
 			if(typeof body === 'undefined') log(error)
 		})
 	}
