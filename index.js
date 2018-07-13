@@ -284,7 +284,7 @@ function TDM(d) {
 		if (!popup) return
 		// empty command
 		ui.open()
-		log('sSpawnMe')
+		//log('sSpawnMe')
 	}
 
 
@@ -1041,7 +1041,7 @@ function TDM(d) {
 			if(index < 0) continue
 			var _si = skillInfo.getSkillsJson(classIdToName(party[index].class))
 			d[i]['stastics'] = dpsStastic(party[index].skillLog,_si)
-			log(d[i]['stastics'])
+			//log(d[i]['stastics'])
 		}
 	}
 
