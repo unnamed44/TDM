@@ -4,16 +4,8 @@
 "use strict"
 const Command = require('command')
 const Long = require("long")
-const config = require('./config.json')
 const fs = require('fs')
 const path = require('path')
-const ui_install = require('./ui_install')
-const UI = require('ui')
-const ManagerUi = require('./managerui')
-const customCommand = require('./customCommands.json')
-const Update = require('./update.js')
-const MonsterInfo = require('./monsterinfo')
-const SkillInfo = require('./skillInfo')
 
 String.prototype.color = function (hexColor) { return `<font color='#${hexColor}'>${this}</font>` }
 
@@ -28,6 +20,15 @@ const MAX_NPC = 50
 const MAX_BOSS = 50
 
 function TDM(d) {
+
+	const UI = require('./ui')
+	const Update = require('./update.js')
+	const MonsterInfo = require('./monsterinfo')
+	const SkillInfo = require('./skillInfo')
+	const ManagerUi = require('./managerui')
+	const customCommand = require('./customCommands.json')
+	const config = require('./config.json')
+	const request = require('./request')
 
 	const command = Command(d)
 	const ui = UI(d)
@@ -169,7 +170,7 @@ function TDM(d) {
 			send('Notice damage is ' + numberWithCommas(notice_damage.toString()))
 			return res.status(200).json(notice_damage.toString())
 			case "E":
-			return res.status(200).json(require('../ui/config.json'))
+			return res.status(200).json(require('./ui_config.json'))
 			case "H":
 			return res.status(200).json(BAMHistory)
 			case "I":
@@ -468,7 +469,6 @@ function TDM(d) {
 	function sendDPSData(data)
 	{
 		//log(data)
-		var request = require('request')
 		request.post({
 			headers: {'content-type': 'application/json'},
 			url: 'http://tera.dvcoa.com.au:3000/uploadDps/test',

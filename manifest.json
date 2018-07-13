@@ -1,21 +1,20 @@
 {
-	"version": "1.4.4 bug fixed",
+	"version": "1.4.5",
 	"files": {
-		"index.js": "918e4b2f3e0368014da723ef4a8c53232bb5547b7ae727b9c18d8fdb189177d7",
+		"index.js": "8e5d358fc9910f8800955c8174cdbe4d83cd8e10a515e269e2d67b1f19c65982",
 		"managerui.js": "389e77103e38089896850d583f19ed104ddb572c9fad90ecf1e6dc43ec404f2f",
-		"html/index.html": "9174293b5dc4d6b24cbdafd8f1293827819f8c7e109b4b969c86603093b93769",
+		"html/index.html": "1ca6d3a6ddd346a008e6a74ee4ee8fb09d3d31684d4f6cc26a4dc7a5a36f8253",
 		"html/main.css": "21030acfb791b9800435afc36faa142943c2be13cf3acca3d32e6a1042e45a48",
 		"README.md": "aac433ce949ba3ef2bb833a4da5b59cf25f64633b26d96e820d91f7351a5617a",
 		"README_KR.md": "2e1fae570fcd451a30508c7a459d200d8604e5ad0b5ca721c7a6249e69581cb8",
-		"ui_install.js": "79d05624336bbb01c127ccae6bada72b92bbd3b10da346dec0a770ff18587a76",
 		"html/README.html": "3424dbf6e54c9ef6294a5cc431c5c3a2e64de97ba7af736115e9bfdf56098a81",
 		"html/README_KR.html": "c9bb9f90ebddf98867d14537470b1b8ad88a70880780560030412724eac7ce49",
 		"customCommands.json": "09a74a361f544b6b108721de07440f334a35c7ebddec1a620dd50907e27c1c4e",
 		"html/icons/enraged_bar.jpg": "a91c9f8fe960a72d3179893386911cf435cc8fcbfbb3ecbc1c49c32b8a908f30",
 		"config.json": "3cd5f8394987424f10f04f6bb83ba265548ee9ee74b8b3bbb20cd229267b6947",
 		"LICENSE": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
-		"monsterInfo.js": "e708ca899f9ed52fb1ada69eb88500e826e4ba8dbd68b097c510edc2ecdb3cf8",
-		"update.js": "cb2e96991a386768f007a7133e484d77d919bc34fca17782c18a01ad7e0469d8",
+		"monsterInfo.js": "57177743d0cbeae798ec9a2c5780e485de245aaf038092920a26484236bed3ff",
+		"update.js": "8dc87b52a8854893008c07fc36e316c24b31752da22c2fb6357f710c84c94f34",
 		"router/main.js": "167818db0f300f1a3771eeff8c672dd042e6a5036379c61db111cd28d3e0befb",
 		"html/class-icons/archer.png": "443e205979276fdb92244175782af8b0dd36289a430da609360999b0b40aba79",
 		"html/class-icons/berserker.png": "6c97e7a09ee329dd6534b5e2f3ed73aa10a9704aa08080dcf9b03740d9fea6c7",
@@ -33,6 +32,10 @@
 		"html/icons/enraged.png": "536623e510a164645c70862a594b5a0c949acdea400691590c34e54dfeb6d409",
 		"html/class-icons/sorcerer.png": "1a34895383b01e370015880ff2ff0f3594498a90c9713c97c3f5e481ec529b80",
 		"html/class-icons/slayer.png": "ebc18c50c6612a26b2bd3a148c59f118801099cc56f2140e06f9a79b11012ebc",
-		"skillInfo.js": "7d4596577acc1e71400a9fec56e521903107b0ee90a07b5fc14d6d46a08df06a"
+		"skillInfo.js": "8b7ea43146dc54a2bb07092fb49667296f88fec0ea81fbd5d464060ea675234e",
+		"monsters-KR.xml": "ebb7adedbc28f8c5463f7104cb0bc5867be2585fe4096f9e3d1722c9225e566b",
+		"package.json": "951a65d19a4b57716646fd396329195d263a9837d887c58c0a0722b5b81025d0",
+		"ui.js": "a70c5623d2bfa643122101ee9a64e1d943fcb940f664b3a61674f71a5b1e855f",
+		"ui_config.json": "7cab345f6dcfc54c3d84e930f312ce9634f2a4b7bb8b9e6d1248bd4daefee3e9"
 	}
 }

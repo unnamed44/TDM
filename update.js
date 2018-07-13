@@ -10,7 +10,7 @@ String.prototype.clr = function (hexColor) { return `<font color='#${hexColor}'>
 
 function Update() {
 
-	var version = '0.0'
+	var version = ''
 
 	this.download = function (url, dest, cb) {
 		return _download(url, dest, cb)
@@ -19,7 +19,19 @@ function Update() {
 	this.update = function ()
 	{
 		deleteDataFiles()
+		npm_install()
 		asyncUpdate()
+	}
+
+	function npm_install()
+	{
+		const { exec } = require('child_process')
+		var cmd = 'npm install'
+		exec(cmd,{cwd:__dirname},function (error, stdout, stderr) {
+			if(error) console.log(error)
+			if(stdout) console.log(stdout)
+			if(stderr) console.log(stderr)
+		});
 	}
 
 	function _download(url, dest, cb) {
@@ -58,7 +70,7 @@ function Update() {
 
 	async function asyncCheckUpdate()
 	{
-		const gitkey = 'manifest.json'
+		const gitkey = 'package.json'
 		const dest = join(__dirname,'_' + gitkey)
 		const url = rootUrl + gitkey
 		try{
@@ -68,37 +80,35 @@ function Update() {
 		catch(_){
 		}
 		if(result !== 'success') return
-		delete require.cache[require.resolve('./_manifest.json')]
-		delete require.cache[require.resolve('./manifest.json')]
-		const gitManifest = require('./_manifest.json')
-		const currentManifest = require('./manifest.json')
+		delete require.cache[require.resolve('./_package.json')]
+		delete require.cache[require.resolve('./package.json')]
+		const gitPackage = require('./_package.json')
+		const currentPackage = require('./package.json')
 		fs.unlinkSync(dest)
-		if(currentManifest.version === gitManifest.version) version = 'TDM version ' + currentManifest.version
-		else version = `Please update new ${gitManifest.version} version.`.clr('FF0000') + '<button class=btn onclick="Update()">Update</button>'
+		if(currentPackage.version === gitPackage.version) version = 'TDM version ' + currentPackage.version
+		else version = `Please update new ${gitPackage.version} version.`.clr('FF0000') + '<button class=btn onclick="Update()">Update</button>'
 		console.log(version)
 	}
 
-
-
 	async function asyncUpdate()
 	{
-		const gitkey = 'manifest.json'
-		const dest = join(__dirname,'_' + gitkey)
-		const url = rootUrl + gitkey
 		try{
-			var result = await _download(url,dest)
+			var result = await _download(rootUrl + manifest.json,join(__dirname,'_' + 'package.json')
+			if(result !== 'success') throw err
+			var result2 = await _download(rootUrl + manifest.json,join(__dirname,'_' + 'manifest.json')
+			if(result2 !== 'success') throw err
 			//console.log(result)
 		}
 		catch(err){
-			throw(err)
+			throw err
 		}
-		if(result !== 'success') return
-		delete require.cache[require.resolve('./_manifest.json')]
-		delete require.cache[require.resolve('./manifest.json')]
-		const gitManifest = require('./_manifest.json')
-		const currentManifest = require('./manifest.json')
-		if(currentManifest.version === gitManifest.version) version = 'TDM version ' + currentManifest.version
-		else version = `Downloading new ${gitManifest.version} version.`.clr('FF0000')
+
+		delete require.cache[require.resolve('./_package.json')]
+		delete require.cache[require.resolve('./package.json')]
+		const gitPackage = require('./_package.json')
+		const currentPackage = require('./package.json')
+		if(currentPackage.version === gitPackage.version) version = 'TDM version ' + currentPackage.version
+		else version = `Downloading new ${gitPackage.version} version.`.clr('FF0000')
 		updateFiles()
 	}
 
@@ -126,9 +136,9 @@ function Update() {
 	async function updateFiles()
 	{
 		var dest,url
-		const _manifest = require('./_manifest.json')
+		const _package = require('./_manifest.json')
 		try{
-			for(var key in _manifest.files)
+			for(var key in _package.files)
 			{
 				if(key === 'config.json') continue
 				if(key === 'customCommands.json') continue
@@ -139,10 +149,10 @@ function Update() {
 				if(result === 'success') fs.renameSync(dest+'.downloaded', dest)
 				//fs.unlinkSync(dest+'.test')
 			}
-
-			fs.renameSync(join(__dirname,'_manifest.json'), join(__dirname,'manifest.json'))
+			fs.renameSync(join(__dirname,'_package.json'), join(__dirname,'package.json'))
+			fs.unlinkSync(join(__dirname,'_manifest.json'))
 			version = `TDM has been Updated. restart tera proxy.`.clr('FF0000')
-			console.log(version)
+			console.log('TDM has been Updated. restart tera proxy')
 		}
 		catch(err){
 			throw err
