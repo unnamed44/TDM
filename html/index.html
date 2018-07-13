@@ -245,7 +245,13 @@
 	{
 		console.log(this.responseText)
 		var c = JSON.parse(this.responseText)
-		openWebsite('http://' + c.host + ':'+ c.port)
+		if(typeof _tera_client_proxy_ === 'undefined') {
+			//window.open(window.location.href, 'TDM', 'titlebar=no, toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no');
+			window.open(window.location.href, 'TDM', 'height=240,width=200,top=0,left=0,directories=no,titlebar=nostatus=no,toolbar=no,menubar=no,navigationbar=no,location=no,resizable=no,scrollbars=no');
+		}
+		else {
+			openWebsite('http://' + c.host + ':'+ c.port)
+		}
 		CloseDps()
 	}
 
@@ -535,6 +541,8 @@
 		document.getElementById('wrapper').setAttribute("style",wrapperdivhight);
 		document.getElementById('history').setAttribute("style",divhight);
 		document.getElementById('settings').setAttribute("style",divhight);
+		document.getElementById('manager').setAttribute("style",divhight);
+		document.getElementById('custom').setAttribute("style",divhight);
 		document.getElementById('wrapper').style.display = "block";
 
 
@@ -612,7 +620,9 @@
 
 	window.onload = function() {
 
-		if(typeof _tera_client_proxy_ !== 'undefined') {
+		if(typeof _tera_client_proxy_ === 'undefined') {
+		}
+		else {
 			_tera_client_proxy_.resize_to(320, 250)
 			_tera_client_proxy_.set_title('Tera DPS Monitor')
 		}
@@ -651,15 +661,16 @@
 	<div  id="manager" class="tabcontent">
 	</div>
 	<div  id="settings" class="tabcontent">
-		<div id='status'>
+		<div class="tab">
+			<button class="tablinks" onclick="openTab(event,'manager')">Module Manager</button>
+			<button class="tablinks" onclick="openTab(event,'custom')">Custom Commands</button>
+			<button class="tablinks" onclick="Update()">Update TDM</button>
+			<button class="tablinks" onclick="useBrowser('http://tera.dvcoa.com.au:3000')"> Rank System</button>
+			<button class="tablinks" onclick="openWebsite('https://discord.gg/JRa7FXd')">TDM Discord</button>
+			<button class="tablinks" onclick="openWebsite('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=C6BU555NMQJD6')">Donate to dev</button>
+			<button class="tablinks" onclick="useBrowser('https://www.gnu.org/licenses/gpl-3.0-standalone.html')">LICENSE</button>
+			<button class="tablinks" onclick="useBrowserHelp()">Usage</button>
 		</div>
-		<button class=btn onclick="Update()">Update TDM</button>
-		<button class=btn onclick="useBrowser('http://tera.dvcoa.com.au:3000')"> Rank System</button>
-		<button class=btn onclick="openWebsite('https://discord.gg/JRa7FXd')">TDM Discord</button>
-		<br>
-		<button class=btn onclick="openWebsite('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=C6BU555NMQJD6')">Donate to dev</button>
-		<button class=btn onclick="useBrowser('https://www.gnu.org/licenses/gpl-3.0-standalone.html')">LICENSE</button>
-		<button class=btn onclick="useBrowserHelp()">Usage</button>
 		<br><br>
 		<table>
 			<tr>
@@ -679,8 +690,7 @@
 				<td><button class=btn onclick="Debug()">Debug</button></td><td><p id="Debug"></p></td>
 			</tr>
 		</table>
-		<br><br>
-		<button class=btn onclick="openTab(event,'manager')">Module Manager</button><button class=btn onclick="openTab(event,'custom')">Custom Commands</button><br>
+
 		<br><br><br><br><br><br><br><br>
 		<br><br><br><br><br><br><br><br>
 		<textarea id="debug" maxLength="2000" rows="14" cols="50" style="background-color: #2E3440;"></textarea>
