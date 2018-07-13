@@ -262,9 +262,9 @@ function TDM(d) {
 	// packet handle
 	function sLogin(e){
 		//party = []
-		NPCs = []
-		BAMHistory = {}
-		Boss = {}
+		//NPCs = []
+		//BAMHistory = {}
+		//Boss = {}
 		me = {
 			"gameId":e.gameId.toString(),
 			"serverId":e.serverId.toString(),
@@ -319,6 +319,13 @@ function TDM(d) {
 			"hpPer" : 0,
 			"enragedTimer" : 0,
 			"estatus" : ''
+		}
+		
+		if(Object.keys(Boss).length >= 50){
+			for(var key in Boss) {
+				clean(Boss[key])
+				break
+			}
 		}
 	}
 
@@ -481,7 +488,7 @@ function TDM(d) {
 			// throws an error, you could also catch it here
 			if (err) throw err
 			// success case, the file was saved
-			log('dps data saved!')
+			//log('dps data saved!')
 		})
 
 	}
@@ -543,7 +550,7 @@ function TDM(d) {
 
 	function sPartyMemberList(e){
 		allUsers = false
-		party = []
+		//party = []
 
 		e.members.forEach(member => {
 			var newPartyMember = {
@@ -1014,13 +1021,6 @@ function TDM(d) {
 			}
 		}
 
-		if(Object.keys(Boss).length >= 50){
-			for(var key in Boss) {
-				clean(Boss[key])
-				break
-			}
-		}
-
 		// party clears when join in a new party
 	}
 
@@ -1052,8 +1052,8 @@ function TDM(d) {
 		msg = unitDmg(damage)
 		//log(skill + ':' + skill.slice(1,skill.length))
 		d.send('S_DUNGEON_EVENT_MESSAGE', 1, {
-			message: `<img src="img://skill__0__${me.templateId}__${skill.slice(1,skill.length)}" width="48" height="48" />&nbsp;${msg}`,
-			unk1: 70, //70 : 2,
+			message: `<img src="img://skill__0__${me.templateId}__${skill.slice(1,skill.length)}" width="20" height="20" />&nbsp;${msg}`,
+			unk1: 2, //70 : 2,
 			unk2: 0,
 			unk3: 0
 		})
@@ -1081,16 +1081,16 @@ function TDM(d) {
 	// helper
     function writeBackup() {
 	    if(Object.keys(Boss).length != 0) {
-		fs.writeFileSync(path.join(__dirname,'_Boss.json'), JSON.stringify(Boss, null, '\t'))
-		log('_Boss.json written')
+			fs.writeFileSync(path.join(__dirname,'_Boss.json'), JSON.stringify(Boss, null, '\t'))
+		//log('_Boss.json written')
 		}
 		if(NPCs.length != 0) {
 			fs.writeFileSync(path.join(__dirname,'_NPCs.json'), JSON.stringify(NPCs, null, '\t'))
-			log('_NPCs.json written')
+			//log('_NPCs.json written')
 		}
 		if(party.length != 0) {
 			fs.writeFileSync(path.join(__dirname,'_party.json'), JSON.stringify(party, null, '\t'))
-			log('_party.json written')
+			//log('_party.json written')
 		}
     }
 
