@@ -194,8 +194,7 @@ function printDateInFormat(m)
    var result="";
    var d = new Date(m);
    result += d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate() +
-             " "+ d.getHours()+":"+d.getMinutes()+":"+
-             d.getSeconds()+" "+d.getMilliseconds();
+             " "+ d.getHours()+":"+d.getMinutes()+":"+d.getSeconds()
    return result;
 }
 
@@ -622,12 +621,9 @@ function useBrowserHelp()
 	}
 	//_tera_client_proxy_.alert(locale);
 	var url = ''
-	if(locale === 'kr') url = 'https://github.com/xmljson/TDM/blob/master/README_KR.md'
+	if(locale === 'ko') url = 'https://github.com/xmljson/TDM/blob/master/README_KR.md'
 	else url = 'https://github.com/xmljson/TDM/blob/master/README.md'
-	if(typeof _tera_client_proxy_ !== 'undefined') {
-		_tera_client_proxy_.resize_to(1024, 768)
-	}
-	window.location.href=url
+	_tera_client_proxy_.open_web_direct(url)
 }
 function openWebsite(url)
 {
