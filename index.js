@@ -314,7 +314,7 @@ function TDM(d) {
 			"playerId":e.playerId.toString(),
 			"templateId":e.templateId.toString(),
 			"name":e.name.toString(),
-			"class":Number((e.templateId - 1).toString().slice(-2)).toString()
+			"class":Number((e.templateId - 1).toString().slice(-2))
 		}
 		putMeInParty(me)
 		writeBackup()
@@ -488,14 +488,23 @@ function TDM(d) {
 		})
 
 		var html = '<table><tr><td>Skill Name</td><td>White Dmg</td><td>Red Dmg</td><td>Total Dmg</td><td>Crit</td></tr>'
+		//console.log(s)
+		var avg=0
 		for(var i in s){
+				//console.log(s[i].wDamage +' '+ s[i].rDamage)
 				var t = s[i].wDamage + s[i].rDamage
 				html+='<tr>'
 				html+='<td>' + s[i].name + '</td>'
-				html+='<td>' +unitDmg(s[i].wDamage.toString()) + '<br>Hit : ' + (s[i].hitCount-s[i].crit) + '</td>'
-				html+='<td>' +unitDmg(s[i].rDamage.toString()) + '<br>' + s[i].crit + '</td>'
-				html+='<td>' +unitDmg(s[i].tDamage.toString()) + '<br>' + s[i].hitCount + '</td>'
-				html+='<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>'+s[i].crit+'/'+s[i].hitCount+'</td>'
+				avg = 0
+				if(s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit))
+				html+='<td>' +unitDmg(s[i].wDamage.toString()) + '<br>avg:' + unitDmg(avg) + '</td>'
+				avg = 0
+				if(s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit))
+				html+='<td>' +unitDmg(s[i].rDamage.toString()) + '<br>' + unitDmg(avg) + '</td>'
+				avg = 0
+				if(s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount))
+				html+='<td>' +unitDmg(s[i].tDamage.toString()) + '<br>' + unitDmg(avg) + '</td>'
+				html+='<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>Crit/Hits :'+s[i].crit+'/'+s[i].hitCount+'</td>'
 				html+='</tr>'
 		}
 		html+='</table>'
