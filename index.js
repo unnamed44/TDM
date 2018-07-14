@@ -158,7 +158,7 @@ function TDM(d) {
 		var fileNames = files.filter(function( element ) {
 			   return element !== undefined;
 			});
-		log(files)
+		//log(files)
 		return fileNames
 	}
 
@@ -491,21 +491,21 @@ function TDM(d) {
 		//console.log(s)
 		var avg=0
 		for(var i in s){
-				//console.log(s[i].wDamage +' '+ s[i].rDamage)
-				var t = s[i].wDamage + s[i].rDamage
-				html+='<tr>'
-				html+='<td>' + s[i].name + '</td>'
-				avg = 0
-				if(s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit))
-				html+='<td>' +unitDmg(s[i].wDamage.toString()) + '<br>avg:' + unitDmg(avg) + '</td>'
-				avg = 0
-				if(s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit))
-				html+='<td>' +unitDmg(s[i].rDamage.toString()) + '<br>' + unitDmg(avg) + '</td>'
-				avg = 0
-				if(s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount))
-				html+='<td>' +unitDmg(s[i].tDamage.toString()) + '<br>' + unitDmg(avg) + '</td>'
-				html+='<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>Crit/Hits :'+s[i].crit+'/'+s[i].hitCount+'</td>'
-				html+='</tr>'
+			//console.log(s[i].wDamage +' '+ s[i].rDamage)
+			var t = s[i].wDamage + s[i].rDamage
+			html+='<tr>'
+			html+='<td>' + s[i].name + '</td>'
+			avg = '0'
+			if(s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit)).toString()
+			html+='<td>' +unitDmg(s[i].wDamage.toString()) + '<br>avg:' + unitDmg(avg) + '</td>'
+			avg = '0'
+			if(s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit)).toString()
+			html+='<td>' +unitDmg(s[i].rDamage.toString()) + '<br>' + unitDmg(avg) + '</td>'
+			avg = '0'
+			if(s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount)).toString()
+			html+='<td>' +unitDmg(s[i].tDamage.toString()) + '<br>' + unitDmg(avg) + '</td>'
+			html+='<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>Crit/Hits :'+s[i].crit+'/'+s[i].hitCount+'</td>'
+			html+='</tr>'
 		}
 		html+='</table>'
 		s = []
