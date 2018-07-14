@@ -138,9 +138,34 @@ function TDM(d) {
 		}, 1000)
 	}
 
+	function getRecordFile(fn)
+	{
+		return JSON.parse( fs.readFileSync(path.join(__dirname,'history',fn), 'utf8') )
+	}
+
+	function recordsFiles()
+	{
+		const { join } = require('path')
+		const { lstatSync, readdirSync ,renameSync} = require('fs')
+		const isDirectory = source => lstatSync(source).isDirectory()
+		const getDataFiles = source =>
+			readdirSync(source).map(function(name){
+				if(!isDirectory(join(source, name)) && name.includes('.json'))
+					return name
+			})
+
+		var files = getDataFiles(join(__dirname,'history'))
+		var fileNames = files.filter(function( element ) {
+			   return element !== undefined;
+			});
+		log(files)
+		return fileNames
+	}
+
 	function api(req, res) {
 		const api = getData(req.params[0])
 		var req_value = Number(api[0])
+		//log(api)
 		switch(api[1]) {
 			case "A":
 			notice_damage += 1000000
@@ -212,15 +237,27 @@ function TDM(d) {
 			update.update()
 			return res.status(200).json("restart proxy after downloads finish.")
 			case "R":
+			// Refresh DPS window
+			if(req_value == 1){
+				var dpsdata = membersDps(currentbossId)
+				return res.status(200).json(dpsdata)
+			}
 			//reank system
 			if(req_value == 2){
 				rankSystem = !rankSystem
 				statusToChat('rankSystem',rankSystem)
 				return res.status(200).json("ok")
 			}
-			// Refresh DPS window
-			var dpsdata = membersDps(currentbossId)
-			return res.status(200).json(dpsdata)
+			//records system
+			if(req_value == 3){
+				//log('records system')
+				return res.status(200).json(recordsFiles())
+			}
+			if(req_value == 4){
+				var filename = req.params[0].substring(2, req.params[0].length)
+				//log('records system ' + filename)
+				return res.status(200).json(getRecordFile(filename))
+			}
 			case "S":
 			//reset
 			if(req_value == 100){
@@ -1015,7 +1052,7 @@ function TDM(d) {
 			addSkillLog(dpsmsg)
 			dpsmsg[0].battleendtime = NPCs[npcIndex].battleendtime
 			BAMHistory[id] = dpsmsg
-			if(debug) saveDpsData(dpsmsg)
+			saveDpsData(dpsmsg)
 			if(rankSystem) sendDPSData(dpsmsg)
 		}
 
