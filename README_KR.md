@@ -27,9 +27,7 @@ RAID에서 dps를 보는 데 문제가있는 사람들을 위해
 
 Tera-proxy\bin\node_modules\
 
-3. Type 'npm install' in commandline in the TDM folder, otherwise you will see error message like below
-
-error: Cannot find module 'express'
+3. Double click on the file npm_install.bat in TDM folder
 
 ## 선택적 데이터
 
