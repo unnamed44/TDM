@@ -93,9 +93,9 @@ function Update() {
 	async function asyncUpdate()
 	{
 		try{
-			var result = await _download(rootUrl + manifest.json,join(__dirname,'_' + 'package.json')
+			var result = await _download(rootUrl + manifest.json,join(__dirname,'_' + 'package.json'))
 			if(result !== 'success') throw err
-			var result2 = await _download(rootUrl + manifest.json,join(__dirname,'_' + 'manifest.json')
+			var result2 = await _download(rootUrl + manifest.json,join(__dirname,'_' + 'manifest.json'))
 			if(result2 !== 'success') throw err
 			//console.log(result)
 		}
