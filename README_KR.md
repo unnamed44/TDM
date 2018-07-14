@@ -41,8 +41,6 @@ UI를 열려면 "!dps u"를 입력하십시오.
 
 config.json에서 region 설정
 
-외부 ui를 사용 하시려면 `Tera-proxy\bin\node_modules\ui\config.json`에서  port number 를 세팅 해주세요.(예: "port" : 9000)
-
 ## 기능들
 
 TDM이 나타나지 않게하려면 Close 버튼을 누릅니다. (제목의 X 버튼과 동일하지 않음)
