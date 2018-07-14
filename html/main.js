@@ -415,7 +415,8 @@ function dpsStastic()
 
 	var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="skillLog(\''+_name+'\',\''+_classId+'\')">Skill Log</button><br>'
 
-	html += '<table><tr><td>Skill Name</td><td>White Dmg</td><td>Red Dmg</td><td>Total Dmg</td><td>Crit</td></tr>'
+	html += '<table><tr><td rowspan=2>Skill Name</td><td>White</td><td>Red</td><td>Total</td><td>Crit</td></tr>'
+	html += '<tr><td>Avrage</td><td>Avrage</td><td>Avrage</td><td>Red/Total</td></tr>'
 	//console.log(s)
 	var avg=0
 	for(var i in s){
@@ -425,14 +426,14 @@ function dpsStastic()
 			html+='<td>' + s[i].name + '</td>'
 			avg = '0'
 			if(s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit)).toString()
-			html+='<td>' +unitDmg(s[i].wDamage.toString()) + '<br>avg:' + unitDmg(avg) + '</td>'
+			html+='<td>' +unitDmg(s[i].wDamage.toString()) + '<br>' + unitDmg(avg) + '</td>'
 			avg = '0'
 			if(s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit)).toString()
 			html+='<td>' +unitDmg(s[i].rDamage.toString()) + '<br>' + unitDmg(avg) + '</td>'
 			avg = '0'
 			if(s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount)).toString()
 			html+='<td>' +unitDmg(s[i].tDamage.toString()) + '<br>' + unitDmg(avg) + '</td>'
-			html+='<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>Crit/Hits :'+s[i].crit+'/'+s[i].hitCount+'</td>'
+			html+='<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>'+s[i].crit+'/'+s[i].hitCount+'</td>'
 			html+='</tr>'
 	}
 	html+='</table>'
