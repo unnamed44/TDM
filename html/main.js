@@ -205,7 +205,7 @@ function RecordsCB() {
 	for(var i in res)
 	{
 		console.log(res[i].split('.')[0])
-		html+='<button class="btn" onclick="clickRecordsFile(\''+res[i]+'\')">'+printDateInFormat(Number(res[i].split('.')[0]))+'</button><br>'		
+		html+='<button class="btn" onclick="clickRecordsFile(\''+res[i]+'\')">'+printDateInFormat(Number(res[i].split('.')[0]))+'</button><br>'
 	}
 
 	document.getElementById("records").innerHTML = html;
@@ -615,8 +615,8 @@ function useBrowserHelp()
 	}
 	//_tera_client_proxy_.alert(locale);
 	var url = ''
-	if(locale === 'kr') url = './README_KR.html'
-	else url = './README.html'
+	if(locale === 'kr') url = 'https://github.com/xmljson/TDM/blob/master/README_KR.md'
+	else url = 'https://github.com/xmljson/TDM/blob/master/README.md'
 	if(typeof _tera_client_proxy_ !== 'undefined') {
 		_tera_client_proxy_.resize_to(1024, 768)
 	}
