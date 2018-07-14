@@ -6,6 +6,7 @@ const Command = require('command')
 const Long = require("long")
 const fs = require('fs')
 const path = require('path')
+const request = require('request')
 
 String.prototype.color = function (hexColor) { return `<font color='#${hexColor}'>${this}</font>` }
 
@@ -28,7 +29,6 @@ function TDM(d) {
 	const ManagerUi = require('./managerui')
 	const customCommand = require('./customCommands.json')
 	const config = require('./config.json')
-	const request = require('./request')
 
 	const command = Command(d)
 	const ui = UI(d)
