@@ -21,11 +21,15 @@ RAID에서 dps를 보는 데 문제가있는 사람들을 위해
 
 ## 설치
 
-버튼을 클릭 Clone or Download한 다음 TDM를 다운로드하십시오 Download Zip.
+1. 버튼을 클릭 Clone or Download한 다음 TDM를 다운로드하십시오 Download Zip.
 
-TDM 압축 해제를 아래 폴더에 넣으시면 됩니다.
+2. TDM 압축 해제를 아래 폴더에 넣으시면 됩니다.
 
 Tera-proxy\bin\node_modules\
+
+3. Type 'npm install' in commandline in the TDM folder, otherwise you will see error message like below
+
+error: Cannot find module 'express'
 
 ## 선택적 데이터
 

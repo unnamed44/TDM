@@ -27,11 +27,13 @@ For those who have a problem with reset data upon dying
 
    place the resulting folder in `Tera-proxy\bin\node_modules\`
 
+3. Type 'npm install' in commandline in the TDM folder, otherwise you will see error message like below
+
+error: Cannot find module 'express'
+
 ## Optional data (for dev)
 
    module manager [manager](https://github.com/Mathicha/manager)
-
-   infinity journal
 
 ## Usage
 

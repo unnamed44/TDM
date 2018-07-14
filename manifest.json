@@ -5,7 +5,7 @@
 		"managerui.js": "389e77103e38089896850d583f19ed104ddb572c9fad90ecf1e6dc43ec404f2f",
 		"html/index.html": "1ca6d3a6ddd346a008e6a74ee4ee8fb09d3d31684d4f6cc26a4dc7a5a36f8253",
 		"html/main.css": "21030acfb791b9800435afc36faa142943c2be13cf3acca3d32e6a1042e45a48",
-		"README.md": "aac433ce949ba3ef2bb833a4da5b59cf25f64633b26d96e820d91f7351a5617a",
+		"README.md": "55ca5349f6c5543ede3bde2361ccd30786d0ffaa16846669143a43a96ac4364e",
 		"README_KR.md": "2e1fae570fcd451a30508c7a459d200d8604e5ad0b5ca721c7a6249e69581cb8",
 		"html/README.html": "3424dbf6e54c9ef6294a5cc431c5c3a2e64de97ba7af736115e9bfdf56098a81",
 		"html/README_KR.html": "c9bb9f90ebddf98867d14537470b1b8ad88a70880780560030412724eac7ce49",
@@ -33,9 +33,10 @@
 		"html/class-icons/sorcerer.png": "1a34895383b01e370015880ff2ff0f3594498a90c9713c97c3f5e481ec529b80",
 		"html/class-icons/slayer.png": "ebc18c50c6612a26b2bd3a148c59f118801099cc56f2140e06f9a79b11012ebc",
 		"skillInfo.js": "8b7ea43146dc54a2bb07092fb49667296f88fec0ea81fbd5d464060ea675234e",
-		"monsters-KR.xml": "ebb7adedbc28f8c5463f7104cb0bc5867be2585fe4096f9e3d1722c9225e566b",
 		"package.json": "951a65d19a4b57716646fd396329195d263a9837d887c58c0a0722b5b81025d0",
 		"ui.js": "a70c5623d2bfa643122101ee9a64e1d943fcb940f664b3a61674f71a5b1e855f",
-		"ui_config.json": "7cab345f6dcfc54c3d84e930f312ce9634f2a4b7bb8b9e6d1248bd4daefee3e9"
+		"ui_config.json": "7cab345f6dcfc54c3d84e930f312ce9634f2a4b7bb8b9e6d1248bd4daefee3e9",
+		"manifest.json": "ddb4c4008d5103cdf6e61a12aa671db252d9acfd5ca2ec035ceda6deb63aff91",
+		"npm_install.bat": "f1848c9efab9321ee95e9971c8bf10d9208cfb0baeff427f251a1ca9003ae1ab"
 	}
 }
