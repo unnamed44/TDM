@@ -6,6 +6,7 @@ var slog = []
 var _skillInfo = []
 var 	_name = ''
 var	_classId = ''
+var _record = {}
 
 // manager ui
 function manager_ajax(url, cb) {
@@ -176,13 +177,61 @@ function History() {
 	ajax("H",HistoryCB)
 }
 
-// history tab
+function recordedStastics(index)
+{
+	document.getElementById("records").innerHTML = _record[index].stastics
+}
+
+function RecordTableDPSFormat(data,tableId)
+{
+	var dpsmsg = ''
+	var enragedBar = 0
+	var class_image=''
+
+	//console.log(data)
+
+	dpsmsg += '<table id="'+tableId+'">'
+
+	for(var i in data){
+		if(data[i].monsterBattleInfo) {
+			if(data[i].etimer > 0)
+			{
+				enragedBar = data[i].etimer * 100 / 36
+				dpsmsg += '<tr><th colspan="4" style="background: url(\'./icons/enraged_bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar +'% 10%;">'
+			}
+			else {
+				enragedBar = data[i].eCountdown * 10
+				dpsmsg += '<tr><th colspan="4" style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar +'% 10%;">'
+			}
+
+			dpsmsg += data[i].enraged
+			dpsmsg += '<br>' + data[i].monsterBattleInfo + '</th></tr>'
+			continue
+		}
+
+
+		dpsmsg 	+='<tr><td> ' + data[i].name
+				+ '<img onclick="recordedStastics(\''+ i +'\')" src="./class-icons/'+classIdToName(data[i].class).toLowerCase()+'.png' +'" />'
+				+ '<td style="display:none;">' + data[i].dps + ' </td>'
+				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + unitDps(data[i].dps) + ' </td>'
+				+ '<td> ' + data[i].percentage  + '%'.color('E69F00') + ' </td>'
+				+ '<td> ' +  data[i].crit  + '%'.color('E69F00') + ' </td></tr>'
+
+		//if(data[i].stastics){}
+	}
+	dpsmsg += '</table>'
+	return dpsmsg
+}
+
+
+// records tab
 function clickRecordsCB() {
-	var res = JSON.parse(this.responseText)
-	console.log(res)
-	//console.log(res[1].name)
-	if(res === '') return
-	document.getElementById("records").innerHTML = tableDPSFormat(res);
+	_record = JSON.parse(this.responseText)
+	//console.log(_record)
+	//console.log(_record[1].name)
+	if(_record === '') return
+	document.getElementById("records").innerHTML = RecordTableDPSFormat(_record,"recordTable");
+	sortTable("recordTable")
 }
 
 function clickRecordsFile(filename) {
@@ -496,7 +545,43 @@ function classIdToName(id)
 	return ''
 }
 
-function tableDPSFormat(data)
+
+function sortTable(tabeId) {
+	var table, rows, switching, i, x, y, shouldSwitch;
+	table = document.getElementById(tabeId);
+	switching = true;
+	/*Make a loop that will continue until
+	no switching has been done:*/
+	while (switching) {
+		//start by saying: no switching is done:
+		switching = false;
+		rows = table.getElementsByTagName("TR");
+		/*Loop through all table rows (except the
+		first, which contains table headers):*/
+		for (i = 1; i < rows.length - 1; i++) {
+			//start by saying there should be no switching:
+			shouldSwitch = false;
+			/*Get the two elements you want to compare,
+			one from current row and one from the next:*/
+			x = rows[i].getElementsByTagName("TD")[1];
+			y = rows[i + 1].getElementsByTagName("TD")[1];
+			//check if the two rows should switch place:
+			if (Number(x.innerHTML.replace(',','')) < Number(y.innerHTML.replace(',',''))) {
+				//if so, mark as a switch and break the loop:
+				shouldSwitch = true;
+				break;
+			}
+		}
+		if (shouldSwitch) {
+			/*If a switch has been marked, make the switch
+			and mark that a switch has been done:*/
+			rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+			switching = true;
+		}
+	}
+}
+
+function tableDPSFormat(data,tableId)
 {
 	var dpsmsg = ''
 	var enragedBar = 0
@@ -504,7 +589,7 @@ function tableDPSFormat(data)
 
 	//console.log(data)
 
-	dpsmsg += '<table>'
+	dpsmsg += '<table id="'+tableId+'">'
 
 	for(var i in data){
 		if(data[i].monsterBattleInfo) {
@@ -526,8 +611,8 @@ function tableDPSFormat(data)
 
 		dpsmsg 	+='<tr><td> ' + data[i].name
 				+ '<img onclick="skillLog(\''+ stripOuterHTML(data[i].name) +'\', '+data[i].class+')" src="./class-icons/'+classIdToName(data[i].class).toLowerCase()+'.png' +'" />'
-				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">'
-				+ unitDps(data[i].dps) + ' </td>'
+				+ '<td style="display:none;">' + data[i].dps + ' </td>'
+				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + unitDps(data[i].dps) + ' </td>'
 				+ '<td> ' + data[i].percentage  + '%'.color('E69F00') + ' </td>'
 				+ '<td> ' +  data[i].crit  + '%'.color('E69F00') + ' </td></tr>'
 
@@ -545,10 +630,11 @@ function refreshCB()
 	//document.getElementById("debug").innerHTML = this.responseText;
 
 	if(res === '') return
-	var result = tableDPSFormat(res)
+	var result = tableDPSFormat(res,"dpsTable")
 	if(result === previousDps) return
 	if(waitForThis == true) return
 	document.getElementById("content").innerHTML = result + '<br>'
+	sortTable("dpsTable")
 
 	previousDps = result
 

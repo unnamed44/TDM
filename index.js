@@ -215,7 +215,7 @@ function TDM(d) {
 				for(var i in party)
 				{
 					if(party[i].name === name) {
-						return res.status(200).json(party[i].skillLog)
+						return res.status(200).json(party[i].Targets[currentbossId].skillLog)
 					}
 				}
 			}
@@ -397,7 +397,7 @@ function TDM(d) {
 			if(NPCs.length >= MAX_NPC)
 			{
 				var removed = NPCs.shift()
-				if(!isBoss(removed.gameId))
+				//if(!isBoss(removed.gameId))
 					for(var i in party)
 						if(party[i].Targets[removed.gameId]) clean(party[i].Targets[removed.gameId])
 			}
@@ -602,7 +602,7 @@ function TDM(d) {
 
 	function sPartyMemberList(e){
 		allUsers = false
-		party = []
+		//party = []
 
 		e.members.forEach(member => {
 			var newPartyMember = {
@@ -611,8 +611,7 @@ function TDM(d) {
 				'playerId' : member.playerId.toString(),
 				'name' : member.name.toString(),
 				'class' : member.class,
-				'Targets' : new Array(),
-				'skillLog' : new Array()
+				'Targets' : new Object()
 			}
 			if(!isPartyMember(member.gameId.toString())) {
 				for(;party.length >= MAX_PARTY_MEMBER;) {
@@ -641,8 +640,7 @@ function TDM(d) {
 			'playerId' : e.playerId.toString(),
 			'name' : e.name.toString(),
 			'class' : uclass,
-			'Targets': new Array(),
-			'skillLog' : new Array()
+			'Targets': new Object()
 		}
 		if(!isPartyMember(e.gameId.toString()) ) {
 			//if(party.length >= 30) party.shift()
@@ -655,8 +653,7 @@ function TDM(d) {
 		BAMHistory = {}
 		lastDps =''
 		for(var i in party ){
-			party[i].skillLog = []
-			party[i].Targets = []
+			party[i].Targets = {}
 		}
 
 		for(var key in NPCs){
@@ -685,8 +682,7 @@ function TDM(d) {
 			'templateId' : m.templateId,
 			'name' : m.name,
 			'class' : m.class,
-			'Targets': new Array(),
-			'skillLog': new Array()
+			'Targets': new Object()
 		}
 
 		if(!isPartyMember(me.gameId)) {
@@ -856,14 +852,15 @@ function TDM(d) {
 					if(crit) critDamage = damage
 					else critDamage = "0"
 					// reset skill log
-					if(skillLog && bossOnly &&!allUsers && isBoss(targetId)) party[i].skillLog = []
-					party[i].Targets[targetId] = {
-						'battlestarttime' : Date.now(),
-						'damage' : damage,
-						'critDamage' : critDamage,
-						'hit' : 1,
-						'crit' : crit
-					}
+					party[i].Targets[targetId] = new Object()
+					party[i].Targets[targetId].battlestarttime = Date.now()
+					party[i].Targets[targetId].damage = damage
+					party[i].Targets[targetId].critDamage = critDamage
+					party[i].Targets[targetId].hit = 1
+					party[i].Targets[targetId].crit = crit
+					// init skillLog
+					party[i].Targets[targetId].skillLog = new Array()
+					//log(party[i].Targets)
 					//log('addMemberDamage true new monster')
 				}
 				else {
@@ -874,15 +871,14 @@ function TDM(d) {
 					//log('addMemberDamage true ' + party[i].Targets[targetId].damage)
 				}
 
-				if(skillLog && bossOnly &&!allUsers && isBoss(targetId)){
-					var skilldata = {
-						'skillId' : skill,
-						'Time' : Date.now(),
-						'damage' : damage,
-						'crit' : crit
-					}
-					party[i].skillLog.push(skilldata)
+				var skilldata = {
+					'skillId' : skill,
+					'Time' : Date.now(),
+					'damage' : damage,
+					'crit' : crit
 				}
+				party[i].Targets[targetId].skillLog.push(skilldata)
+
 				return true
 			}
 		}
@@ -950,15 +946,6 @@ function TDM(d) {
 			"totalPartyDamage " : totalPartyDamage.toString(),
 			"huntingZoneId" : NPCs[npcIndex].huntingZoneId,
 			"templateId" : NPCs[npcIndex].templateId
-		})
-
-		// when party over 10 ppl, only sort at the end of the battle for the perfomance
-		//if(party.length < 10 || NPCs[npcIndex].battleendtime != 0)
-		party.sort(function(a,b) {
-			if(typeof a.Targets[targetId] === 'undefined' || typeof b.Targets[targetId] === 'undefined') return 0
-			if(Long.fromString(a.Targets[targetId].damage).gt(b.Targets[targetId].damage)) return -1
-			else if(Long.fromString(b.Targets[targetId].damage).gt(a.Targets[targetId].damage)) return 1
-			else return 0
 		})
 
 		// remove lowest dps member if over 30
@@ -1059,7 +1046,7 @@ function TDM(d) {
 
 		if(isBoss(id) && Boss[id].hpPer <= 0 && dpsmsg !== '')
 		{
-			addSkillLog(dpsmsg)
+			addSkillLog(dpsmsg,id)
 			dpsmsg[0].battleendtime = NPCs[npcIndex].battleendtime
 			BAMHistory[id] = dpsmsg
 			saveDpsData(dpsmsg)
@@ -1087,7 +1074,7 @@ function TDM(d) {
 		return -1
 	}
 
-	function addSkillLog(d)
+	function addSkillLog(d,targetId)
 	{
 		for(var i in d)
 		{
@@ -1095,7 +1082,7 @@ function TDM(d) {
 			var index = getPartyMemberIndexByName(stripOuterHTML(d[i].name))
 			if(index < 0) continue
 			var _si = skillInfo.getSkillsJson(classIdToName(party[index].class))
-			d[i]['stastics'] = dpsStastic(party[index].skillLog,_si)
+			d[i]['stastics'] = dpsStastic(party[index].Targets[targetId].skillLog,_si)
 			//log(d[i]['stastics'])
 		}
 	}
@@ -1136,9 +1123,10 @@ function TDM(d) {
 	// helper
     function writeBackup() {
 	    if(party.length != 0) {
-		    	for(var i in party)
-		    		if(party[i].skillLog)
-					party[i].skillLog = []
+		    	for(var i in party){
+					party[i].Targets = {}
+					//for(var key in party[i].Targets) party[i].Targets[key].skillLog = []
+			}
 		    fs.writeFileSync(path.join(__dirname,'_party.json'), JSON.stringify(party, null, '\t'))
 		    //log('_party.json written')
 	    }
