@@ -349,7 +349,8 @@ function TDM(d) {
 		var id = e.id.toString()
 		var hpMax = e.maxHp
 		var hpCur = e.curHp
-		if(!isBoss(id)) setBoss(id)
+		//if(!isBoss(id)) setBoss(id)
+		if(!Boss[id]) setBoss(id)
 		Boss[id].hpPer = Number(hpCur.multiply(100).div(hpMax))
 	}
 
@@ -374,7 +375,7 @@ function TDM(d) {
 
 	function isBoss(id)
 	{
-		if(typeof Boss[id] === 'undefined') return false
+		if(!Boss[id]) return false
 		else return true
 	}
 
@@ -396,9 +397,9 @@ function TDM(d) {
 			if(NPCs.length >= MAX_NPC)
 			{
 				var removed = NPCs.shift()
-
-				for(var i in party)
-				if(typeof party[i].Targets[removed.gameId] !== 'undefined') clean(party[i].Targets[removed.gameId])
+				if(!isBoss(removed.gameId))
+					for(var i in party)
+						if(party[i].Targets[removed.gameId]) clean(party[i].Targets[removed.gameId])
 			}
 			monInfo.getNPCInfoFromXml(newNPC)
 			NPCs.push(newNPC)
@@ -601,7 +602,7 @@ function TDM(d) {
 
 	function sPartyMemberList(e){
 		allUsers = false
-		//party = []
+		party = []
 
 		e.members.forEach(member => {
 			var newPartyMember = {
@@ -1134,22 +1135,35 @@ function TDM(d) {
 
 	// helper
     function writeBackup() {
+	    if(party.length != 0) {
+		    	for(var i in party)
+		    		if(party[i].skillLog)
+					party[i].skillLog = []
+		    fs.writeFileSync(path.join(__dirname,'_party.json'), JSON.stringify(party, null, '\t'))
+		    //log('_party.json written')
+	    }
+	    if(NPCs.length != 0) {
+		    fs.writeFileSync(path.join(__dirname,'_NPCs.json'), JSON.stringify(NPCs, null, '\t'))
+		    //log('_NPCs.json written')
+	    }
 	    if(Object.keys(Boss).length != 0) {
-			fs.writeFileSync(path.join(__dirname,'_Boss.json'), JSON.stringify(Boss, null, '\t'))
-		//log('_Boss.json written')
-		}
-		if(NPCs.length != 0) {
-			fs.writeFileSync(path.join(__dirname,'_NPCs.json'), JSON.stringify(NPCs, null, '\t'))
-			//log('_NPCs.json written')
-		}
-		if(party.length != 0) {
-			fs.writeFileSync(path.join(__dirname,'_party.json'), JSON.stringify(party, null, '\t'))
-			//log('_party.json written')
-		}
+		    	for(var key in Boss )
+		    		if(Boss[key].enragedTimer)
+					Boss[key].enragedTimer = {}
+		    fs.writeFileSync(path.join(__dirname,'_Boss.json'), JSON.stringify(Boss, null, '\t'))
+		    //log('_Boss.json written')
+	    }
+
     }
 
     function readBackup() {
-		var data = fs.readFileSync(path.join(__dirname,'_Boss.json'),"utf-8")
+
+	    var data = fs.readFileSync(path.join(__dirname,'_party.json'),"utf-8")
+	    party = []
+	    party = JSON.parse(data)
+	    log('_party.json read')
+
+		data = fs.readFileSync(path.join(__dirname,'_Boss.json'),"utf-8")
 		Boss = []
 		Boss = JSON.parse(data)
 		log('_Boss.json read')
@@ -1159,10 +1173,7 @@ function TDM(d) {
 		NPCs = JSON.parse(data)
 		log('_NPCs.json read')
 
-		data = fs.readFileSync(path.join(__dirname,'_party.json'),"utf-8")
-		party = []
-		party = JSON.parse(data)
-		log('_party.json read')
+
     }
 
     function clean(obj) {
