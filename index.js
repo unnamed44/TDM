@@ -398,7 +398,7 @@ function TDM(d) {
 				var removed = NPCs.shift()
 
 				for(var i in party)
-				if(typeof party[i].NPCInfo[removed.gameId] !== 'undefined') clean(party[i].NPCInfo[removed.gameId])
+				if(typeof party[i].Targets[removed.gameId] !== 'undefined') clean(party[i].Targets[removed.gameId])
 			}
 			monInfo.getNPCInfoFromXml(newNPC)
 			NPCs.push(newNPC)
@@ -610,7 +610,7 @@ function TDM(d) {
 				'playerId' : member.playerId.toString(),
 				'name' : member.name.toString(),
 				'class' : member.class,
-				'NPCInfo' : new Array(),
+				'Targets' : new Array(),
 				'skillLog' : new Array()
 			}
 			if(!isPartyMember(member.gameId.toString())) {
@@ -640,7 +640,7 @@ function TDM(d) {
 			'playerId' : e.playerId.toString(),
 			'name' : e.name.toString(),
 			'class' : uclass,
-			'NPCInfo': new Array(),
+			'Targets': new Array(),
 			'skillLog' : new Array()
 		}
 		if(!isPartyMember(e.gameId.toString()) ) {
@@ -655,7 +655,7 @@ function TDM(d) {
 		lastDps =''
 		for(var i in party ){
 			party[i].skillLog = []
-			party[i].NPCInfo = []
+			party[i].Targets = []
 		}
 
 		for(var key in NPCs){
@@ -684,7 +684,7 @@ function TDM(d) {
 			'templateId' : m.templateId,
 			'name' : m.name,
 			'class' : m.class,
-			'NPCInfo': new Array(),
+			'Targets': new Array(),
 			'skillLog': new Array()
 		}
 
@@ -849,14 +849,14 @@ function TDM(d) {
 		for(var i in party){
 			if(id===party[i].gameId) {
 				//new monster
-				if(typeof party[i].NPCInfo[targetId] === 'undefined')
+				if(typeof party[i].Targets[targetId] === 'undefined')
 				{
 					var critDamage
 					if(crit) critDamage = damage
 					else critDamage = "0"
 					// reset skill log
 					if(skillLog && bossOnly &&!allUsers && isBoss(targetId)) party[i].skillLog = []
-					party[i].NPCInfo[targetId] = {
+					party[i].Targets[targetId] = {
 						'battlestarttime' : Date.now(),
 						'damage' : damage,
 						'critDamage' : critDamage,
@@ -866,11 +866,11 @@ function TDM(d) {
 					//log('addMemberDamage true new monster')
 				}
 				else {
-					party[i].NPCInfo[targetId].damage = Long.fromString(damage).add(party[i].NPCInfo[targetId].damage).toString()
-					if(crit) party[i].NPCInfo[targetId].critDamage = Long.fromString(party[i].NPCInfo[targetId].critDamage).add(damage).toString()
-					party[i].NPCInfo[targetId].hit += 1
-					if(crit) party[i].NPCInfo[targetId].crit +=1
-					//log('addMemberDamage true ' + party[i].NPCInfo[targetId].damage)
+					party[i].Targets[targetId].damage = Long.fromString(damage).add(party[i].Targets[targetId].damage).toString()
+					if(crit) party[i].Targets[targetId].critDamage = Long.fromString(party[i].Targets[targetId].critDamage).add(damage).toString()
+					party[i].Targets[targetId].hit += 1
+					if(crit) party[i].Targets[targetId].crit +=1
+					//log('addMemberDamage true ' + party[i].Targets[targetId].damage)
 				}
 
 				if(skillLog && bossOnly &&!allUsers && isBoss(targetId)){
@@ -954,9 +954,9 @@ function TDM(d) {
 		// when party over 10 ppl, only sort at the end of the battle for the perfomance
 		//if(party.length < 10 || NPCs[npcIndex].battleendtime != 0)
 		party.sort(function(a,b) {
-			if(typeof a.NPCInfo[targetId] === 'undefined' || typeof b.NPCInfo[targetId] === 'undefined') return 0
-			if(Long.fromString(a.NPCInfo[targetId].damage).gt(b.NPCInfo[targetId].damage)) return -1
-			else if(Long.fromString(b.NPCInfo[targetId].damage).gt(a.NPCInfo[targetId].damage)) return 1
+			if(typeof a.Targets[targetId] === 'undefined' || typeof b.Targets[targetId] === 'undefined') return 0
+			if(Long.fromString(a.Targets[targetId].damage).gt(b.Targets[targetId].damage)) return -1
+			else if(Long.fromString(b.Targets[targetId].damage).gt(a.Targets[targetId].damage)) return 1
 			else return 0
 		})
 
@@ -973,13 +973,13 @@ function TDM(d) {
 		var fill_size = 0
 
 		for(var i in party){
-			if(totalPartyDamage.equals(0) || battleduration <= 0 || typeof party[i].NPCInfo[targetId] === 'undefined') continue
+			if(totalPartyDamage.equals(0) || battleduration <= 0 || typeof party[i].Targets[targetId] === 'undefined') continue
 			cname=party[i].name
 			if(hideNames) cname='HIDDEN'
 			if(party[i].gameId===me.gameId) cname=cname.color('00FF00')
 
 
-			tdamage = Long.fromString(party[i].NPCInfo[targetId].damage)
+			tdamage = Long.fromString(party[i].Targets[targetId].damage)
 			dps = tdamage.div(battledurationbysec).toString()
 			var percentage = tdamage.multiply(100).div(totalPartyDamage).toString()
 
@@ -990,8 +990,8 @@ function TDM(d) {
 			var graph_size = percentage //+ fill_size
 
 			var crit
-			if(party[i].NPCInfo[targetId].crit == 0 || party[i].NPCInfo[targetId].hit == 0) crit = 0
-			else crit = Math.floor(party[i].NPCInfo[targetId].crit * 100 / party[i].NPCInfo[targetId].hit)
+			if(party[i].Targets[targetId].crit == 0 || party[i].Targets[targetId].hit == 0) crit = 0
+			else crit = Math.floor(party[i].Targets[targetId].crit * 100 / party[i].Targets[targetId].hit)
 
 			dpsJson.push({
 				"name": cname,
@@ -1228,7 +1228,8 @@ function TDM(d) {
 			toChat('notice_damage : ' + notice_damage)
 		}
 		else if (arg == 't' || arg=='test') {
-			d.toClient('S_NPC_MENU_SELECT', 1, {type:28})
+			//d.toClient('S_NPC_MENU_SELECT', 1, {type:28})
+			writeBackup()
 		}
 		// notice
 		else if (arg === 'n' ||  arg === 'notice') {
