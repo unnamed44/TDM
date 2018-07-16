@@ -17,7 +17,7 @@ Long.prototype.divThousand = function() {
 
 const MAX_BAM_HISTORY = 10
 const MAX_PARTY_MEMBER = 30
-const MAX_NPC = 50
+const MAX_NPC = 100
 const MAX_BOSS = 50
 
 function TDM(d) {
@@ -48,6 +48,7 @@ function TDM(d) {
 	BAMHistory = new Object(),
 	lastDps= new Array(),
 	currentbossId = '',
+	currentZone = 0,
 	allUsers = false,
 	maxSize = false,
 	hideNames = false,
@@ -215,6 +216,8 @@ function TDM(d) {
 				for(var i in party)
 				{
 					if(party[i].name === name) {
+						log('currentbossId :' + currentbossId)
+						log(party[i].Targets)
 						return res.status(200).json(party[i].Targets[currentbossId].skillLog)
 					}
 				}
@@ -304,10 +307,6 @@ function TDM(d) {
 
 	// packet handle
 	function sLogin(e){
-		//party = []
-		//NPCs = []
-		//BAMHistory = {}
-		//Boss = {}
 		me = {
 			"gameId":e.gameId.toString(),
 			"serverId":e.serverId.toString(),
@@ -317,23 +316,20 @@ function TDM(d) {
 			"class":Number((e.templateId - 1).toString().slice(-2))
 		}
 		putMeInParty(me)
-		writeBackup()
 	}
 
 	function sSpawnMe(e){
 		me.gameId=e.gameId.toString()
-		currentbossId = ''
-		//NPCs = []
 		if (!popup) return
-		// empty command
 		ui.open()
-		//log('sSpawnMe')
+		log('sSpawnMe')
 	}
 
 
 	function sLoadTopo(e){
 		// gg reset
 		if(e.zone === 9714) d.toServer('C_RESET_ALL_DUNGEON', 1, {})
+		currentZone = e.zone
 	}
 
 	function sAnswerInteractive(e){
@@ -394,13 +390,7 @@ function TDM(d) {
 		}
 		if(getNPCIndex(e.gameId.toString()) < 0)
 		{
-			if(NPCs.length >= MAX_NPC)
-			{
-				var removed = NPCs.shift()
-				//if(!isBoss(removed.gameId))
-					for(var i in party)
-						if(party[i].Targets[removed.gameId]) clean(party[i].Targets[removed.gameId])
-			}
+			if(NPCs.length >= MAX_NPC) NPCs.shift()
 			monInfo.getNPCInfoFromXml(newNPC)
 			NPCs.push(newNPC)
 			//log('sSpawnNpc '+newNPC.zoneName)
@@ -589,21 +579,14 @@ function TDM(d) {
 
 	//party handler
 	function sLeavePartyMember(e){
-		//var id = e.playerId.toString()
-		//for(var i in party){
-		//	if(id===party[i].playerId) party.splice(i,1)
-		//}
 	}
 
 	function sLeaveparty(e){
-		//party = []
-		//putMeInParty()
 	}
 
 	function sPartyMemberList(e){
 		allUsers = false
 		//party = []
-
 		e.members.forEach(member => {
 			var newPartyMember = {
 				'gameId' : member.gameId.toString(),
@@ -627,7 +610,10 @@ function TDM(d) {
 		if(!allUsers) return
 		var id = e.gameId.toString()
 		for(var i in party){
-			if(id===party[i].gameId) party.splice(i,1)
+			if(id===party[i].gameId) {
+				party.splice(i,1)
+				break
+			}
 		}
 	}
 
@@ -643,7 +629,6 @@ function TDM(d) {
 			'Targets': new Object()
 		}
 		if(!isPartyMember(e.gameId.toString()) ) {
-			//if(party.length >= 30) party.shift()
 			party.push(newPartyMember)
 		}
 	}
@@ -851,6 +836,10 @@ function TDM(d) {
 					var critDamage
 					if(crit) critDamage = damage
 					else critDamage = "0"
+
+					// remove previous Targets when hit a new boss (exept HH)
+					if(isBoss(id) && currentZone != 950) party[i].Targets = {}
+
 					// reset skill log
 					party[i].Targets[targetId] = new Object()
 					party[i].Targets[targetId].battlestarttime = Date.now()
@@ -1007,14 +996,14 @@ function TDM(d) {
 		var npcIndex = getNPCIndex(id)
 		var duration = 0
 		if(npcIndex <0) return
-		// removing NPC which has battle
-		if(NPCs[npcIndex].battlestarttime == 0) {
+		// remove : no battle, pet
+		if(NPCs[npcIndex].battlestarttime == 0 || NPCs[npcIndex].owner !== "0") {
 			NPCs.splice(npcIndex,1)
-			//log('NPC removed : '+ NPCs[npcIndex].npcName)
 			return
 		}
+
 		if(NPCs[npcIndex].battleendtime != 0) {
-			log('DOUBLE sDespawnNpc ERROR' + NPCs[npcIndex].npcName)
+			log('DOUBLE sDespawnNpc ERROR :' + NPCs[npcIndex].npcName)
 			return
 		}
 
@@ -1062,7 +1051,6 @@ function TDM(d) {
 				break
 			}
 		}
-
 		// party clears when join in a new party
 	}
 
@@ -1227,6 +1215,9 @@ function TDM(d) {
 			toChat('notice_damage : ' + notice_damage)
 		}
 		else if (arg == 't' || arg=='test') {
+			//d.toClient('S_NPC_MENU_SELECT', 1, {type:28})
+		}
+		else if (arg == 'w' || arg=='write') {
 			//d.toClient('S_NPC_MENU_SELECT', 1, {type:28})
 			writeBackup()
 		}
