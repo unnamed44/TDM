@@ -144,6 +144,12 @@ function TDM(d) {
 		return JSON.parse( fs.readFileSync(path.join(__dirname,'history',fn), 'utf8') )
 	}
 
+	function DeleteFile(fn)
+	{
+		fs.unlinkSync(path.join(__dirname,'history',fn))
+		console.log('deleted history file : ' + fn)
+	}
+
 	function recordsFiles()
 	{
 		const { join } = require('path')
@@ -197,6 +203,14 @@ function TDM(d) {
 			return res.status(200).json(notice_damage.toString())
 			case "E":
 			return res.status(200).json(require('./ui_config.json'))
+			case "F":
+			if(req_value == 1){ // delete file
+				var filename = req.params[0].substring(2, req.params[0].length)
+				//log('records system ' + filename)
+				DeleteFile(filename)
+				return res.status(200).json("deleted")
+			}
+			return
 			case "H":
 			return res.status(200).json(BAMHistory)
 			case "I":
@@ -476,7 +490,7 @@ function TDM(d) {
 			else return 0
 		})
 
-		var html = '<table><tr><td>Skill Name</td><td>White Dmg</td><td>Red Dmg</td><td>Total Dmg</td><td>Crit</td></tr>'
+		var html = '<table class="stastics"><tr><th>Skill Name</th><th>White Dmg</th><th>Red Dmg</th><th>Total Dmg</th><th>Crit</th></tr>'
 		//console.log(s)
 		var avg=0
 		for(var i in s){

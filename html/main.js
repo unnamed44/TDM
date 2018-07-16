@@ -190,7 +190,7 @@ function RecordTableDPSFormat(data,tableId)
 
 	//console.log(data)
 
-	dpsmsg += '<table id="'+tableId+'">'
+	dpsmsg += '<table class="" id="'+tableId+'">'
 
 	for(var i in data){
 		if(data[i].monsterBattleInfo) {
@@ -238,6 +238,10 @@ function clickRecordsFile(filename) {
 	ajax("4R"+filename,clickRecordsCB)
 }
 
+function DeleteFile(filename) {
+	ajax("1F"+filename)
+}
+
 function printDateInFormat(m)
 {
    var result="";
@@ -253,7 +257,7 @@ function RecordsCB() {
 	for(var i in res)
 	{
 		console.log(res[i].split('.')[0])
-		html+='<button class="btn" onclick="clickRecordsFile(\''+res[i]+'\')">'+printDateInFormat(Number(res[i].split('.')[0]))+'</button><br>'
+		html+='<button class="btn" onclick="clickRecordsFile(\''+res[i]+'\')">View</button>'+printDateInFormat(Number(res[i].split('.')[0])) + '<button class="btn" onclick="DeleteFile(\''+res[i]+'\')">delete</button><br>'
 	}
 
 	document.getElementById("records").innerHTML = html;
@@ -464,8 +468,8 @@ function dpsStastic()
 
 	var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="skillLog(\''+_name+'\',\''+_classId+'\')">Skill Log</button><br>'
 
-	html += '<table><tr><td rowspan=2>Skill Name</td><td>White</td><td>Red</td><td>Total</td><td>Crit</td></tr>'
-	html += '<tr><td>Avrage</td><td>Avrage</td><td>Avrage</td><td>Red/Total</td></tr>'
+	html += '<table class="stastics"><tr><th rowspan=2>Skill Name</th><th>White</th><th>Red</th><th>Total</th><th>Crit</th></tr>'
+	html += '<tr><th>Avrage</th><th>Avrage</th><th>Avrage</th><th>Red/Total</th></tr>'
 	//console.log(s)
 	var avg=0
 	for(var i in s){
@@ -501,7 +505,7 @@ function skillLogCB()
 	slog = JSON.parse(this.responseText)
 	//console.log(slog)
 	var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="dpsStastic()">Stastic</button><br>'
-	html += '<table><tr><td>Time</td><td>Skill Name</td><td>Damage</td></tr>'
+	html += '<table class="stastics"><tr><th>Time</th><th>Skill Name</th><th>Damage</th></tr>'
 	for(var i in slog){
 			html+='<tr>'
 			html+='<td>' +(new Date(slog[i].Time)).toTimeString().slice(0,8)+ '</td>'

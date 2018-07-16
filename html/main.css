@@ -15,6 +15,23 @@ body {
 	color: #FFFFFF;
 }
 
+.skilllog, .stastics{
+	border-collapse:collapse;
+	border: 1px solid;
+	vertical-align: center;
+	text-align: right;
+}
+
+.skilllog th, .stastics th{
+	background-color:#B7950B;
+}
+
+.skilllog td, .skilllog th, .stastics td,.stastics th{
+	border: 1px solid;
+	vertical-align: center;
+	padding : 4px;
+}
+
 table ,td, tr{
 	border-collapse:collapse;
 	border: 1px solid;
