@@ -15,7 +15,7 @@ Long.prototype.divThousand = function() {
 	return stringValue.substring(0, stringValue.length - 3)
 }
 
-const MAX_BAM_HISTORY = 10
+const MAX_RECORD_FILE = 30
 const MAX_PARTY_MEMBER = 30
 const MAX_NPC = 100
 const MAX_BOSS = 50
@@ -45,7 +45,6 @@ function TDM(d) {
 	Boss = new Object(),
 	NPCs = new Array(),
 	party = new Array(),
-	BAMHistory = new Object(),
 	lastDps= new Array(),
 	currentbossId = '',
 	currentZone = 0,
@@ -165,6 +164,11 @@ function TDM(d) {
 		var fileNames = files.filter(function( element ) {
 			   return element !== undefined;
 			});
+
+
+		for(;fileNames.length > MAX_RECORD_FILE;) {
+			DeleteFile(fileNames.shift())
+		}
 		//log(files)
 		return fileNames
 	}
@@ -211,8 +215,6 @@ function TDM(d) {
 				return res.status(200).json("deleted")
 			}
 			return
-			case "H":
-			return res.status(200).json(BAMHistory)
 			case "I":
 			hideNames = !hideNames
 			statusToChat('hideNames',hideNames)
@@ -647,7 +649,6 @@ function TDM(d) {
 
 	function removeAllPartyDPSdata()
 	{
-		BAMHistory = {}
 		lastDps =''
 		for(var i in party ){
 			party[i].Targets = {}
@@ -899,8 +900,7 @@ function TDM(d) {
 			"allUsers" : allUsers ? 'allUsers'.color(enable_color) : 'allUsers'.strike().color(disable_color),
 			"debug" : debug ? 'debug'.color(enable_color) : 'debug'.strike().color(disable_color),
 			"partyLengh" : party.length,
-			"NPCsLength" : NPCs.length,
-			"BAMHistoryLength" : Object.keys(BAMHistory).length
+			"NPCsLength" : NPCs.length
 		}
 		return settings
 	}
@@ -1049,21 +1049,10 @@ function TDM(d) {
 		{
 			addSkillLog(dpsmsg,id)
 			dpsmsg[0].battleendtime = NPCs[npcIndex].battleendtime
-			BAMHistory[id] = dpsmsg
 			saveDpsData(dpsmsg)
 			if(rankSystem) sendDPSData(dpsmsg)
 		}
-
 		NPCs[npcIndex].dpsmsg = dpsmsg
-
-		//History limit 10
-		if(Object.keys(BAMHistory).length >= MAX_BAM_HISTORY){
-			for(var key in BAMHistory) {
-				clean(BAMHistory[key])
-				break
-			}
-		}
-		// party clears when join in a new party
 	}
 
 	function getPartyMemberIndexByName(n)
