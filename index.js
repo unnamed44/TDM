@@ -216,8 +216,6 @@ function TDM(d) {
 				for(var i in party)
 				{
 					if(party[i].name === name) {
-						log('currentbossId :' + currentbossId)
-						log(party[i].Targets)
 						return res.status(200).json(party[i].Targets[currentbossId].skillLog)
 					}
 				}
