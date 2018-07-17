@@ -15,7 +15,7 @@ Long.prototype.divThousand = function() {
 	return stringValue.substring(0, stringValue.length - 3)
 }
 
-const RANK_SERVER = 'https://longu.herokuapp.com'
+const RANK_SERVER = 'http://tera.dvcoa.com.au:3000'
 const MAX_RECORD_FILE = 30
 const MAX_PARTY_MEMBER = 30
 const MAX_NPC = 100
