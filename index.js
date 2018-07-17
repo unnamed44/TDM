@@ -864,20 +864,8 @@ function TDM(d) {
 					else critDamage = "0"
 
 					// remove previous Targets when hit a new boss (exept HH)
-					if(isBoss(targetId) && currentZone != 950) {
-						log('currentbossId :' + currentbossId)
-						log('addMemberDamage Id :' + targetId)
-						log("previously bug : party[i].Targets = {} " + targetId)
-						party[i].Targets = {}
-						// cleaning party Targets
-						/*for(;Object.keys(party[i].Targets).length > 3;) {
-							for(var key in party[i].Targets){
-								log('clean Target id :' + key)
-								clean(party[i].Targets[key])
-								break
-							}
-						}*/
-					}
+					// cleaning party Targets
+					if(isBoss(targetId) && currentZone != 950) party[i].Targets = {}
 
 					// reset skill log
 					party[i].Targets[targetId] = new Object()
