@@ -25,7 +25,7 @@ function getSkillsFromTsv(tsv,className){
 function getPetSkillsFromTsv(tsv,petId){
 	var lines=tsv.split("\n");
 	var result = [];
-	var headers= ["id","NA","NA","className","skillName"]
+	var headers= ["id","NA","petName","className","skillName"]
 	for(var i=1;i<lines.length;i++){
 		var obj = {};
 		var currentline=lines[i].split("\t");

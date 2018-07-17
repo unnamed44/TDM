@@ -18,9 +18,15 @@ function Update() {
 
 	this.update = function ()
 	{
+		makeDirs()
 		deleteDataFiles()
 		npm_install()
 		asyncUpdate()
+	}
+
+	function makeDirs()
+	{
+		if (!fs.existsSync(join(__dirname,'history'))) fs.mkdirSync(join(__dirname,'history'))		
 	}
 
 	function npm_install()
@@ -68,6 +74,10 @@ function Update() {
 		asyncCheckUpdate()
 	}
 
+	function stripOuterHTML(str) {
+		return str.replace(/^<[^>]+>|<\/[^>]+><[^\/][^>]*>|<\/[^>]+>$/g, '')
+	}
+
 	async function asyncCheckUpdate()
 	{
 		const gitkey = 'package.json'
@@ -87,7 +97,7 @@ function Update() {
 		fs.unlinkSync(dest)
 		if(currentPackage.version === gitPackage.version) version = 'TDM version ' + currentPackage.version
 		else version = `Please update new ${gitPackage.version} version.`.clr('FF0000') + '<button class=btn onclick="Update()">Update</button>'
-		console.log(version)
+		console.log(stripOuterHTML(version))
 	}
 
 	async function asyncUpdate()

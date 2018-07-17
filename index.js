@@ -747,6 +747,7 @@ function TDM(d) {
 		if(currentbossId === gid) return
 		if(bossOnly && !isBoss(gid)) return
 		currentbossId = gid
+		log('setCurBoss currentbossId' + currentbossId)
 	}
 	// damage handler : Core
 	function sEachSkillResult(e){
@@ -866,7 +867,16 @@ function TDM(d) {
 
 					// remove previous Targets when hit a new boss (exept HH)
 					// cleaning party Targets
-					if(isBoss(targetId) && currentZone != 950) party[i].Targets = {}
+					if(isBoss(targetId) && currentZone != 950) {
+						party[i].Targets = {}
+						log('party[i].Targets = {} , currentbossId :' + targetId)
+						/*for(;Object.keys(party[i].Targets).length > 3;)
+							for(var key in party[i].Targets){
+								clean(party[i].Targets[key])
+								break
+							}*/
+
+					}
 
 					// reset skill log
 					party[i].Targets[targetId] = new Object()
@@ -888,7 +898,7 @@ function TDM(d) {
 					//log('addMemberDamage true ' + party[i].Targets[targetId].damage)
 				}
 
-				if(pet == true) log(skill)
+				//if(pet == true) log(skill)
 
 				var skilldata = {
 					'skillId' : skill,
@@ -1064,6 +1074,7 @@ function TDM(d) {
 
 		if(isBoss(id) && Boss[id].hpPer <= 0 && dpsmsg !== '')
 		{
+			log('addSkillLog : ' + id)
 			addSkillLog(dpsmsg,id)
 			dpsmsg[0].battleendtime = NPCs[npcIndex].battleendtime
 			saveDpsData(dpsmsg)

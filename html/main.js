@@ -381,15 +381,14 @@ function binarySearchSkillName(d, t, s , e)
 
 function searchPetSkillName(id)
 {
-
 	var pid = id.split(':').shift()
 	var skillId = id.split(':').pop()
 	//console.log(pid + '-' + skillId)
 	for(var i in _petsSkillInfo)
 	{
-			if(_petsSkillInfo[i].id === pid && _petsSkillInfo[i].className === skillId) return _petsSkillInfo[i].skillName
+			if(_petsSkillInfo[i].id === pid && _petsSkillInfo[i].className === skillId) return _petsSkillInfo[i].petName + ':'+ _petsSkillInfo[i].skillName
 	}
-	return 'Pet skill'
+	return 'Unknown pet skill'
 }
 
 function skillIdToName(id,pet)
@@ -664,37 +663,14 @@ function refreshDPS()
 	}, 1000);
 }
 
-window.addEventListener('error', function(e) {
-	if(typeof _tera_client_proxy_ !== 'undefined') {
-		_tera_client_proxy_.alert('Error: ' + e.message)
-	}
-})
-
-window.onbeforeunload =  function() {
-	//ajax("P",CloseDpsCB)
-	return null;
-}
-
 function setStyleCB()
 {
-
 	document.getElementById("debug").innerHTML = this.responseText
 	var data = this.responseText.substring(1, this.responseText.length - 1)
 	var size = data.split(',')
 	if(typeof _tera_client_proxy_ !== 'undefined') {
 		_tera_client_proxy_.resize_to(Number(size[0]), Number(size[1]))
 	}
-	var divhight = 'height:' + (Number(size[1]) - 55) + 'px'
-	document.getElementById('content').setAttribute("style",divhight);
-	var wrapperdivhight = 'height:' + size[1] + 'px'
-	document.getElementById('wrapper').setAttribute("style",wrapperdivhight);
-	document.getElementById('settings').setAttribute("style",divhight);
-	document.getElementById('manager').setAttribute("style",divhight);
-	document.getElementById('records').setAttribute("style",divhight);
-	document.getElementById('custom').setAttribute("style",divhight);
-	document.getElementById('wrapper').style.display = "block";
-
-
 }
 
 function readConfig()
@@ -763,6 +739,34 @@ function nullClientProxy () {
     }
     this.close = 0;
 }
+
+window.addEventListener('error', function(e) {
+	if(typeof _tera_client_proxy_ !== 'undefined') {
+		_tera_client_proxy_.alert('Error: ' + e.message)
+	}
+	else {
+		alert('Error: ' + e.message)
+	}
+})
+
+
+
+window.addEventListener('resize', function(event){
+  // do stuff here
+  	var width = window.innerWidth;
+	var height = window.innerHeight;
+
+	var divhight = 'height:' + (height - 55) + 'px'
+	document.getElementById('content').setAttribute("style",divhight);
+	var wrapperdivhight = 'height:' + height + 'px'
+	document.getElementById('wrapper').setAttribute("style",wrapperdivhight);
+	document.getElementById('settings').setAttribute("style",divhight);
+	document.getElementById('manager').setAttribute("style",divhight);
+	document.getElementById('records').setAttribute("style",divhight);
+	document.getElementById('custom').setAttribute("style",divhight);
+	document.getElementById('wrapper').style.display = "block";
+
+});
 
 window.onload = function() {
 
