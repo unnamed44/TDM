@@ -1044,9 +1044,8 @@ function TDM(d) {
 
 		var dpsmsg = membersDps(id)
 
-		// dps history
 		if(isBoss(id) && Boss[id].hpPer > 0)
-			log('temp zone :' + NPCs[npcIndex].templateId +':'+ NPCs[npcIndex].huntingZoneId + ' HP :' + Boss[id].hpPer)
+			log('Boss despawn , templateId zoneId :' + NPCs[npcIndex].templateId +':'+ NPCs[npcIndex].huntingZoneId + ' HP :' + Boss[id].hpPer)
 		// GG
 		if(NPCs[npcIndex].huntingZoneId === 713 && NPCs[npcIndex].templateId === 81301 && Boss[id].hpPer <= 20){
 			Boss[id].hpPer = 0

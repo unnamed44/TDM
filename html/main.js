@@ -162,21 +162,6 @@ function openweb(e) {
 }
 
 
-// history tab
-function HistoryCB() {
-	var res = JSON.parse(this.responseText)
-	if(res === '') return
-	var result = ''
-	for(var key in res){
-		result += tableDPSFormat(res[key])
-	}
-	document.getElementById("history").innerHTML = result;
-}
-
-function History() {
-	ajax("H",HistoryCB)
-}
-
 function recordedStastics(index)
 {
 	document.getElementById("records").innerHTML = _record[index].stastics
@@ -216,8 +201,6 @@ function RecordTableDPSFormat(data,tableId)
 				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + unitDps(data[i].dps) + ' </td>'
 				+ '<td> ' + data[i].percentage  + '%'.color('E69F00') + ' </td>'
 				+ '<td> ' +  data[i].crit  + '%'.color('E69F00') + ' </td></tr>'
-
-		//if(data[i].stastics){}
 	}
 	dpsmsg += '</table>'
 	return dpsmsg
@@ -227,8 +210,6 @@ function RecordTableDPSFormat(data,tableId)
 // records tab
 function clickRecordsCB() {
 	_record = JSON.parse(this.responseText)
-	//console.log(_record)
-	//console.log(_record[1].name)
 	if(_record === '') return
 	document.getElementById("records").innerHTML = RecordTableDPSFormat(_record,"recordTable");
 	sortTable("recordTable")
@@ -282,7 +263,7 @@ function SettingsCB()
 	document.getElementById("RankSystem").innerHTML = TDMSettings.rankSystem
 	document.getElementById("AllUsers").innerHTML = TDMSettings.allUsers
 	document.getElementById("Debug").innerHTML = TDMSettings.debug
-	document.getElementById("debug").innerHTML = 'party:'+ TDMSettings.partyLengh + '| NPCs:' + TDMSettings.NPCsLength + '| BAMHistory:' + TDMSettings.BAMHistoryLength
+	document.getElementById("debug").innerHTML = 'party:'+ TDMSettings.partyLengh + '| NPCs:' + TDMSettings.NPCsLength
 }
 
 function Settings(){
@@ -402,11 +383,6 @@ function skillIdToName(id)
 	if(_skillInfo.length == 0) return 'skill tsv missing'
 	var sid = id.slice(1,id.length)
 	return binarySearchSkillName(_skillInfo, sid, 0, _skillInfo.length - 1)
-	/*for(var i in _skillInfo)
-	{
-		if(_skillInfo[i].id === sid)
-			return _skillInfo[i].skillName
-	}*/
 }
 
 function dpsStastic()
@@ -683,7 +659,6 @@ function setStyleCB()
 	document.getElementById('content').setAttribute("style",divhight);
 	var wrapperdivhight = 'height:' + size[1] + 'px'
 	document.getElementById('wrapper').setAttribute("style",wrapperdivhight);
-	document.getElementById('history').setAttribute("style",divhight);
 	document.getElementById('settings').setAttribute("style",divhight);
 	document.getElementById('manager').setAttribute("style",divhight);
 	document.getElementById('records').setAttribute("style",divhight);
@@ -742,7 +717,6 @@ function openTab(evt, tabName) {
     if(evt != null)evt.currentTarget.className += " active";
 
     if(tabName === 'wrapper') DPS()
-    if(tabName === 'history') History()
     if(tabName === 'records') Records()
     if(tabName === 'settings') Settings()
     if(tabName === 'custom') Custom()
