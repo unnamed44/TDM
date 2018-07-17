@@ -295,7 +295,8 @@ function TDM(d) {
 				return res.status(200).json('ok')
 			}
 			// skill info
-			return res.status(200).json(skillInfo.getSkillsJson(classIdToName(req_value)))
+			var _si = skillInfo.getPetsSkillsJson().concat(skillInfo.getSkillsJson(classIdToName(req_value)))
+			return res.status(200).json(_si)
 			case "U":
 			if(!debug) {
 				toChat('This button is only for debug mode')
@@ -887,6 +888,8 @@ function TDM(d) {
 					//log('addMemberDamage true ' + party[i].Targets[targetId].damage)
 				}
 
+				if(pet == true) log(skill)
+
 				var skilldata = {
 					'skillId' : skill,
 					'isPet' : pet,
@@ -1084,7 +1087,8 @@ function TDM(d) {
 			if(d[i].hasOwnProperty('monsterBattleInfo')) continue
 			var index = getPartyMemberIndexByName(stripOuterHTML(d[i].name))
 			if(index < 0) continue
-			var _si = skillInfo.getSkillsJson(classIdToName(party[index].class))
+			//var _si = skillInfo.getSkillsJson(classIdToName(party[index].class))
+			var _si = skillInfo.getPetsSkillsJson().concat(skillInfo.getSkillsJson(classIdToName(party[index].class)))
 			d[i]['stastics'] = dpsStastic(party[index].Targets[targetId].skillLog,_si)
 			//log(d[i]['stastics'])
 		}
@@ -1126,10 +1130,6 @@ function TDM(d) {
 	// helper
     function writeBackup() {
 	    if(party.length != 0) {
-		    	for(var i in party){
-					party[i].Targets = {}
-					//for(var key in party[i].Targets) party[i].Targets[key].skillLog = []
-			}
 		    fs.writeFileSync(path.join(__dirname,'_party.json'), JSON.stringify(party, null, '\t'))
 		    //log('_party.json written')
 	    }

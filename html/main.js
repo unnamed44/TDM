@@ -4,6 +4,7 @@ var agree = false
 var waitForThis = false
 var slog = []
 var _skillInfo = []
+var _petsSkillInfo = []
 var 	_name = ''
 var	_classId = ''
 var _record = {}
@@ -378,12 +379,30 @@ function binarySearchSkillName(d, t, s , e)
   	if (target < id) return binarySearchSkillName(d,t,s,m);
 }
 
+function searchPetSkillName(id)
+{
+
+	var pid = id.split(':').shift()
+	var skillId = id.split(':').pop()
+	//console.log(pid + '-' + skillId)
+	for(var i in _petsSkillInfo)
+	{
+			if(_petsSkillInfo[i].id === pid && _petsSkillInfo[i].className === skillId) return _petsSkillInfo[i].skillName
+	}
+	return 'Pet skill'
+}
+
 function skillIdToName(id,pet)
 {
 	if(_skillInfo.length == 0) return 'skill tsv missing'
 	var sid = id.slice(1,id.length)
-	if(pet == true) return 'pet skill'
-	return binarySearchSkillName(_skillInfo, sid, 0, _skillInfo.length - 1)
+	//if(pet == true) return 'pet skill'
+	if(pet == true) {
+		return searchPetSkillName(sid)
+	}
+	else {
+		return binarySearchSkillName(_skillInfo, sid, 0, _skillInfo.length - 1)
+	}
 }
 
 function dpsStastic()
@@ -393,7 +412,7 @@ function dpsStastic()
 	// set skill name
 	for (var i in slog)
 	{
-		slog[i]['name'] = skillIdToName(slog[i].skillId,slog[i].pet)
+		slog[i]['name'] = skillIdToName(slog[i].skillId,slog[i].isPet)
 	}
 
 	for(var i in slog)
@@ -488,7 +507,7 @@ function skillLogCB()
 	for(var i in slog){
 			html+='<tr>'
 			html+='<td>' +(new Date(slog[i].Time)).toTimeString().slice(0,8)+ '</td>'
-			html+='<td>' +skillIdToName(slog[i].skillId,slog[i].pet)+ '</td>'
+			html+='<td>' +skillIdToName(slog[i].skillId,slog[i].isPet)+ '</td>'
 			html+='<td>' + (slog[i].crit ? unitDmg(slog[i].damage).color('FF3000') : unitDmg(slog[i].damage)) + '</td>'
 			html+='</tr>'
 	}
@@ -498,7 +517,15 @@ function skillLogCB()
 
 function getSkillInfoCB()
 {
-	_skillInfo = JSON.parse(this.responseText)
+	var si = JSON.parse(this.responseText)
+
+	_petsSkillInfo = si.slice(0,181)
+	_skillInfo = si.slice(181,si.length)
+
+	console.log(_petsSkillInfo)
+	console.log(_skillInfo)
+
+
 	ajax("2L"+_name,skillLogCB)
 }
 
@@ -608,6 +635,7 @@ function tableDPSFormat(data,tableId)
 function refreshCB()
 {
 	_skillInfo = []
+	_petsSkillInfo = []
 	var res = JSON.parse(this.responseText)
 
 	//document.getElementById("debug").innerHTML = this.responseText;
