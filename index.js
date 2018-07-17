@@ -15,6 +15,7 @@ Long.prototype.divThousand = function() {
 	return stringValue.substring(0, stringValue.length - 3)
 }
 
+const RANK_SERVER = 'https://longu.herokuapp.com'
 const MAX_RECORD_FILE = 30
 const MAX_PARTY_MEMBER = 30
 const MAX_NPC = 100
@@ -140,7 +141,13 @@ function TDM(d) {
 
 	function getRecordFile(fn)
 	{
-		return JSON.parse( fs.readFileSync(path.join(__dirname,'history',fn), 'utf8') )
+		try{
+			return JSON.parse( fs.readFileSync(path.join(__dirname,'history',fn), 'utf8') )
+		}
+		catch(err)
+		{
+			log(err)
+		}
 	}
 
 	function DeleteFile(fn)
@@ -151,23 +158,29 @@ function TDM(d) {
 
 	function recordsFiles()
 	{
-		const { join } = require('path')
-		const { lstatSync, readdirSync ,renameSync} = require('fs')
-		const isDirectory = source => lstatSync(source).isDirectory()
-		const getDataFiles = source =>
-			readdirSync(source).map(function(name){
-				if(!isDirectory(join(source, name)) && name.includes('.json'))
-					return name
-			})
+		try{
+			const { join } = require('path')
+			const { lstatSync, readdirSync ,renameSync} = require('fs')
+			const isDirectory = source => lstatSync(source).isDirectory()
+			const getDataFiles = source =>
+				readdirSync(source).map(function(name){
+					if(!isDirectory(join(source, name)) && name.includes('.json'))
+						return name
+				})
 
-		var files = getDataFiles(join(__dirname,'history'))
-		var fileNames = files.filter(function( element ) {
-			   return element !== undefined;
-			});
+			var files = getDataFiles(join(__dirname,'history'))
+			var fileNames = files.filter(function( element ) {
+				   return element !== undefined;
+				});
 
 
-		for(;fileNames.length > MAX_RECORD_FILE;) {
-			DeleteFile(fileNames.shift())
+			for(;fileNames.length > MAX_RECORD_FILE;) {
+				DeleteFile(fileNames.shift())
+			}
+		}
+		catch(err)
+		{
+			log(err)
 		}
 		//log(files)
 		return fileNames
@@ -522,7 +535,7 @@ function TDM(d) {
 		//log(data)
 		request.post({
 			headers: {'content-type': 'application/json'},
-			url: 'http://tera.dvcoa.com.au:3000/uploadDps/test',
+			url: RANK_SERVER + '/uploadDps/test',
 			//url: 'http://localhost:3000/uploadDps/test',
 			form: data
 		}, function(error, response, body){
