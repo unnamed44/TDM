@@ -253,12 +253,14 @@ function printDateInFormat(m)
 
 function RecordsCB() {
 	var res = JSON.parse(this.responseText)
-	var html = '<br>'
+	var html = '<br><table>'
 	for(var i in res)
 	{
-		console.log(res[i].split('.')[0])
-		html+='<button class="btn" onclick="clickRecordsFile(\''+res[i]+'\')">View</button>'+printDateInFormat(Number(res[i].split('.')[0])) + '<button class="btn" onclick="DeleteFile(\''+res[i]+'\')">delete</button><br>'
+		html	+='<tr><td><button class="btn" onclick="clickRecordsFile(\''+res[i]+'\')">View</button></td>'
+			+ '<td>' + printDateInFormat(Number(res[i].split('.')[0])) + '</td>'
+			+ '<td><button class="btn" onclick="DeleteFile(\''+res[i]+'\')">delete</button></td></tr>'
 	}
+	html += '</table>'
 
 	document.getElementById("records").innerHTML = html;
 }
@@ -328,7 +330,7 @@ function getVersion()
 
 function ExtUICB()
 {
-	console.log(this.responseText)
+	//console.log(this.responseText)
 	var c = JSON.parse(this.responseText)
 	if(typeof _tera_client_proxy_ === 'undefined') {
 		//window.open(window.location.href, 'TDM', 'titlebar=no, toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no');
