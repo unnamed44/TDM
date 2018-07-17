@@ -381,9 +381,11 @@ function binarySearchSkillName(d, t, s , e)
 
 function searchPetSkillName(id)
 {
+	return 'Pet skill ' + id
 	var pid = id.split(':').shift()
 	var skillId = id.split(':').pop()
-	//console.log(pid + '-' + skillId)
+	console.log(id)
+	console.log(pid + '-' + skillId)
 	for(var i in _petsSkillInfo)
 	{
 			if(_petsSkillInfo[i].id === pid && _petsSkillInfo[i].className === skillId) return _petsSkillInfo[i].petName + ':'+ _petsSkillInfo[i].skillName
