@@ -378,10 +378,11 @@ function binarySearchSkillName(d, t, s , e)
   	if (target < id) return binarySearchSkillName(d,t,s,m);
 }
 
-function skillIdToName(id)
+function skillIdToName(id,pet)
 {
 	if(_skillInfo.length == 0) return 'skill tsv missing'
 	var sid = id.slice(1,id.length)
+	if(pet == true) return 'pet skill'
 	return binarySearchSkillName(_skillInfo, sid, 0, _skillInfo.length - 1)
 }
 
@@ -392,7 +393,7 @@ function dpsStastic()
 	// set skill name
 	for (var i in slog)
 	{
-		slog[i]['name'] = skillIdToName(slog[i].skillId)
+		slog[i]['name'] = skillIdToName(slog[i].skillId,slog[i].pet)
 	}
 
 	for(var i in slog)
@@ -487,7 +488,7 @@ function skillLogCB()
 	for(var i in slog){
 			html+='<tr>'
 			html+='<td>' +(new Date(slog[i].Time)).toTimeString().slice(0,8)+ '</td>'
-			html+='<td>' +skillIdToName(slog[i].skillId)+ '</td>'
+			html+='<td>' +skillIdToName(slog[i].skillId,slog[i].pet)+ '</td>'
 			html+='<td>' + (slog[i].crit ? unitDmg(slog[i].damage).color('FF3000') : unitDmg(slog[i].damage)) + '</td>'
 			html+='</tr>'
 	}

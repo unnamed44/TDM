@@ -823,7 +823,7 @@ function TDM(d) {
 								noticeDps(e.damage.toString(),skill)
 							}
 						}
-						if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit,skill)){
+						if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit,skill,true)){
 							//log('[DPS] : unhandled pet damage ' + e.damage + ' target : ' + target)
 							//log('[DPS] : srcId : ' + sourceId + ' me.gameId : ' + me.gameId)
 							//log(e)
@@ -842,7 +842,7 @@ function TDM(d) {
 		}
 	}
 
-	function addMemberDamage(id,targetId,damage,crit,skill)
+	function addMemberDamage(id,targetId,damage,crit,skill,pet)
 	{
 		//log('addMemberDamage ' + id + ' ' + target + ' ' + damage + ' ' + crit)
 		var npcIndex = getNPCIndex(targetId)
@@ -889,6 +889,7 @@ function TDM(d) {
 
 				var skilldata = {
 					'skillId' : skill,
+					'isPet' : pet,
 					'Time' : Date.now(),
 					'damage' : damage,
 					'crit' : crit
