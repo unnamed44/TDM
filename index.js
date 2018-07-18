@@ -983,7 +983,7 @@ function TDM(d) {
 			"monsterBattleInfo" : monsterBattleInfo,
 			"battleDuration" : battledurationbysec,
 			"battleendtime" : 0,
-			"totalPartyDamage " : totalPartyDamage.toString(),
+			"totalPartyDamage" : totalPartyDamage.toString(),
 			"huntingZoneId" : NPCs[npcIndex].huntingZoneId,
 			"templateId" : NPCs[npcIndex].templateId
 		})
