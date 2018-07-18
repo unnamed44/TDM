@@ -894,11 +894,6 @@ function TDM(d) {
 		else if(type == SKILL_TYPE_HEAL && currentbossId)
 		{
 			if(typeof party[memberIndex].Targets[currentbossId] === 'undefined' ){
-				party[memberIndex].Targets[currentbossId].damage = "0"
-				party[memberIndex].Targets[currentbossId].critDamage = "0"
-				party[memberIndex].Targets[currentbossId].hit = 0
-				party[memberIndex].Targets[currentbossId].crit = 0
-
 				party[memberIndex].Targets[currentbossId] = new Object()
 				party[memberIndex].Targets[currentbossId].battlestarttime = Date.now()
 				party[memberIndex].Targets[currentbossId].heal = damage
@@ -906,6 +901,11 @@ function TDM(d) {
 				party[memberIndex].Targets[currentbossId].healHit = 1
 				party[memberIndex].Targets[currentbossId].healCrit = crit
 				party[memberIndex].Targets[currentbossId].skillLog = new Array()
+
+				party[memberIndex].Targets[currentbossId].damage = "0"
+				party[memberIndex].Targets[currentbossId].critDamage = "0"
+				party[memberIndex].Targets[currentbossId].hit = 0
+				party[memberIndex].Targets[currentbossId].crit = 0
 			}
 			else {
 				party[memberIndex].Targets[currentbossId].heal = Long.fromString(damage).add(party[memberIndex].Targets[currentbossId].heal).toString()
