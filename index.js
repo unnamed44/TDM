@@ -119,10 +119,14 @@ function TDM(d) {
 			//if(i == 0) continue
 			if(data[i].hasOwnProperty('enraged')) continue
 			if(hideNames) data[i].name='HIDDEN'
+
+			var crit = data[i].crit  + '% Crit '.color(enable_color)
+			if(data[i].class == 6 || data[i].class == 7) crit += '/' + data[i].healCrit  + '% Heal Crit'.color(disable_color)
+
 			dpsmsg 	+=data[i].name + ' '+ unitDps(data[i].dps) + 'DPS '
 			+ unitDmg(data[i].totalDamage) + 'Dmg '
 			+ data[i].percentage  + '% ofTot '.color(enable_color)
-			+ data[i].crit  + '% Crit '.color(enable_color) + '\n'
+			+ crit + '\n'
 
 
 		}
@@ -514,7 +518,8 @@ function TDM(d) {
 			else return 0
 		})
 
-		var html = '<table class="stastics"><tr><th>Skill Name</th><th>White Dmg</th><th>Red Dmg</th><th>Total Dmg</th><th>Crit</th></tr>'
+		var html = '<table class="stastics"><tr><th rowspan=2>Skill Name</th><th>White</th><th>Red</th><th>Total</th><th>Crit</th></tr>'
+		html += '<tr><th>Avrage</th><th>Avrage</th><th>Avrage</th><th>Red/Total</th></tr>'
 		//console.log(s)
 		var avg=0
 		for(var i in s){
@@ -524,14 +529,14 @@ function TDM(d) {
 			html+='<td>' + s[i].name + '</td>'
 			avg = '0'
 			if(s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit)).toString()
-			html+='<td>' +unitDmg(s[i].wDamage.toString()) + '<br>avg:' + unitDmg(avg) + '</td>'
+			html+='<td>' +unitDmg(s[i].wDamage.toString()) + '<br>' + unitDmg(avg) + '</td>'
 			avg = '0'
 			if(s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit)).toString()
 			html+='<td>' +unitDmg(s[i].rDamage.toString()) + '<br>' + unitDmg(avg) + '</td>'
 			avg = '0'
 			if(s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount)).toString()
 			html+='<td>' +unitDmg(s[i].tDamage.toString()) + '<br>' + unitDmg(avg) + '</td>'
-			html+='<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>Crit/Hits :'+s[i].crit+'/'+s[i].hitCount+'</td>'
+			html+='<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>'+s[i].crit+'/'+s[i].hitCount+'</td>'
 			html+='</tr>'
 		}
 		html+='</table>'
@@ -998,7 +1003,6 @@ function TDM(d) {
 
 		var cname
 		var dps=0
-		var fill_size = 0
 
 		for(var i in party){
 			if(totalPartyDamage.equals(0) || battleduration <= 0 || typeof party[i].Targets[targetId] === 'undefined') continue
@@ -1011,24 +1015,25 @@ function TDM(d) {
 			dps = tdamage.div(battledurationbysec).toString()
 			var percentage = tdamage.multiply(100).div(totalPartyDamage).toString()
 
-			// the smallest gap size from highest damage (sorted)
-			if(i==0) fill_size = 100 - percentage
-
-			// add the gap size for each member graph
-			var graph_size = percentage //+ fill_size
-
-			var crit
+			var crit = 0,healCrit = 0
 			if(party[i].Targets[targetId].crit == 0 || party[i].Targets[targetId].hit == 0) crit = 0
 			else crit = Math.floor(party[i].Targets[targetId].crit * 100 / party[i].Targets[targetId].hit)
 
+			if(party[i].class == 6 || party[i].class == 7)
+			{
+				if(party[i].Targets[targetId].healCrit == 0 || party[i].Targets[targetId].healHit == 0) healCrit = 0
+				else healCrit = Math.floor(party[i].Targets[targetId].healCrit * 100 / party[i].Targets[targetId].healHit)
+			}
+
 			dpsJson.push({
-				"name": cname,
-				"class":party[i].class,
-				"serverId": party[i].serverId,
-				"totalDamage":tdamage.toString(),
-				"dps":dps,
-				"percentage":percentage,
-				"crit":crit
+				"name" : cname,
+				"class" : party[i].class,
+				"serverId" : party[i].serverId,
+				"totalDamage" : tdamage.toString(),
+				"dps": dps,
+				"percentage" :percentage,
+				"crit" : crit,
+				"healCrit" : healCrit
 			})
 		}
 

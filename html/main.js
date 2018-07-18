@@ -620,12 +620,16 @@ function tableDPSFormat(data,tableId)
 		}
 
 
+		var crit = data[i].crit  + '%'.color('E69F00')
+		if(data[i].class == 6 || data[i].class == 7) crit += ' ' + data[i].healCrit  + '%'.color('56B4E9')
+
+
 		dpsmsg 	+='<tr><td> ' + data[i].name
 				+ '<img onclick="skillLog(\''+ stripOuterHTML(data[i].name) +'\', '+data[i].class+')" src="./class-icons/'+classIdToName(data[i].class).toLowerCase()+'.png' +'" />'
 				+ '<td style="display:none;">' + data[i].dps + ' </td>'
 				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + unitDps(data[i].dps) + ' </td>'
 				+ '<td> ' + data[i].percentage  + '%'.color('E69F00') + ' </td>'
-				+ '<td> ' +  data[i].crit  + '%'.color('E69F00') + ' </td></tr>'
+				+ '<td> ' + crit  + ' </td></tr>'
 
 		//if(data[i].stastics){}
 	}
