@@ -21,6 +21,14 @@ const MAX_PARTY_MEMBER = 30
 const MAX_NPC = 100
 const MAX_BOSS = 50
 
+
+//# 0 = Hidden, 1 = Damage, 2 = Heal, 3 = MP
+
+const SKILL_TYPE_HIDDEN=0
+const SKILL_TYPE_DAMAGE=1
+const SKILL_TYPE_HEAL=2
+const SKILL_TYPE_MP=3
+
 function TDM(d) {
 
 	const UI = require('./ui')
@@ -744,15 +752,15 @@ function TDM(d) {
 
 	function setCurBoss(gid)
 	{
-		if(currentbossId === gid) return
-		if(bossOnly && !isBoss(gid)) return
+		if(currentbossId === gid) return false
+		if(bossOnly && !isBoss(gid)) return false
 		currentbossId = gid
 		log('setCurBoss currentbossId' + currentbossId)
+		return true
 	}
-	// damage handler : Core
-	function sEachSkillResult(e){
-		if(!enable) return
-		// read from saved : for reloading TDM
+
+	function setMe()
+	{
 		if(party.length == 0) {
 			readBackup()
 			if(party.length == 0) return
@@ -767,153 +775,156 @@ function TDM(d) {
 			log(party)
 			log('me.gameId :'+ party[0].gameId)
 		}
+	}
 
+	// damage handler : Core
+	function sEachSkillResult(e){
+		if(!enable) return
+		setMe()
 		//log('me.gameId :'+ me.gameId + '->'+ e.source.toString() +' ->'+ e.owner.toString())
-
 		//log('[DPS] : ' + e.damage + ' target : ' + e.target.toString())
 		var memberIndex = getPartyMemberIndex(e.source.toString())
 		var sourceId = e.source.toString()
 		var target = e.target.toString()
 		var skill = e.skill.toString()
+		var type = e.type // # 0 = Hidden, 1 = Damage, 2 = Heal, 3 = MP
+
+		//if(e.blocked) log('sEachSkillResult blocked' + party[memberIndex].name + ' ' + NPCs[getNPCIndex(target)].npcName + ' ' + e.damage + ' ' + e.crit + ' ' + e.type + ' ' + skill)
 
 		if(e.damage.gt(0)){// && !e.blocked){
 			if(memberIndex >= 0){
-				// notice damage
-				if(me.gameId===sourceId){
-					setCurBoss(target)
-					//currentbossId = target
-					if(e.damage.gt(notice_damage)) {
-						noticeDps(e.damage.toString(),skill)
-					}
-				}
 				// members damage
-				if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit,skill)){
-					//log('[DPS] : unhandled members damage ' + e.damage + ' target : ' + target)
-				}
+				addMemberDamage(memberIndex,target,e.damage.toString(),e.crit,type,skill)
 			}
 			else if(memberIndex < 0){
 				// projectile
 				var ownerIndex = getPartyMemberIndex(e.owner.toString())
 				if(ownerIndex >= 0) {
 					var sourceId = e.owner.toString()
-					// notice damage
-					if(me.gameId===sourceId){
-						setCurBoss(target)
-						//currentbossId = target
-						if(e.damage.gt(notice_damage)) {
-							noticeDps(e.damage.toString(),skill)
-						}
-					}
-					if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit,skill)){
-						//log('[DPS] : unhandled projectile damage ' + e.damage + ' target : ' + target)
-						//log('[DPS] : srcId : ' + sourceId + ' me.gameId : ' + me.gameId)
-						//log(e)
-					}
-
-
-
+					addMemberDamage(ownerIndex,target,e.damage.toString(),e.crit,type,skill)
 				}
 				else{// pet
 					var petIndex=getIndexOfPetOwner(e.source.toString(),e.owner.toString())
 					if(petIndex >= 0) {
-						var sourceId = party[petIndex].gameId
-						// notice damage
-						if(me.gameId===sourceId){
-							setCurBoss(target)
-							//currentbossId = target
-							if(e.damage.gt(notice_damage)) {
-								noticeDps(e.damage.toString(),skill)
-							}
-						}
-						if(!addMemberDamage(sourceId,target,e.damage.toString(),e.crit,skill,true)){
-							//log('[DPS] : unhandled pet damage ' + e.damage + ' target : ' + target)
-							//log('[DPS] : srcId : ' + sourceId + ' me.gameId : ' + me.gameId)
-							//log(e)
-						}
-
-
-
-					}
-					else{
-						//var npcIndex= getNPCIndex(target)
-						//if(npcIndex < 0) log('[DPS] : Target is not NPC ' + e.damage + ' target : ' + target)
-						//else log('[DPS] : unhandled NPC damage ' + e.damage + ' target : ' + NPCs[npcIndex].npcName)
+						addMemberDamage(petIndex,target,e.damage.toString(),e.crit,type,skill,true)
 					}
 				}
 			}
 		}
 	}
 
-	function addMemberDamage(id,targetId,damage,crit,skill,pet)
+	function addMemberDamage(memberIndex,targetId,damage,crit,type,skill,pet)
 	{
-		//log('addMemberDamage ' + id + ' ' + target + ' ' + damage + ' ' + crit)
-		var npcIndex = getNPCIndex(targetId)
-		if(npcIndex <0) return false
-		if(NPCs[npcIndex].battlestarttime == 0){
-			NPCs[npcIndex].battlestarttime = Date.now()
-			NPCs[npcIndex].battleendtime = 0 // 지배석 버그
-		}
 
-		NPCs[npcIndex].totalPartyDamage = Long.fromString(NPCs[npcIndex].totalPartyDamage).add(damage).toString()
-
-		for(var i in party){
-			if(id===party[i].gameId) {
-				//new monster
-				if(typeof party[i].Targets[targetId] === 'undefined')
-				{
-					var critDamage
-					if(crit) critDamage = damage
-					else critDamage = "0"
-
-					// remove previous Targets when hit a new boss (exept HH)
-					// cleaning party Targets
-					if(isBoss(targetId) && currentZone != 950) {
-						party[i].Targets = {}
-						log('party[i].Targets = {} , currentbossId :' + targetId)
-						/*for(;Object.keys(party[i].Targets).length > 3;)
-							for(var key in party[i].Targets){
-								clean(party[i].Targets[key])
-								break
-							}*/
-
-					}
-
-					// reset skill log
-					party[i].Targets[targetId] = new Object()
-					party[i].Targets[targetId].battlestarttime = Date.now()
-					party[i].Targets[targetId].damage = damage
-					party[i].Targets[targetId].critDamage = critDamage
-					party[i].Targets[targetId].hit = 1
-					party[i].Targets[targetId].crit = crit
-					// init skillLog
-					party[i].Targets[targetId].skillLog = new Array()
-					//log(party[i].Targets)
-					//log('addMemberDamage true new monster')
-				}
-				else {
-					party[i].Targets[targetId].damage = Long.fromString(damage).add(party[i].Targets[targetId].damage).toString()
-					if(crit) party[i].Targets[targetId].critDamage = Long.fromString(party[i].Targets[targetId].critDamage).add(damage).toString()
-					party[i].Targets[targetId].hit += 1
-					if(crit) party[i].Targets[targetId].crit +=1
-					//log('addMemberDamage true ' + party[i].Targets[targetId].damage)
-				}
-
-				//if(pet == true) log(skill)
-
-				var skilldata = {
-					'skillId' : skill,
-					'isPet' : pet,
-					'Time' : Date.now(),
-					'damage' : damage,
-					'crit' : crit
-				}
-				party[i].Targets[targetId].skillLog.push(skilldata)
-
-				return true
+		var myNewBoss = false
+		if(me.gameId===party[memberIndex].gameId && type == SKILL_TYPE_DAMAGE) {
+			myNewBoss = setCurBoss(targetId)
+			if(Long.fromString(damage).gt(notice_damage)) {
+				noticeDps(damage,skill)
 			}
 		}
-		//log('addMemberDamage false')
-		return false
+
+		var npcIndex = getNPCIndex(targetId)
+		if(npcIndex >= 0 ){
+			if(NPCs[npcIndex].battlestarttime == 0){
+				NPCs[npcIndex].battlestarttime = Date.now()
+				NPCs[npcIndex].battleendtime = 0 // 지배석 버그
+			}
+			NPCs[npcIndex].totalPartyDamage = Long.fromString(NPCs[npcIndex].totalPartyDamage).add(damage).toString()
+		}
+/*
+		if(type == SKILL_TYPE_DAMAGE || type == SKILL_TYPE_HIDDEN)
+			log('addMemberDamage ' + type + ' ' + party[memberIndex].name + ' ' + NPCs[npcIndex].npcName + ' ' + damage + ' ' + crit + ' ' + skill + ' ' + pet)
+		else
+			log('addMemberDamage ' + type + ' ' + party[memberIndex].name + ' ' + damage + ' ' + crit + ' ' + skill + ' ' + pet)
+*/
+		if(type == SKILL_TYPE_DAMAGE || type == SKILL_TYPE_HIDDEN) {
+			//new monster
+			if(typeof party[memberIndex].Targets[targetId] === 'undefined')
+			{
+				// remove previous Targets when hit a new boss (exept HH)
+				if(isBoss(targetId) && currentZone != 950) {
+					party[memberIndex].Targets = {}
+					log('party[memberIndex].Targets = {} , currentbossId :' + targetId)
+				}
+				/*for(;Object.keys(party[memberIndex].Targets).length > 3;)
+					for(var key in party[memberIndex].Targets){
+						clean(party[memberIndex].Targets[key])
+						break
+					}*/
+				party[memberIndex].Targets[targetId] = new Object()
+				party[memberIndex].Targets[targetId].battlestarttime = Date.now()
+				party[memberIndex].Targets[targetId].damage = damage
+				party[memberIndex].Targets[targetId].critDamage = crit? damage:"0"
+				party[memberIndex].Targets[targetId].hit = 1
+				party[memberIndex].Targets[targetId].crit = crit
+				party[memberIndex].Targets[targetId].skillLog = new Array()
+
+				party[memberIndex].Targets[targetId].heal = "0"
+				party[memberIndex].Targets[targetId].critHeal = "0"
+				party[memberIndex].Targets[targetId].healHit = 0
+				party[memberIndex].Targets[targetId].healCrit = 0
+				//log("new mon :" + party[memberIndex].Targets[targetId].damage)
+			}
+			else {
+				party[memberIndex].Targets[targetId].damage = Long.fromString(damage).add(party[memberIndex].Targets[targetId].damage).toString()
+				party[memberIndex].Targets[targetId].hit += 1
+				if(crit) {
+					party[memberIndex].Targets[targetId].critDamage = Long.fromString(party[memberIndex].Targets[targetId].critDamage).add(damage).toString()
+					party[memberIndex].Targets[targetId].crit +=1
+				}
+
+				//log("cur mon :" + party[memberIndex].Targets[targetId].damage)
+			}
+			var skilldata = {
+				'skillId' : skill,
+				'isPet' : pet,
+				'type' : type,
+				'Time' : Date.now(),
+				'damage' : damage,
+				'crit' : crit
+			}
+			party[memberIndex].Targets[targetId].skillLog.push(skilldata)
+		}
+		else if(type == SKILL_TYPE_HEAL && currentbossId)
+		{
+			if(typeof party[memberIndex].Targets[currentbossId] === 'undefined' ){
+				party[memberIndex].Targets[currentbossId].damage = "0"
+				party[memberIndex].Targets[currentbossId].critDamage = "0"
+				party[memberIndex].Targets[currentbossId].hit = 0
+				party[memberIndex].Targets[currentbossId].crit = 0
+
+				party[memberIndex].Targets[currentbossId] = new Object()
+				party[memberIndex].Targets[currentbossId].battlestarttime = Date.now()
+				party[memberIndex].Targets[currentbossId].heal = damage
+				party[memberIndex].Targets[currentbossId].critHeal = crit? damage:"0"
+				party[memberIndex].Targets[currentbossId].healHit = 1
+				party[memberIndex].Targets[currentbossId].healCrit = crit
+				party[memberIndex].Targets[currentbossId].skillLog = new Array()
+			}
+			else {
+				party[memberIndex].Targets[currentbossId].heal = Long.fromString(damage).add(party[memberIndex].Targets[currentbossId].heal).toString()
+				party[memberIndex].Targets[currentbossId].healHit += 1
+				if(crit){
+					party[memberIndex].Targets[currentbossId].critHeal = Long.fromString(party[memberIndex].Targets[currentbossId].critHeal).add(damage).toString()
+					party[memberIndex].Targets[currentbossId].healCrit +=1
+				}
+			}
+
+			var skilldata = {
+				'skillId' : skill,
+				'isPet' : pet,
+				'type' : type,
+				'Time' : Date.now(),
+				'damage' : damage,
+				'crit' : crit
+			}
+			party[memberIndex].Targets[currentbossId].skillLog.push(skilldata)
+		}
+		else if(type == SKILL_TYPE_MP)
+		{
+
+		}
 	}
 
 	function getSettings()
