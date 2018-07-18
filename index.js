@@ -50,7 +50,7 @@ function TDM(d) {
 	region = config.region
 
 
-	let me,
+	let me = new Object(),
 	Boss = new Object(),
 	NPCs = new Array(),
 	party = new Array(),
@@ -87,7 +87,7 @@ function TDM(d) {
 
 	function unitDps(dps)
 	{
-		if(dps.length <= 5) return numberWithCommas(dps) + ' /s '
+		if(dps.length <= 5) return numberWithCommas(dps) + '/s '
 		if(dps.length > 5 && dps.length < 10) {
 			 var kdps= dps.substring(0, dps.length - 3)
 			 return numberWithCommas(kdps) + 'k/s '
@@ -113,15 +113,25 @@ function TDM(d) {
 
 	function textDPSFormat(data)
 	{
+
+		log(data)
+		var battleInfo = data.shift()
+
+		data.sort(function(a,b) {
+			return Number(b.percentage) - Number(a.percentage)
+		})
+
 		var dpsmsg = ''
-		dpsmsg += stripOuterHTML(data[0].monsterBattleInfo) + '\n'
+
+		log(battleInfo)
+		dpsmsg += stripOuterHTML(battleInfo.monsterBattleInfo) + '\n'
 		for(var i in data){
 			//if(i == 0) continue
 			if(data[i].hasOwnProperty('enraged')) continue
 			if(hideNames) data[i].name='HIDDEN'
 
 			var crit = data[i].crit  + '% Crit '.color(enable_color)
-			if(data[i].class == 6 || data[i].class == 7) crit += '/' + data[i].healCrit  + '% Heal Crit'.color(disable_color)
+			if(data[i].class == 6 || data[i].class == 7) crit += ' ' + data[i].healCrit  + '% Heal Crit'.color(disable_color)
 
 			dpsmsg 	+=data[i].name + ' '+ unitDps(data[i].dps) + 'DPS '
 			+ unitDmg(data[i].totalDamage) + 'Dmg '
@@ -281,6 +291,7 @@ function TDM(d) {
 			case "R":
 			// Refresh DPS window
 			if(req_value == 1){
+				setMe()
 				var dpsdata = membersDps(currentbossId)
 				return res.status(200).json(dpsdata)
 			}
@@ -769,23 +780,13 @@ function TDM(d) {
 		if(party.length == 0) {
 			readBackup()
 			if(party.length == 0) return
-			me = {
-				"gameId":party[0].gameId,
-				"serverId":party[0].serverId,
-				"playerId":party[0].playerId,
-				"templateId":party[0].templateId,
-				"name":party[0].name,
-				"class":party[0].class
-			}
-			log(party)
-			log('me.gameId :'+ party[0].gameId)
+			log(me)
 		}
 	}
 
 	// damage handler : Core
 	function sEachSkillResult(e){
 		if(!enable) return
-		setMe()
 		//log('me.gameId :'+ me.gameId + '->'+ e.source.toString() +' ->'+ e.owner.toString())
 		//log('[DPS] : ' + e.damage + ' target : ' + e.target.toString())
 		var memberIndex = getPartyMemberIndex(e.source.toString())
@@ -850,7 +851,7 @@ function TDM(d) {
 				// remove previous Targets when hit a new boss (exept HH)
 				if(isBoss(targetId) && currentZone != 950) {
 					party[memberIndex].Targets = {}
-					log('party[memberIndex].Targets = {} , currentbossId :' + targetId)
+					log('party[memberIndex].Targets = {} , targetId :' + targetId)
 				}
 				/*for(;Object.keys(party[memberIndex].Targets).length > 3;)
 					for(var key in party[memberIndex].Targets){
@@ -863,12 +864,11 @@ function TDM(d) {
 				party[memberIndex].Targets[targetId].critDamage = crit? damage:"0"
 				party[memberIndex].Targets[targetId].hit = 1
 				party[memberIndex].Targets[targetId].crit = crit
-				party[memberIndex].Targets[targetId].skillLog = new Array()
-
 				party[memberIndex].Targets[targetId].heal = "0"
 				party[memberIndex].Targets[targetId].critHeal = "0"
 				party[memberIndex].Targets[targetId].healHit = 0
 				party[memberIndex].Targets[targetId].healCrit = 0
+				party[memberIndex].Targets[targetId].skillLog = new Array()
 				//log("new mon :" + party[memberIndex].Targets[targetId].damage)
 			}
 			else {
@@ -900,12 +900,11 @@ function TDM(d) {
 				party[memberIndex].Targets[currentbossId].critHeal = crit? damage:"0"
 				party[memberIndex].Targets[currentbossId].healHit = 1
 				party[memberIndex].Targets[currentbossId].healCrit = crit
-				party[memberIndex].Targets[currentbossId].skillLog = new Array()
-
 				party[memberIndex].Targets[currentbossId].damage = "0"
 				party[memberIndex].Targets[currentbossId].critDamage = "0"
 				party[memberIndex].Targets[currentbossId].hit = 0
 				party[memberIndex].Targets[currentbossId].crit = 0
+				party[memberIndex].Targets[currentbossId].skillLog = new Array()
 			}
 			else {
 				party[memberIndex].Targets[currentbossId].heal = Long.fromString(damage).add(party[memberIndex].Targets[currentbossId].heal).toString()
@@ -949,11 +948,9 @@ function TDM(d) {
 		return settings
 	}
 
-	function membersDps(targetId) // 0 : text,html 2:json
+	function membersDps(targetId)
 	{
 		var endtime = 0
-		var dpsmsg = ''
-		var bossIndex = -1
 		var tdamage = new Long(0,0)
 		var dpsJson= []
 
@@ -1043,7 +1040,6 @@ function TDM(d) {
 		if(bossOnly && isBoss(targetId) ) lastDps = dpsJson
 		if(!bossOnly) lastDps = dpsJson
 
-		//return dpsmsg
 		return dpsJson
 	}
 
@@ -1156,42 +1152,65 @@ function TDM(d) {
 
 	// helper
     function writeBackup() {
+
+	    var backupPath = path.join(__dirname,'backup')
+
+	    if (!fs.existsSync(backupPath)) fs.mkdirSync(backupPath)
+
+	    if(Object.keys(me).length != 0) {
+		    me.currentbossId = currentbossId
+		    fs.writeFileSync(path.join(backupPath,'_me.json'), JSON.stringify(me, null, '\t'))
+		    log('_me.json written')
+	    }
+
 	    if(party.length != 0) {
-		    fs.writeFileSync(path.join(__dirname,'_party.json'), JSON.stringify(party, null, '\t'))
-		    //log('_party.json written')
+		    fs.writeFileSync(path.join(backupPath,'_party.json'), JSON.stringify(party, null, '\t'))
+		    log('_party.json written')
 	    }
 	    if(NPCs.length != 0) {
-		    fs.writeFileSync(path.join(__dirname,'_NPCs.json'), JSON.stringify(NPCs, null, '\t'))
-		    //log('_NPCs.json written')
+		    fs.writeFileSync(path.join(backupPath,'_NPCs.json'), JSON.stringify(NPCs, null, '\t'))
+		    log('_NPCs.json written')
 	    }
 	    if(Object.keys(Boss).length != 0) {
 		    	for(var key in Boss )
 		    		if(Boss[key].enragedTimer)
 					Boss[key].enragedTimer = {}
-		    fs.writeFileSync(path.join(__dirname,'_Boss.json'), JSON.stringify(Boss, null, '\t'))
-		    //log('_Boss.json written')
+		    fs.writeFileSync(path.join(backupPath,'_Boss.json'), JSON.stringify(Boss, null, '\t'))
+		    log('_Boss.json written')
 	    }
 
     }
 
     function readBackup() {
 
-	    var data = fs.readFileSync(path.join(__dirname,'_party.json'),"utf-8")
+	    var backupPath = path.join(__dirname,'backup')
+
+	    if (!fs.existsSync(backupPath)) {
+		    log('backup directory doesnt exist!')
+		    return
+	    }
+
+	    var data = fs.readFileSync(path.join(backupPath,'_me.json'),"utf-8")
+	    me = {}
+	    me = JSON.parse(data)
+	    currentbossId = me.currentbossId
+	    log('_me.json read')
+	    log('currentbossId ' + currentbossId)
+
+	    data = fs.readFileSync(path.join(backupPath,'_party.json'),"utf-8")
 	    party = []
 	    party = JSON.parse(data)
 	    log('_party.json read')
 
-		data = fs.readFileSync(path.join(__dirname,'_Boss.json'),"utf-8")
-		Boss = []
-		Boss = JSON.parse(data)
-		log('_Boss.json read')
+	    data = fs.readFileSync(path.join(backupPath,'_Boss.json'),"utf-8")
+	    Boss = {}
+	    Boss = JSON.parse(data)
+	    log('_Boss.json read')
 
-		data = fs.readFileSync(path.join(__dirname,'_NPCs.json'),"utf-8")
-		NPCs = []
-		NPCs = JSON.parse(data)
-		log('_NPCs.json read')
-
-
+	    data = fs.readFileSync(path.join(backupPath,'_NPCs.json'),"utf-8")
+	    NPCs = []
+	    NPCs = JSON.parse(data)
+	    log('_NPCs.json read')
     }
 
     function clean(obj) {
@@ -1218,15 +1237,6 @@ function TDM(d) {
 	function toChat(msg) {
 		if(!msg) return
 		send(msg)
-	}
-
-	function toNotice(msg) {
-		if (notice) d.toClient('S_DUNGEON_EVENT_MESSAGE',1, {
-			unk1: 42,
-			unk2: 0,
-			unk3: 27,
-			message: msg
-		})
 	}
 
 	function send(msg) { command.message(`[DPS] : ` + [...arguments].join('\n  - '.color('FFFFFF'))) }
@@ -1260,7 +1270,6 @@ function TDM(d) {
 			//d.toClient('S_NPC_MENU_SELECT', 1, {type:28})
 		}
 		else if (arg == 'w' || arg=='write') {
-			//d.toClient('S_NPC_MENU_SELECT', 1, {type:28})
 			writeBackup()
 		}
 		// notice
