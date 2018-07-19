@@ -199,7 +199,7 @@ function RecordTableDPSFormat(data,tableId)
 		dpsmsg 	+='<tr><td> ' + data[i].name
 				+ '<img onclick="recordedStastics(\''+ i +'\')" src="./class-icons/'+classIdToName(data[i].class).toLowerCase()+'.png' +'" />'
 				+ '<td style="display:none;">' + data[i].dps + ' </td>'
-				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + unitDps(data[i].dps) + ' </td>'
+				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + unitDps(data[i].dps) + '</td>'
 				+ '<td> ' + data[i].percentage  + '%'.color('E69F00') + ' </td>'
 				+ '<td> ' +  data[i].crit  + '%'.color('E69F00') + ' </td></tr>'
 	}

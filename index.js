@@ -87,27 +87,27 @@ function TDM(d) {
 
 	function unitDps(dps)
 	{
-		if(dps.length <= 5) return numberWithCommas(dps) + '/s '
+		if(dps.length <= 5) return numberWithCommas(dps) + '/s'
 		if(dps.length > 5 && dps.length < 10) {
 			 var kdps= dps.substring(0, dps.length - 3)
-			 return numberWithCommas(kdps) + 'k/s '
+			 return numberWithCommas(kdps) + 'k/s'
 		}
 		if(dps.length >= 10) {
 			var mdps= dps.substring(0, dps.length - 6)
-			return numberWithCommas(mdps) + 'm/s '
+			return numberWithCommas(mdps) + 'm/s'
 		}
 	}
 
 	function unitDmg(dps)
 	{
-		if(dps.length <= 5) return numberWithCommas(dps) + ' '
+		if(dps.length <= 5) return numberWithCommas(dps)
 		if(dps.length > 5 && dps.length < 10) {
 			 var kdps= dps.substring(0, dps.length - 3)
-			 return numberWithCommas(kdps) + 'k '
+			 return numberWithCommas(kdps) + 'k'
 		}
 		if(dps.length >= 10) {
 			var mdps= dps.substring(0, dps.length - 6)
-			return numberWithCommas(mdps) + 'm '
+			return numberWithCommas(mdps) + 'm'
 		}
 	}
 
@@ -133,8 +133,8 @@ function TDM(d) {
 			var crit = data[i].crit  + '% Crit '.color(enable_color)
 			if(data[i].class == 6 || data[i].class == 7) crit += ' ' + data[i].healCrit  + '% Heal Crit'.color(disable_color)
 
-			dpsmsg 	+=data[i].name + ' '+ unitDps(data[i].dps) + 'DPS '
-			+ unitDmg(data[i].totalDamage) + 'Dmg '
+			dpsmsg 	+=data[i].name + ' '+ unitDps(data[i].dps) + ' DPS '
+			+ unitDmg(data[i].totalDamage) + ' Dmg '
 			+ data[i].percentage  + '% ofTot '.color(enable_color)
 			+ crit + '\n'
 
