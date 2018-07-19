@@ -85,51 +85,46 @@ function TDM(d) {
 		return data
 	}
 
-	function unitDps(dps)
-	{
-		if(dps.length <= 5) return numberWithCommas(dps) + '/s'
-		if(dps.length > 5 && dps.length < 10) {
-			 var kdps= dps.substring(0, dps.length - 3)
-			 return numberWithCommas(kdps) + 'k/s'
+	function nFormatter(num, digits) {
+		var si = [
+			{ value: 1, symbol: "" },
+			{ value: 1E3, symbol: "k" },
+			{ value: 1E6, symbol: "M" },
+			{ value: 1E9, symbol: "G" },
+			{ value: 1E12, symbol: "T" },
+			{ value: 1E15, symbol: "P" },
+			{ value: 1E18, symbol: "E" }
+		];
+		var rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
+		var i;
+		for (i = si.length - 1; i > 0; i--) {
+			if (num >= si[i].value) {
+				break;
+			}
 		}
-		if(dps.length >= 10) {
-			var mdps= dps.substring(0, dps.length - 6)
-			return numberWithCommas(mdps) + 'm/s'
-		}
-	}
-
-	function unitDmg(dps)
-	{
-		if(dps.length <= 5) return numberWithCommas(dps)
-		if(dps.length > 5 && dps.length < 10) {
-			 var kdps= dps.substring(0, dps.length - 3)
-			 return numberWithCommas(kdps) + 'k'
-		}
-		if(dps.length >= 10) {
-			var mdps= dps.substring(0, dps.length - 6)
-			return numberWithCommas(mdps) + 'm'
-		}
+		return (num / si[i].value).toFixed(digits).replace(rx, "$1") + si[i].symbol;
 	}
 
 	function textDPSFormat(data)
 	{
 		var battleInfo = data.shift()
 		data.sort(function(a,b) {return Number(b.percentage) - Number(a.percentage)})
+		data.unshift(battleInfo)
 		var dpsmsg = ''
 		dpsmsg += stripOuterHTML(battleInfo.monsterBattleInfo) + '\n'
+		dpsmsg += 'NAME | DPS | Damage | Dmg Percent | Crit dmg (heal) \n'
 		for(var i in data){
 			//if(i == 0) continue
 			if(data[i].hasOwnProperty('enraged')) continue
 			if(hideNames) data[i].name='HIDDEN'
 
-			var crit = data[i].crit  + '% Crit '.color(enable_color)
-			if(data[i].class == 6 || data[i].class == 7) crit += ' ' + data[i].healCrit  + '% Heal Crit'.color(disable_color)
+			var crit = data[i].crit  + '% '.color(enable_color)
+			if(data[i].class == 6 || data[i].class == 7) crit += ' ' + data[i].healCrit  + '% '.color(disable_color)
 
-			dpsmsg 	+=data[i].name + ' '+ unitDps(data[i].dps) + ' DPS '
-			+ unitDmg(data[i].totalDamage) + ' Dmg '
-			+ data[i].percentage  + '% ofTot '.color(enable_color)
+			dpsmsg 	+=data[i].name + ' | '+ nFormatter(Number(data[i].dps),1) + ' | '
+			+ nFormatter(Number(data[i].totalDamage),1) + ' | '
+			+ data[i].percentage  + '% | '.color(enable_color)
 			+ crit + '\n'
-
 
 		}
 		return dpsmsg
@@ -217,7 +212,7 @@ function TDM(d) {
 			case "C":
 			if(req_value == 1 || req_value == 2){
 				if(lastDps === '' ) return res.status(200).json('ok')
-				sendByEachLine(req_value,lastDps)
+				sendByEachLine(req_value,membersDps(currentbossId))
 				return res.status(200).json('ok')
 			}
 
@@ -284,8 +279,12 @@ function TDM(d) {
 			// Refresh DPS window
 			if(req_value == 1){
 				setMe()
-				var dpsdata = membersDps(currentbossId)
-				return res.status(200).json(dpsdata)
+				var data = membersDps(currentbossId)
+				var battleInfo = data.shift()
+				data.sort(function(a,b) {return Number(b.percentage) - Number(a.percentage)})
+				data.unshift(battleInfo)
+				//log(battleInfo)
+				return res.status(200).json(data)
 			}
 			//reank system
 			if(req_value == 2){
@@ -329,7 +328,7 @@ function TDM(d) {
 			case "W":
 			var wname = req.params[0].substring(2, req.params[0].length)
 			if(wname === '' || lastDps === '' ) return res.status(200).json('ok')
-			sendByEachLine(wname,lastDps)
+			sendByEachLine(wname,membersDps(currentbossId))
 			return res.status(200).json('ok')
 			case "X":
 			if(!debug) {
@@ -532,13 +531,13 @@ function TDM(d) {
 			html+='<td>' + s[i].name + '</td>'
 			avg = '0'
 			if(s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit)).toString()
-			html+='<td>' +unitDmg(s[i].wDamage.toString()) + '<br>' + unitDmg(avg) + '</td>'
+			html+='<td>' +nFormatter(Number(s[i].wDamage.toString()),1) + '<br>' + nFormatter(Number(avg),1) + '</td>'
 			avg = '0'
 			if(s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit)).toString()
-			html+='<td>' +unitDmg(s[i].rDamage.toString()) + '<br>' + unitDmg(avg) + '</td>'
+			html+='<td>' +nFormatter(Number(s[i].rDamage.toString()),1) + '<br>' + nFormatter(Number(avg),1) + '</td>'
 			avg = '0'
 			if(s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount)).toString()
-			html+='<td>' +unitDmg(s[i].tDamage.toString()) + '<br>' + unitDmg(avg) + '</td>'
+			html+='<td>' +nFormatter(Number(s[i].tDamage.toString()),1) + '<br>' + nFormatter(Number(avg),1) + '</td>'
 			html+='<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>'+s[i].crit+'/'+s[i].hitCount+'</td>'
 			html+='</tr>'
 		}
@@ -967,14 +966,18 @@ function TDM(d) {
 		var battleduration = endtime-NPCs[npcIndex].battlestarttime
 		//log(battleduration +  ' = '+ endtime + ' - '+ NPCs[npcIndex].battlestarttime )
 
-		if (battleduration < 1000) battleduration = 1000
+		if (battleduration < 1000) battleduration = 1000 // for divide by zero error
 		var battledurationbysec = Math.floor((battleduration) / 1000)
 
 		var minutes = "0" + Math.floor(battledurationbysec / 60);
 		var seconds = "0" + (battledurationbysec - minutes * 60);
-		var monsterBattleInfo = NPCs[npcIndex].npcName + ' ' + minutes.substr(-2) + ":" + seconds.substr(-2) + '</br>'
+		var bossPercent = isBoss(targetId) ? Boss[targetId].hpPer : '100'
+		var monsterBattleInfo = NPCs[npcIndex].npcName + ' '
+							+ nFormatter(Number(totalPartyDamage.div(battledurationbysec).toString()),1) + '/s '
+							+ nFormatter(Number(NPCs[npcIndex].totalPartyDamage),1) + ' '
+							+ bossPercent + '% '
+							+ minutes.substr(-2) + ":" + seconds.substr(-2)
 		monsterBattleInfo = monsterBattleInfo.color(enable_color)
-		if(isBoss(targetId) && Boss[targetId].enraged) monsterBattleInfo = '<img class=enraged />'+monsterBattleInfo
 
 		dpsJson.push({
 			"enraged": isBoss(targetId) ? Boss[targetId].estatus : '',
@@ -982,6 +985,7 @@ function TDM(d) {
 			"eCountdown" : isBoss(targetId)&&Boss[targetId].nextEnrage !=0 ? Boss[targetId].hpPer - Boss[targetId].nextEnrage : 0,
 			"monsterBattleInfo" : monsterBattleInfo,
 			"battleDuration" : battledurationbysec,
+			"hpPer" : isBoss(targetId) ? Boss[targetId].hpPer : '100',
 			"battleendtime" : 0,
 			"totalPartyDamage" : totalPartyDamage.toString(),
 			"huntingZoneId" : NPCs[npcIndex].huntingZoneId,
@@ -1124,7 +1128,7 @@ function TDM(d) {
 	{
 		if(!notice) return
 		var msg = ''
-		msg = unitDmg(damage)
+		msg = nFormatter(Number(damage),1)
 		//log(skill + ':' + skill.slice(1,skill.length))
 		d.send('S_DUNGEON_EVENT_MESSAGE', 1, {
 			message: `<img src="img://skill__0__${me.templateId}__${skill.slice(1,skill.length)}" width="20" height="20" />&nbsp;${msg}`,
@@ -1192,28 +1196,33 @@ function TDM(d) {
 		    log('backup directory doesnt exist!')
 		    return
 	    }
+	    try{
+		    log('_me.json read')
+		    var data = fs.readFileSync(path.join(backupPath,'_me.json'),"utf-8")
+		    me = {}
+		    me = JSON.parse(data)
+		    currentbossId = me.currentbossId
+		    log('currentbossId ' + currentbossId)
 
-	    var data = fs.readFileSync(path.join(backupPath,'_me.json'),"utf-8")
-	    me = {}
-	    me = JSON.parse(data)
-	    currentbossId = me.currentbossId
-	    log('_me.json read')
-	    log('currentbossId ' + currentbossId)
+		    log('_party.json read')
+		    data = fs.readFileSync(path.join(backupPath,'_party.json'),"utf-8")
+		    party = []
+		    party = JSON.parse(data)
 
-	    data = fs.readFileSync(path.join(backupPath,'_party.json'),"utf-8")
-	    party = []
-	    party = JSON.parse(data)
-	    log('_party.json read')
+		    log('_Boss.json read')
+		    data = fs.readFileSync(path.join(backupPath,'_Boss.json'),"utf-8")
+		    Boss = {}
+		    Boss = JSON.parse(data)
 
-	    data = fs.readFileSync(path.join(backupPath,'_Boss.json'),"utf-8")
-	    Boss = {}
-	    Boss = JSON.parse(data)
-	    log('_Boss.json read')
-
-	    data = fs.readFileSync(path.join(backupPath,'_NPCs.json'),"utf-8")
-	    NPCs = []
-	    NPCs = JSON.parse(data)
-	    log('_NPCs.json read')
+		    log('_NPCs.json read')
+		    data = fs.readFileSync(path.join(backupPath,'_NPCs.json'),"utf-8")
+		    NPCs = []
+		    NPCs = JSON.parse(data)
+	    }
+	    catch(err)
+	    {
+		    log(err)
+	    }
     }
 
     function clean(obj) {
