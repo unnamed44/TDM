@@ -113,17 +113,9 @@ function TDM(d) {
 
 	function textDPSFormat(data)
 	{
-
-		log(data)
 		var battleInfo = data.shift()
-
-		data.sort(function(a,b) {
-			return Number(b.percentage) - Number(a.percentage)
-		})
-
+		data.sort(function(a,b) {return Number(b.percentage) - Number(a.percentage)})
 		var dpsmsg = ''
-
-		log(battleInfo)
 		dpsmsg += stripOuterHTML(battleInfo.monsterBattleInfo) + '\n'
 		for(var i in data){
 			//if(i == 0) continue
@@ -687,6 +679,7 @@ function TDM(d) {
 
 	function removeAllPartyDPSdata()
 	{
+		log('removeAllPartyDPSdata')
 		lastDps =''
 		for(var i in party ){
 			party[i].Targets = {}
@@ -850,8 +843,13 @@ function TDM(d) {
 			{
 				// remove previous Targets when hit a new boss (exept HH)
 				if(isBoss(targetId) && currentZone != 950) {
+					for(var key in party[memberIndex].Targets){
+						log('removing Targets = {} :'+key + ' ' + party[memberIndex].name)
+						//clean(party[memberIndex].Targets[key])
+						//break
+					}
 					party[memberIndex].Targets = {}
-					log('party[memberIndex].Targets = {} , targetId :' + targetId)
+					log('New targetId :' + targetId + ' ' + party[memberIndex].name)
 				}
 				/*for(;Object.keys(party[memberIndex].Targets).length > 3;)
 					for(var key in party[memberIndex].Targets){
@@ -1110,6 +1108,11 @@ function TDM(d) {
 			if(d[i].hasOwnProperty('monsterBattleInfo')) continue
 			var index = getPartyMemberIndexByName(stripOuterHTML(d[i].name))
 			if(index < 0) continue
+			if(typeof party[index].Targets[targetId].skillLog === 'undefined') {
+				log('skillLog === undefined')
+				log(party[index])
+				continue
+			}
 			//var _si = skillInfo.getSkillsJson(classIdToName(party[index].class))
 			var _si = skillInfo.getPetsSkillsJson().concat(skillInfo.getSkillsJson(classIdToName(party[index].class)))
 			d[i]['stastics'] = dpsStastic(party[index].Targets[targetId].skillLog,_si)
