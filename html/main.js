@@ -8,6 +8,7 @@ var _petsSkillInfo = []
 var 	_name = ''
 var	_classId = ''
 var _record = {}
+var _recordfilename = ''
 
 // manager ui
 function manager_ajax(url, cb) {
@@ -169,7 +170,7 @@ function openweb(e) {
 
 function recordedStastics(index)
 {
-	document.getElementById("records").innerHTML = _record[index].stastics
+	document.getElementById("content").innerHTML = _record[index].stastics
 }
 
 function RecordTableDPSFormat(data,tableId)
@@ -216,11 +217,12 @@ function RecordTableDPSFormat(data,tableId)
 function clickRecordsCB() {
 	_record = JSON.parse(this.responseText)
 	if(_record === '') return
-	document.getElementById("records").innerHTML = RecordTableDPSFormat(_record,"recordTable");
+	document.getElementById("content").innerHTML = RecordTableDPSFormat(_record,"recordTable");
 	sortTable("recordTable")
 }
 
 function clickRecordsFile(filename) {
+	_recordfilename = filename
 	ajax("4R"+filename,clickRecordsCB)
 }
 
@@ -244,11 +246,11 @@ function RecordsCB() {
 	{
 		html	+='<tr><td><button class="btn" onclick="clickRecordsFile(\''+res[i]+'\')">View</button></td>'
 			+ '<td>' + printDateInFormat(Number(res[i].split('.')[0])) + '</td>'
-			+ '<td><button class="btn" onclick="DeleteFile(\''+res[i]+'\')">delete</button></td></tr>'
+			//+ '<td><button class="btn" onclick="DeleteFile(\''+res[i]+'\')">delete</button></td></tr>'
 	}
 	html += '</table>'
 
-	document.getElementById("records").innerHTML = html;
+	document.getElementById("content").innerHTML = html;
 }
 
 
@@ -277,7 +279,10 @@ function Settings(){
 
 // dps tab
 function DPS(){
-
+	ajax("5R",null) // reset recordFilename
+	if(waitForThis == true) return refreshDPS()
+	waitForThis = false
+	previousDps = 'NEW'
 }
 
 // Custom tab
@@ -469,7 +474,7 @@ function dpsStastic()
 
 function printStastics(value)
 {
-	document.getElementById("records").innerHTML = html
+	document.getElementById("content").innerHTML = html
 }
 
 function skillLogCB()
@@ -651,6 +656,7 @@ function refreshDPS()
 {
 	previousDps = 'NEW'
 	waitForThis = false
+	ajax("1R",refreshCB)
 	var i = setInterval(function(){
 		if(waitForThis){
 			clearInterval(i);
@@ -715,11 +721,14 @@ function openTab(evt, tabName) {
     for (i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
-    document.getElementById(tabName).style.display = "block";
+    if(tabName !== 'records') document.getElementById(tabName).style.display = "block";
     if(evt != null)evt.currentTarget.className += " active";
 
     if(tabName === 'wrapper') DPS()
-    if(tabName === 'records') Records()
+    if(tabName === 'records') {
+	    document.getElementById('wrapper').style.display = "block";
+	    Records()
+    }
     if(tabName === 'settings') Settings()
     if(tabName === 'custom') Custom()
     if(tabName === 'manager') Manager()
@@ -759,7 +768,6 @@ window.addEventListener('resize', function(event){
 	document.getElementById('wrapper').setAttribute("style",wrapperdivhight);
 	document.getElementById('settings').setAttribute("style",divhight);
 	document.getElementById('manager').setAttribute("style",divhight);
-	document.getElementById('records').setAttribute("style",divhight);
 	document.getElementById('custom').setAttribute("style",divhight);
 	document.getElementById('wrapper').style.display = "block";
 

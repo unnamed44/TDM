@@ -62,7 +62,8 @@ function TDM(d) {
 	hideNames = false,
 	skillLog = true,
 	popup = true,
-	rankSystem = true
+	rankSystem = true,
+	recordFilename = ''
 
 	let enable_color = 'E69F00',
 	disable_color = '56B4E9'
@@ -201,149 +202,166 @@ function TDM(d) {
 		//log(api)
 		switch(api[1]) {
 			case "A":
-			notice_damage += 1000000
-			if(notice_damage > 20000000) notice_damage = 1000000
-			send('Notice damage is ' + numberWithCommas(notice_damage.toString()))
-			return res.status(200).json(notice_damage.toString())
+				notice_damage += 1000000
+				if(notice_damage > 20000000) notice_damage = 1000000
+				send('Notice damage is ' + numberWithCommas(notice_damage.toString()))
+				return res.status(200).json(notice_damage.toString())
 			case "B":
-			debug = !debug
-			statusToChat('Debug mode',debug)
-			return res.status(200).json("ok")
+				debug = !debug
+				statusToChat('Debug mode',debug)
+				return res.status(200).json("ok")
 			case "C":
-			if(req_value == 1 || req_value == 2){
-				if(lastDps.length == 0 ) return res.status(200).json('ok')
-				sendByEachLine(req_value,membersDps(currentbossId))
-				return res.status(200).json('ok')
-			}
+				if(req_value == 1 || req_value == 2){
+					if(recordFilename !== ''){
+						sendByEachLine(req_value,getRecordFile(recordFilename))
+						return res.status(200).json('ok')
+					}
+					var data = membersDps(currentbossId)
+					if(data.length == 0 ) return res.status(200).json('ok')
+					sendByEachLine(req_value,data)
+					return res.status(200).json('ok')
+				}
 
-			if(req_value == 3) return res.status(200).json(customCommand)
-			if(req_value == 4){
-				var cmd = req.params[0].substring(2, req.params[0].length)
-				sendExec(cmd)
-				return res.status(200).json('ok')
-			}
+				if(req_value == 3) return res.status(200).json(customCommand)
+				if(req_value == 4){
+					var cmd = req.params[0].substring(2, req.params[0].length)
+					sendExec(cmd)
+					return res.status(200).json('ok')
+				}
 
 			case "D":
-			notice_damage = req_value
-			send('Notice damage is ' + numberWithCommas(notice_damage.toString()))
-			return res.status(200).json(notice_damage.toString())
+				notice_damage = req_value
+				send('Notice damage is ' + numberWithCommas(notice_damage.toString()))
+				return res.status(200).json(notice_damage.toString())
 			case "E":
-			return res.status(200).json(require('./ui_config.json'))
+				return res.status(200).json(require('./ui_config.json'))
 			case "F":
-			if(req_value == 1){ // delete file
-				var filename = req.params[0].substring(2, req.params[0].length)
-				//log('records system ' + filename)
-				DeleteFile(filename)
-				return res.status(200).json("deleted")
-			}
-			return
+				if(req_value == 1){ // delete file
+					var filename = req.params[0].substring(2, req.params[0].length)
+					//log('records system ' + filename)
+					DeleteFile(filename)
+					return res.status(200).json("deleted")
+				}
+				return res.status(200).json('ok')
 			case "I":
-			hideNames = !hideNames
-			statusToChat('hideNames',hideNames)
-			return res.status(200).json("ok")
-			case "L":
-			if(req_value == 1) // skill Log enable/disable
-			{
-				skillLog = !skillLog
-				statusToChat('skillLog',skillLog)
+				hideNames = !hideNames
+				statusToChat('hideNames',hideNames)
 				return res.status(200).json("ok")
-			}
-			if(req_value == 2) // skill Log
-			{
-				var name = req.params[0].substring(2, req.params[0].length)
-				for(var i in party)
+			case "L":
+				if(req_value == 1) // skill Log enable/disable
 				{
-					if(party[i].name === name) {
-						return res.status(200).json(party[i].Targets[currentbossId].skillLog)
+					skillLog = !skillLog
+					statusToChat('skillLog',skillLog)
+					return res.status(200).json("ok")
+				}
+				if(req_value == 2) // skill Log
+				{
+					var name = req.params[0].substring(2, req.params[0].length)
+					for(var i in party)
+					{
+						if(party[i].name === name) {
+							return res.status(200).json(party[i].Targets[currentbossId].skillLog)
+						}
 					}
 				}
-			}
-			leaveParty()
-			return res.status(200).json('ok')
-			case "N":
-			notice = !notice
-			statusToChat('notice damage',notice)
-			return res.status(200).json("ok")
-			case "O":
-			bossOnly = !bossOnly
-			statusToChat('boss Only',bossOnly)
-			return res.status(200).json("ok")
-			case "P":
-			popup = false
-			statusToChat('dps popup',popup)
-			return res.status(200).json("ok")
-			case "Q":
-			update.update()
-			return res.status(200).json("restart proxy after downloads finish.")
-			case "R":
-			// Refresh DPS window
-			if(req_value == 1){
-				setMe()
-				var data = membersDps(currentbossId)
-				if(data.length == 0) return res.status(200).json('')
-				var battleInfo = data.shift()
-				data.sort(function(a,b) {return Number(b.percentage) - Number(a.percentage)})
-				data.unshift(battleInfo)
-				return res.status(200).json(data)
-			}
-			//reank system
-			if(req_value == 2){
-				rankSystem = !rankSystem
-				statusToChat('rankSystem',rankSystem)
-				return res.status(200).json("ok")
-			}
-			//records system
-			if(req_value == 3){
-				//log('records system')
-				return res.status(200).json(recordsFiles())
-			}
-			if(req_value == 4){
-				var filename = req.params[0].substring(2, req.params[0].length)
-				//log('records system ' + filename)
-				return res.status(200).json(getRecordFile(filename))
-			}
-			case "S":
-			//reset
-			if(req_value == 100){
-				removeAllPartyDPSdata()
+				leaveParty()
 				return res.status(200).json('ok')
-			}
-			// skill info
-			var _si = skillInfo.getPetsSkillsJson().concat(skillInfo.getSkillsJson(classIdToName(req_value)))
-			return res.status(200).json(_si)
+			case "N":
+				notice = !notice
+				statusToChat('notice damage',notice)
+				return res.status(200).json("ok")
+			case "O":
+				bossOnly = !bossOnly
+				statusToChat('boss Only',bossOnly)
+				return res.status(200).json("ok")
+			case "P":
+				popup = false
+				statusToChat('dps popup',popup)
+				return res.status(200).json("ok")
+			case "Q":
+				update.update()
+				return res.status(200).json("restart proxy after downloads finish.")
+			case "R":
+				// Refresh DPS window
+				if(req_value == 1){
+					setMe()
+					var data = membersDps(currentbossId)
+					if(data.length == 0) return res.status(200).json('')
+					var battleInfo = data.shift()
+					data.sort(function(a,b) {return Number(b.percentage) - Number(a.percentage)})
+					data.unshift(battleInfo)
+					return res.status(200).json(data)
+				}
+				//reank system
+				if(req_value == 2){
+					rankSystem = !rankSystem
+					statusToChat('rankSystem',rankSystem)
+					return res.status(200).json("ok")
+				}
+				//records system
+				if(req_value == 3){
+					//log('records system')
+					return res.status(200).json(recordsFiles())
+				}
+				if(req_value == 4){
+					recordFilename = req.params[0].substring(2, req.params[0].length)
+					//log('records system ' + filename)
+					return res.status(200).json(getRecordFile(recordFilename))
+				}
+				if(req_value == 5){
+					recordFilename = ''
+					return res.status(200).json("ok")
+				}
+			case "S":
+				//reset
+				if(req_value == 100){
+					removeAllPartyDPSdata()
+					return res.status(200).json('ok')
+				}
+				// skill info
+				var _si = skillInfo.getPetsSkillsJson().concat(skillInfo.getSkillsJson(classIdToName(req_value)))
+				return res.status(200).json(_si)
 			case "U":
-			if(!debug) {
-				toChat('This button is only for debug mode')
-				return res.status(200).json("no")
-			}
-			allUsers = maxSize =  !allUsers
-			ui.open()
-			statusToChat('Count all dps',allUsers)
-			return res.status(200).json("ok")
+				if(!debug) {
+					toChat('This button is only for debug mode')
+					return res.status(200).json("no")
+				}
+				allUsers = maxSize =  !allUsers
+				ui.open()
+				statusToChat('Count all dps',allUsers)
+				return res.status(200).json("ok")
 			case "V":
-			var ver = []
-			ver.push(update.getVersion())
-			return res.status(200).json(ver)
-			ver = []
+				var ver = []
+				ver.push(update.getVersion())
+				return res.status(200).json(ver)
 			case "W":
-			var wname = req.params[0].substring(2, req.params[0].length)
-			if(wname === '' || lastDps.length == 0 ) return res.status(200).json('ok')
-			sendByEachLine(wname,membersDps(currentbossId))
-			return res.status(200).json('ok')
+				var wname = req.params[0].substring(2, req.params[0].length)
+				if(wname === '') return res.status(200).json('ok')
+				if(recordFilename !== ''){
+					sendByEachLine(wname,getRecordFile(recordFilename))
+					return res.status(200).json('ok')
+				}
+				else{
+					var data = membersDps(currentbossId)
+					if( data.length == 0 ) return res.status(200).json('ok')
+					sendByEachLine(wname,data)
+					return res.status(200).json('ok')
+				}
+				return res.status(200).json('ok')
 			case "X":
-			if(!debug) {
-				toChat('This button is only for debug mode')
-				return res.status(200).json("no")
-			}
-			sendExec('reload TDM')
-			return res.status(200).json("ok")
+				if(!debug) {
+					toChat('This button is only for debug mode')
+					return res.status(200).json("no")
+				}
+				sendExec('reload TDM')
+				return res.status(200).json("ok")
 			case "Y":
-			return res.status(200).json(getSettings())
+				return res.status(200).json(getSettings())
 			case "Z":
-			if(maxSize) return res.status(200).json('320,700')
-			else return res.status(200).json('320,250')
+				if(maxSize) return res.status(200).json('320,700')
+				else return res.status(200).json('320,250')
 			default:
-			return res.status(404).send("404")
+				return res.status(404).send("404")
 		}
 	}
 
