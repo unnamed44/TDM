@@ -278,18 +278,12 @@ function TDM(d) {
 			case "R":
 			// Refresh DPS window
 			if(req_value == 1){
-				try{
-					setMe()
-					var data = membersDps(currentbossId)
-					var battleInfo = data.shift()
-					data.sort(function(a,b) {return Number(b.percentage) - Number(a.percentage)})
-					data.unshift(battleInfo)
-				}
-				catch(err)
-				{
-					log(err)
-				}
-				//log(battleInfo)
+				setMe()
+				var data = membersDps(currentbossId)
+				if(data.length == 0) return res.status(200).json('')
+				var battleInfo = data.shift()
+				data.sort(function(a,b) {return Number(b.percentage) - Number(a.percentage)})
+				data.unshift(battleInfo)
 				return res.status(200).json(data)
 			}
 			//reank system
@@ -685,7 +679,7 @@ function TDM(d) {
 	function removeAllPartyDPSdata()
 	{
 		log('removeAllPartyDPSdata')
-		lastDps =''
+		lastDps = []
 		currentbossId = ''
 
 		for(var i in party ){

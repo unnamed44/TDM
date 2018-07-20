@@ -493,8 +493,8 @@ function getSkillInfoCB()
 	_petsSkillInfo = si.slice(0,181)
 	_skillInfo = si.slice(181,si.length)
 
-	console.log(_petsSkillInfo)
-	console.log(_skillInfo)
+	//console.log(_petsSkillInfo)
+	//console.log(_skillInfo)
 
 
 	ajax("2L"+_name,skillLogCB)
@@ -588,7 +588,7 @@ function tableDPSFormat(data,tableId)
 	var enragedBar = 0
 	var class_image=''
 
-	console.log(data)
+	//console.log(data)
 
 	dpsmsg += '<table id="'+tableId+'">'
 
@@ -632,9 +632,7 @@ function refreshCB()
 	_skillInfo = []
 	_petsSkillInfo = []
 	var res = JSON.parse(this.responseText)
-	//console.log(res)
-	if(Object.keys(res).length == 1) return
-
+	if(res === '' ) return
 	var result = tableDPSFormat(res,"dpsTable")
 	if(result === previousDps) return
 	if(waitForThis == true) return
