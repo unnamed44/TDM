@@ -124,7 +124,7 @@ function TDM(d) {
 
 			dpsmsg 	+=data[i].name + ' | '+ nFormatter(Number(data[i].dps),1) + ' | '
 			+ nFormatter(Number(data[i].totalDamage),1) + ' | '
-			+ data[i].percentage  + '% | '.color(enable_color)
+			+ data[i].percentage  + '%'.color(enable_color) + ' | '
 			+ crit + '\n'
 
 		}
