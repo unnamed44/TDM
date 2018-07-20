@@ -971,11 +971,9 @@ function TDM(d) {
 
 		var minutes = "0" + Math.floor(battledurationbysec / 60);
 		var seconds = "0" + (battledurationbysec - minutes * 60);
-		var bossPercent = isBoss(targetId) ? Boss[targetId].hpPer : '100'
 		var monsterBattleInfo = NPCs[npcIndex].npcName + ' '
 							+ nFormatter(Number(totalPartyDamage.div(battledurationbysec).toString()),1) + '/s '
 							+ nFormatter(Number(NPCs[npcIndex].totalPartyDamage),1) + ' '
-							+ bossPercent + '% '
 							+ minutes.substr(-2) + ":" + seconds.substr(-2)
 		monsterBattleInfo = monsterBattleInfo.color(enable_color)
 
@@ -985,7 +983,6 @@ function TDM(d) {
 			"eCountdown" : isBoss(targetId)&&Boss[targetId].nextEnrage !=0 ? Boss[targetId].hpPer - Boss[targetId].nextEnrage : 0,
 			"monsterBattleInfo" : monsterBattleInfo,
 			"battleDuration" : battledurationbysec,
-			"hpPer" : isBoss(targetId) ? Boss[targetId].hpPer : '100',
 			"battleendtime" : 0,
 			"totalPartyDamage" : totalPartyDamage.toString(),
 			"huntingZoneId" : NPCs[npcIndex].huntingZoneId,
