@@ -99,8 +99,12 @@ function LeaveParty() {
 	ajax("L",null)
 }
 
+function ResetCB(){
+	document.getElementById("content").innerHTML = '<br>'
+}
+
 function Reset() {
-	ajax("100S",null)
+	ajax("100S",ResetCB)
 }
 function CloseDpsCB() {
 	if(typeof _tera_client_proxy_ !== 'undefined') {
