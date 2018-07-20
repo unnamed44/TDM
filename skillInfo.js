@@ -47,23 +47,6 @@ function getPetSkillsFromTsv(tsv,petId){
 	return result; //JSON
 }
 
-function getSkillsFromTsv(tsv,className){
-	var lines=tsv.split("\n");
-	var result = [];
-	var headers= ["id","NA","NA","className","skillName"]
-	for(var i=1;i<lines.length;i++){
-		var obj = {};
-		var currentline=lines[i].split("\t");
-		if( currentline[3] === className){
-			for(var j=0;j<headers.length;j++){
-				obj[headers[j]] = currentline[j];
-			}
-			result.push(obj);
-		}
-	}
-	return result; //JSON
-}
-
 function SkillInfo(r,u){
 	this.update = u
 	if(r === 'EU') this.region = 'EU-EN'
