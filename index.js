@@ -211,7 +211,7 @@ function TDM(d) {
 			return res.status(200).json("ok")
 			case "C":
 			if(req_value == 1 || req_value == 2){
-				if(lastDps === '' ) return res.status(200).json('ok')
+				if(lastDps.length == 0 ) return res.status(200).json('ok')
 				sendByEachLine(req_value,membersDps(currentbossId))
 				return res.status(200).json('ok')
 			}
@@ -327,7 +327,7 @@ function TDM(d) {
 			ver = []
 			case "W":
 			var wname = req.params[0].substring(2, req.params[0].length)
-			if(wname === '' || lastDps === '' ) return res.status(200).json('ok')
+			if(wname === '' || lastDps.length == 0 ) return res.status(200).json('ok')
 			sendByEachLine(wname,membersDps(currentbossId))
 			return res.status(200).json('ok')
 			case "X":
