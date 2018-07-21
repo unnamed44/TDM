@@ -388,7 +388,7 @@ function TDM(d) {
 
 	function sLoadTopo(e){
 		// gg reset
-		if(e.zone === 9714) d.toServer('C_RESET_ALL_DUNGEON', 1, {})
+		//if(e.zone === 9714) d.toServer('C_RESET_ALL_DUNGEON', 1, {})
 		currentZone = e.zone
 	}
 
@@ -653,11 +653,11 @@ function TDM(d) {
 				'gameId' : member.gameId.toString(),
 				'serverId' : member.serverId.toString(),
 				'playerId' : member.playerId.toString(),
-				'name' : member.name.toString(),
+				'name' : member.name,
 				'class' : member.class,
 				'Targets' : new Object()
 			}
-			if(!isPartyMember(member.gameId.toString())) {
+			if(!isPartyMember(member.gameId.toString(), member.name)) {
 				for(;party.length >= MAX_PARTY_MEMBER;) {
 					party.shift()
 				}
@@ -685,11 +685,11 @@ function TDM(d) {
 			'gameId' : e.gameId.toString(),
 			'serverId' : e.serverId.toString(),
 			'playerId' : e.playerId.toString(),
-			'name' : e.name.toString(),
+			'name' : e.name,
 			'class' : uclass,
 			'Targets': new Object()
 		}
-		if(!isPartyMember(e.gameId.toString()) ) {
+		if(!isPartyMember(e.gameId.toString(),e.name) ) {
 			party.push(newPartyMember)
 		}
 	}
@@ -733,7 +733,7 @@ function TDM(d) {
 			'Targets': new Object()
 		}
 
-		if(!isPartyMember(me.gameId)) {
+		if(!isPartyMember(me.gameId,m.name)) {
 			party.push(newPartyMember)
 		}
 	}
@@ -764,7 +764,15 @@ function TDM(d) {
 		return -1
 	}
 
-	function isPartyMember(gid){
+	function isPartyMember(gid,name){
+		for(var i in party){
+			if(name===party[i].name) {
+				// set new gId
+				party[i].gameId = gid
+				return true
+			}
+		}
+
 		for(var i in party){
 			if(gid===party[i].gameId) return true
 		}

@@ -1,6 +1,6 @@
 {
 	"name": "TDM",
-	"version": "1.5.6",
+	"version": "1.5.7",
 	"dependencies": {
 		"express": "^4.16.3",
 		"request": "^2.87.0"
