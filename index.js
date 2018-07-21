@@ -103,7 +103,7 @@ function TDM(d) {
 				break;
 			}
 		}
-		return (num / si[i].value).toFixed(digits).replace(rx, "$1") + si[i].symbol;
+		return (num / si[i].value).toFixed(digits+i-1).replace(rx, "$1") + si[i].symbol;
 	}
 
 	function textDPSFormat(data)
