@@ -9,6 +9,28 @@ const path = require('path')
 const request = require('request')
 
 String.prototype.color = function (hexColor) { return `<font color='#${hexColor}'>${this}</font>` }
+String.prototype.stripHTML = function () { return this.replace(/<[^>]+>/g, '') }
+String.prototype.numberWithCommas = function () { return this.replace(/\B(?=(\d{3})+(?!\d))/g, ",") }
+
+Number.prototype.nFormatter =	function (digits) {
+	var si = [
+		{ value: 1, symbol: "" },
+		{ value: 1E3, symbol: "k" },
+		{ value: 1E6, symbol: "M" },
+		{ value: 1E9, symbol: "G" },
+		{ value: 1E12, symbol: "T" },
+		{ value: 1E15, symbol: "P" },
+		{ value: 1E18, symbol: "E" }
+	];
+	var rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
+	var i;
+	for (i = si.length - 1; i > 0; i--) {
+		if (this >= si[i].value) {
+			break;
+		}
+	}
+	return (this / si[i].value).toFixed(digits+i-1).replace(rx, "$1") + si[i].symbol;
+}
 
 Long.prototype.divThousand = function() {
 	var stringValue = this.toString()
@@ -50,11 +72,12 @@ function TDM(d) {
 	region = config.region
 
 
-	let me = new Object(),
-	Boss = new Object(),
-	NPCs = new Array(),
-	party = new Array(),
-	lastDps= new Array(),
+	let me = {},
+	Boss = {},
+	NPCs = [],
+	party = [],
+	currentParty = {},
+	lastDps= [],
 	currentbossId = '',
 	currentZone = 0,
 	allUsers = false,
@@ -86,33 +109,13 @@ function TDM(d) {
 		return data
 	}
 
-	function nFormatter(num, digits) {
-		var si = [
-			{ value: 1, symbol: "" },
-			{ value: 1E3, symbol: "k" },
-			{ value: 1E6, symbol: "M" },
-			{ value: 1E9, symbol: "G" },
-			{ value: 1E12, symbol: "T" },
-			{ value: 1E15, symbol: "P" },
-			{ value: 1E18, symbol: "E" }
-		];
-		var rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
-		var i;
-		for (i = si.length - 1; i > 0; i--) {
-			if (num >= si[i].value) {
-				break;
-			}
-		}
-		return (num / si[i].value).toFixed(digits+i-1).replace(rx, "$1") + si[i].symbol;
-	}
-
 	function textDPSFormat(data)
 	{
 		var battleInfo = data.shift()
 		data.sort(function(a,b) {return Number(b.percentage) - Number(a.percentage)})
 		data.unshift(battleInfo)
 		var dpsmsg = ''
-		dpsmsg += stripOuterHTML(battleInfo.monsterBattleInfo) + '\n'
+		dpsmsg += battleInfo.monsterBattleInfo.stripHTML() + '\n'
 		dpsmsg += 'NAME | DPS | Damage | Dmg Percent | Crit dmg (heal) \n'
 		for(var i in data){
 			//if(i == 0) continue
@@ -122,8 +125,8 @@ function TDM(d) {
 			var crit = data[i].crit  + '% '.color(enable_color)
 			if(data[i].class == 6 || data[i].class == 7) crit += ' ' + data[i].healCrit  + '% '.color(disable_color)
 
-			dpsmsg 	+=data[i].name + ' | '+ nFormatter(Number(data[i].dps),1) + ' | '
-			+ nFormatter(Number(data[i].totalDamage),1) + ' | '
+			dpsmsg 	+=data[i].name + ' | '+ Number(data[i].dps).nFormatter(1) + ' | '
+			+ Number(data[i].totalDamage).nFormatter(1) + ' | '
 			+ data[i].percentage  + '%'.color(enable_color) + ' | '
 			+ crit + '\n'
 
@@ -135,7 +138,7 @@ function TDM(d) {
 	{
 
 		let i = 0
-		var msg = textDPSFormat(dpsjson)
+		var msg = textDPSFormat(dpsjson).stripHTML()
 		let msgs = msg.split('\n'),
 		CounterId = setInterval( () => {
 			//log(msgs)
@@ -204,7 +207,7 @@ function TDM(d) {
 			case "A":
 				notice_damage += 1000000
 				if(notice_damage > 20000000) notice_damage = 1000000
-				send('Notice damage is ' + numberWithCommas(notice_damage.toString()))
+				send('Notice damage is ' + notice_damage.toString().numberWithCommas())
 				return res.status(200).json(notice_damage.toString())
 			case "B":
 				debug = !debug
@@ -231,7 +234,7 @@ function TDM(d) {
 
 			case "D":
 				notice_damage = req_value
-				send('Notice damage is ' + numberWithCommas(notice_damage.toString()))
+				send('Notice damage is ' + notice_damage.toString().numberWithCommas())
 				return res.status(200).json(notice_damage.toString())
 			case "E":
 				return res.status(200).json(require('./ui_config.json'))
@@ -549,13 +552,13 @@ function TDM(d) {
 			html+='<td>' + s[i].name + '</td>'
 			avg = '0'
 			if(s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit)).toString()
-			html+='<td>' +nFormatter(Number(s[i].wDamage.toString()),1) + '<br>' + nFormatter(Number(avg),1) + '</td>'
+			html+='<td>' +Number(s[i].wDamage.toString()).nFormatter(1) + '<br>' + Number(avg).nFormatter(1) + '</td>'
 			avg = '0'
 			if(s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit)).toString()
-			html+='<td>' +nFormatter(Number(s[i].rDamage.toString()),1) + '<br>' + nFormatter(Number(avg),1) + '</td>'
+			html+='<td>' +Number(s[i].rDamage.toString()).nFormatter(1) + '<br>' + Number(avg).nFormatter(1) + '</td>'
 			avg = '0'
 			if(s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount)).toString()
-			html+='<td>' +nFormatter(Number(s[i].tDamage.toString()),1) + '<br>' + nFormatter(Number(avg),1) + '</td>'
+			html+='<td>' +Number(s[i].tDamage.toString()).nFormatter(1) + '<br>' + Number(avg).nFormatter(1) + '</td>'
 			html+='<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>'+s[i].crit+'/'+s[i].hitCount+'</td>'
 			html+='</tr>'
 		}
@@ -640,22 +643,27 @@ function TDM(d) {
 
 	//party handler
 	function sLeavePartyMember(e){
+		clean(currentParty[e.gameId.toString()])
 	}
 
-	function sLeaveparty(e){
+	function sLeaveparty(){
+		clean(currentParty)
 	}
 
 	function sPartyMemberList(e){
 		allUsers = false
 		//party = []
 		e.members.forEach(member => {
+
+			currentParty[member.gameId.toString()] = member.name
+
 			var newPartyMember = {
 				'gameId' : member.gameId.toString(),
 				'serverId' : member.serverId.toString(),
 				'playerId' : member.playerId.toString(),
 				'name' : member.name,
 				'class' : member.class,
-				'Targets' : new Object()
+				'Targets' : {}
 			}
 			if(!isPartyMember(member.gameId.toString(), member.name)) {
 				for(;party.length >= MAX_PARTY_MEMBER;) {
@@ -687,7 +695,7 @@ function TDM(d) {
 			'playerId' : e.playerId.toString(),
 			'name' : e.name,
 			'class' : uclass,
-			'Targets': new Object()
+			'Targets': {}
 		}
 		if(!isPartyMember(e.gameId.toString(),e.name) ) {
 			party.push(newPartyMember)
@@ -730,7 +738,7 @@ function TDM(d) {
 			'templateId' : m.templateId,
 			'name' : m.name,
 			'class' : m.class,
-			'Targets': new Object()
+			'Targets': {}
 		}
 
 		if(!isPartyMember(me.gameId,m.name)) {
@@ -764,17 +772,17 @@ function TDM(d) {
 		return -1
 	}
 
-	function isPartyMember(gid,name){
+	function isPartyMember(gId,name){
 		for(var i in party){
 			if(name===party[i].name) {
 				// set new gId
-				party[i].gameId = gid
+				party[i].gameId = gId
 				return true
 			}
 		}
 
 		for(var i in party){
-			if(gid===party[i].gameId) return true
+			if(gId===party[i].gameId) return true
 		}
 		return false
 	}
@@ -786,11 +794,22 @@ function TDM(d) {
 		return -1
 	}
 
-	function setCurBoss(gid)
+	function syncParty()
 	{
-		if(currentbossId === gid) return false
-		if(bossOnly && !isBoss(gid)) return false
-		currentbossId = gid
+		for(var i in party)
+		{
+			if(typeof currentParty[party[i].gameId] === 'undefiend' && party[i].gameId !== me.gameId) party[i].Targets = {}
+		}
+	}
+
+	function setCurBoss(gId)
+	{
+		if(currentbossId === gId) return false
+		if(bossOnly && !isBoss(gId)) return false
+
+		if(isBoss(gId) && currentZone != 950) syncParty()
+
+		currentbossId = gId
 		log('setCurBoss currentbossId' + currentbossId)
 		return true
 	}
@@ -883,7 +902,7 @@ function TDM(d) {
 						clean(party[memberIndex].Targets[key])
 						break
 					}*/
-				party[memberIndex].Targets[targetId] = new Object()
+				party[memberIndex].Targets[targetId] = {}
 				party[memberIndex].Targets[targetId].battlestarttime = Date.now()
 				party[memberIndex].Targets[targetId].damage = damage
 				party[memberIndex].Targets[targetId].critDamage = crit? damage:"0"
@@ -893,7 +912,7 @@ function TDM(d) {
 				party[memberIndex].Targets[targetId].critHeal = "0"
 				party[memberIndex].Targets[targetId].healHit = 0
 				party[memberIndex].Targets[targetId].healCrit = 0
-				party[memberIndex].Targets[targetId].skillLog = new Array()
+				party[memberIndex].Targets[targetId].skillLog = []
 				//log("new mon :" + party[memberIndex].Targets[targetId].damage)
 			}
 			else {
@@ -919,7 +938,7 @@ function TDM(d) {
 		else if(type == SKILL_TYPE_HEAL && currentbossId)
 		{
 			if(typeof party[memberIndex].Targets[currentbossId] === 'undefined' ){
-				party[memberIndex].Targets[currentbossId] = new Object()
+				party[memberIndex].Targets[currentbossId] = {}
 				party[memberIndex].Targets[currentbossId].battlestarttime = Date.now()
 				party[memberIndex].Targets[currentbossId].heal = damage
 				party[memberIndex].Targets[currentbossId].critHeal = crit? damage:"0"
@@ -929,7 +948,7 @@ function TDM(d) {
 				party[memberIndex].Targets[currentbossId].critDamage = "0"
 				party[memberIndex].Targets[currentbossId].hit = 0
 				party[memberIndex].Targets[currentbossId].crit = 0
-				party[memberIndex].Targets[currentbossId].skillLog = new Array()
+				party[memberIndex].Targets[currentbossId].skillLog = []
 			}
 			else {
 				party[memberIndex].Targets[currentbossId].heal = Long.fromString(damage).add(party[memberIndex].Targets[currentbossId].heal).toString()
@@ -959,7 +978,7 @@ function TDM(d) {
 	function getSettings()
 	{
 		var settings = {
-			"noticeDamage" : notice ? numberWithCommas(notice_damage.toString()).color(enable_color) : numberWithCommas(notice_damage.toString()).strike().color(disable_color),
+			"noticeDamage" : notice ? notice_damage.toString().numberWithCommas().color(enable_color) : notice_damage.toString().numberWithCommas().strike().color(disable_color),
 			"notice" : notice ? 'notice'.color(enable_color) : 'notice'.strike().color(disable_color),
 			"bossOnly" : bossOnly ? 'Boss Only'.color(enable_color) : 'Boss Only'.strike().color(disable_color),
 			"hideNames" : hideNames ? 'hideNames'.color(enable_color) : 'hideNames'.strike().color(disable_color),
@@ -1000,8 +1019,8 @@ function TDM(d) {
 		var minutes = "0" + Math.floor(battledurationbysec / 60);
 		var seconds = "0" + (battledurationbysec - minutes * 60);
 		var monsterBattleInfo = NPCs[npcIndex].npcName + ' '
-							+ nFormatter(Number(totalPartyDamage.div(battledurationbysec).toString()),1) + '/s '
-							+ nFormatter(Number(NPCs[npcIndex].totalPartyDamage),1) + ' '
+							+ Number(totalPartyDamage.div(battledurationbysec).toString()).nFormatter(1) + '/s '
+							+ Number(NPCs[npcIndex].totalPartyDamage).nFormatter(1) + ' '
 							+ minutes.substr(-2) + ":" + seconds.substr(-2)
 		monsterBattleInfo = monsterBattleInfo.color(enable_color)
 
@@ -1050,6 +1069,7 @@ function TDM(d) {
 			}
 
 			dpsJson.push({
+				"gameId" : party[i].gameId,
 				"name" : cname,
 				"class" : party[i].class,
 				"serverId" : party[i].serverId,
@@ -1122,20 +1142,12 @@ function TDM(d) {
 		NPCs[npcIndex].dpsmsg = dpsmsg
 	}
 
-	function getPartyMemberIndexByName(n)
-	{
-		for(var i in party){
-			if(party[i].name === n) return i
-		}
-		return -1
-	}
-
 	function addSkillLog(d,targetId)
 	{
 		for(var i in d)
 		{
 			if(d[i].hasOwnProperty('monsterBattleInfo')) continue
-			var index = getPartyMemberIndexByName(stripOuterHTML(d[i].name))
+			var index = getPartyMemberIndex(d[i].gameId)
 			if(index < 0) continue
 			if(typeof party[index].Targets[targetId].skillLog === 'undefined') {
 				log('skillLog === undefined')
@@ -1153,7 +1165,7 @@ function TDM(d) {
 	{
 		if(!notice) return
 		var msg = ''
-		msg = nFormatter(Number(damage),1)
+		msg = Number(damage).nFormatter(1)
 		//log(skill + ':' + skill.slice(1,skill.length))
 		d.send('S_DUNGEON_EVENT_MESSAGE', 1, {
 			message: `<img src="img://skill__0__${me.templateId}__${skill.slice(1,skill.length)}" width="20" height="20" />&nbsp;${msg}`,
@@ -1182,7 +1194,6 @@ function TDM(d) {
 		return ''
 	}
 
-	// helper
     function writeBackup() {
 
 	    var backupPath = path.join(__dirname,'backup')
@@ -1193,6 +1204,11 @@ function TDM(d) {
 		    me.currentbossId = currentbossId
 		    fs.writeFileSync(path.join(backupPath,'_me.json'), JSON.stringify(me, null, '\t'))
 		    log('_me.json written')
+	    }
+
+	    if(Object.keys(currentParty).length != 0) {
+		    fs.writeFileSync(path.join(backupPath,'_currentParty.json'), JSON.stringify(currentParty, null, '\t'))
+		    log('_currentParty.json written')
 	    }
 
 	    if(party.length != 0) {
@@ -1222,54 +1238,48 @@ function TDM(d) {
 		    return
 	    }
 	    try{
-		    log('_me.json read')
-		    var data = fs.readFileSync(path.join(backupPath,'_me.json'),"utf-8")
-		    me = {}
-		    me = JSON.parse(data)
-		    currentbossId = me.currentbossId
-		    log('currentbossId ' + currentbossId)
+		    if (fs.existsSync(path.join(backupPath,'_me.json'))) {
+			    log('_me.json read')
+			    var data = fs.readFileSync(path.join(backupPath,'_me.json'),"utf-8")
+			    me = {}
+			    me = JSON.parse(data)
+			    currentbossId = me.currentbossId
+			    log('currentbossId ' + currentbossId)
+		    }
 
-		    log('_party.json read')
-		    data = fs.readFileSync(path.join(backupPath,'_party.json'),"utf-8")
-		    party = []
-		    party = JSON.parse(data)
+		    if (fs.existsSync(path.join(backupPath,'_party.json'))) {
 
-		    log('_Boss.json read')
-		    data = fs.readFileSync(path.join(backupPath,'_Boss.json'),"utf-8")
-		    Boss = {}
-		    Boss = JSON.parse(data)
+			    log('_party.json read')
+			    data = fs.readFileSync(path.join(backupPath,'_party.json'),"utf-8")
+			    party = []
+			    party = JSON.parse(data)
+		    }
 
-		    log('_NPCs.json read')
-		    data = fs.readFileSync(path.join(backupPath,'_NPCs.json'),"utf-8")
-		    NPCs = []
-		    NPCs = JSON.parse(data)
+		    if (fs.existsSync(path.join(backupPath,'_currentParty.json'))) {
+			    log('_currentParty.json read')
+			    data = fs.readFileSync(path.join(backupPath,'_currentParty.json'),"utf-8")
+			    currentParty = {}
+			    currentParty = JSON.parse(data)
+		    }
+		    if (fs.existsSync(path.join(backupPath,'_Boss.json'))) {
+			    log('_Boss.json read')
+			    data = fs.readFileSync(path.join(backupPath,'_Boss.json'),"utf-8")
+			    Boss = {}
+			    Boss = JSON.parse(data)
+		    }
+		    if (fs.existsSync(path.join(backupPath,'_NPCs.json'))) {
+
+			    log('_NPCs.json read')
+			    data = fs.readFileSync(path.join(backupPath,'_NPCs.json'),"utf-8")
+			    NPCs = []
+			    NPCs = JSON.parse(data)
+		    }
 	    }
 	    catch(err)
 	    {
 		    log(err)
 	    }
     }
-
-    function clean(obj) {
-        for (let key in obj) {
-            if (obj[key] && typeof obj[key] === "object") {
-                if (Object.keys(obj[key]).length !== 0) {
-                    clean(obj[key])
-                }
-                if (Object.keys(obj[key]).length === 0) {
-                    delete obj[key]
-                }
-            }
-        }
-    }
-
-	function stripOuterHTML(str) {
-		return str.replace(/^<[^>]+>|<\/[^>]+><[^\/][^>]*>|<\/[^>]+>$/g, '')
-	}
-
-	function numberWithCommas(x) {
-		return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-	}
 
 	function toChat(msg) {
 		if(!msg) return
@@ -1320,6 +1330,19 @@ function TDM(d) {
 	this.destructor = () => {
 		writeBackup()
 		command.remove('dps')
+	}
+
+	function clean(obj) {
+		for (let key in obj) {
+			if (obj[key] && typeof obj[key] === "object") {
+				if (Object.keys(obj[key]).length !== 0) {
+					clean(obj[key])
+				}
+				if (Object.keys(obj[key]).length === 0) {
+					delete obj[key]
+				}
+			}
+		}
 	}
 
 	d.hook('S_LOGIN',10, sLogin)
