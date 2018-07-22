@@ -1,6 +1,6 @@
 'use strict'
 const Command = require('command');
-const UI = require('ui')
+const UI = require('./ui')
 
 function ModulesManagerUi(d) {
 	const command = Command(d);
