@@ -426,7 +426,7 @@ function TDM(d) {
 
 		if(Object.keys(Boss).length >= MAX_BOSS){
 			for(var key in Boss) {
-				clean(Boss[key])
+				delete Boss[key]
 				break
 			}
 		}
@@ -643,16 +643,15 @@ function TDM(d) {
 
 	//party handler
 	function sLeavePartyMember(e){
-		clean(currentParty[e.gameId.toString()])
 	}
 
 	function sLeaveparty(){
-		clean(currentParty)
+		currentParty = {}
 	}
 
 	function sPartyMemberList(e){
 		allUsers = false
-		//party = []
+		currentParty = {}
 		e.members.forEach(member => {
 
 			currentParty[member.gameId.toString()] = member.name
@@ -891,17 +890,10 @@ function TDM(d) {
 				if(isBoss(targetId) && currentZone != 950) {
 					for(var key in party[memberIndex].Targets){
 						log('removing Targets = {} :'+key + ' ' + party[memberIndex].name)
-						//clean(party[memberIndex].Targets[key])
-						//break
 					}
 					party[memberIndex].Targets = {}
 					log('New targetId :' + targetId + ' ' + party[memberIndex].name)
 				}
-				/*for(;Object.keys(party[memberIndex].Targets).length > 3;)
-					for(var key in party[memberIndex].Targets){
-						clean(party[memberIndex].Targets[key])
-						break
-					}*/
 				party[memberIndex].Targets[targetId] = {}
 				party[memberIndex].Targets[targetId].battlestarttime = Date.now()
 				party[memberIndex].Targets[targetId].damage = damage
@@ -1206,10 +1198,10 @@ function TDM(d) {
 		    log('_me.json written')
 	    }
 
-	    if(Object.keys(currentParty).length != 0) {
+	    //if(Object.keys(currentParty).length != 0) {
 		    fs.writeFileSync(path.join(backupPath,'_currentParty.json'), JSON.stringify(currentParty, null, '\t'))
 		    log('_currentParty.json written')
-	    }
+	    //}
 
 	    if(party.length != 0) {
 		    fs.writeFileSync(path.join(backupPath,'_party.json'), JSON.stringify(party, null, '\t'))
@@ -1226,7 +1218,6 @@ function TDM(d) {
 		    fs.writeFileSync(path.join(backupPath,'_Boss.json'), JSON.stringify(Boss, null, '\t'))
 		    log('_Boss.json written')
 	    }
-
     }
 
     function readBackup() {
@@ -1330,19 +1321,6 @@ function TDM(d) {
 	this.destructor = () => {
 		writeBackup()
 		command.remove('dps')
-	}
-
-	function clean(obj) {
-		for (let key in obj) {
-			if (obj[key] && typeof obj[key] === "object") {
-				if (Object.keys(obj[key]).length !== 0) {
-					clean(obj[key])
-				}
-				if (Object.keys(obj[key]).length === 0) {
-					delete obj[key]
-				}
-			}
-		}
 	}
 
 	d.hook('S_LOGIN',10, sLogin)
