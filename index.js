@@ -1336,7 +1336,7 @@ function TDM(d) {
 	d.hook('S_DESPAWN_USER', 3, sDespawnUser)
 	d.hook('S_SPAWN_USER',12, sSpawnUser)
 	d.hook('S_NPC_STATUS',1, sNpcStatus)
-	d.hook('S_EACH_SKILL_RESULT',d.base.majorPatchVersion < 74 ? 7:9, {order: 200}, sEachSkillResult)
+	d.hook('S_EACH_SKILL_RESULT',d.base.majorPatchVersion < 74 ? 10 : 12, {order: 200}, sEachSkillResult)
 }
 
 module.exports = TDM
