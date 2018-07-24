@@ -97,6 +97,7 @@ function TDM(d) {
 	update.checkUpdate()
 	skillInfo.checkFiles()
 	monInfo.checkFiles()
+	setMe()
 
 	// awesomnium web browser UI
 	ui.use(UI.static(__dirname + '/html'))
@@ -287,7 +288,6 @@ function TDM(d) {
 			case "R":
 				// Refresh DPS window
 				if(req_value == 1){
-					setMe()
 					var data = membersDps(currentbossId)
 					if(data.length == 0) return res.status(200).json('')
 					var battleInfo = data.shift()
