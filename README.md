@@ -29,6 +29,8 @@ For those who have a problem with reset data upon dying
 
 3. Double click on the file npm_install.bat in TDM folder
 
+(If you are using pinkie's proxy double click on the file pinkie_proxy_patch.bat)
+
 ## Optional data (for dev)
 
    module manager [manager](https://github.com/Mathicha/manager)

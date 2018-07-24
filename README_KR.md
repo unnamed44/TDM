@@ -27,7 +27,9 @@ RAID에서 dps를 보는 데 문제가있는 사람들을 위해
 
 Tera-proxy\bin\node_modules\
 
-3. Double click on the file npm_install.bat in TDM folder
+3. 더블클릭 npm_install.bat
+
+(If you are using pinkie's proxy double click on the file pinkie_proxy_patch.bat)
 
 ## 선택적 데이터
 

@@ -687,7 +687,8 @@ function TDM(d) {
 
 	function sSpawnUser(e){
 		if(!allUsers) return
-		var uclass = Number((e.templateId - 1).toString().slice(-2)).toString()
+		//var uclass = Number((e.templateId - 1).toString().slice(-2)).toString()
+		var uclass = (e.templateId - 10101) % 100;
 		var newPartyMember = {
 			'gameId' : e.gameId.toString(),
 			'serverId' : e.serverId.toString(),
