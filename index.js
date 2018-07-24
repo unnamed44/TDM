@@ -167,7 +167,7 @@ function TDM(d) {
 	function DeleteFile(fn)
 	{
 		fs.unlinkSync(path.join(__dirname,'history',fn))
-		console.log('deleted history file : ' + fn)
+		//log('deleted history file : ' + fn)
 	}
 
 	function recordsFiles()
@@ -385,7 +385,7 @@ function TDM(d) {
 		me.gameId=e.gameId.toString()
 		if (!popup) return
 		ui.open()
-		log('sSpawnMe :' + currentbossId)
+		//log('sSpawnMe :' + currentbossId)
 	}
 
 
@@ -704,7 +704,7 @@ function TDM(d) {
 
 	function removeAllPartyDPSdata()
 	{
-		log('removeAllPartyDPSdata')
+		//log('removeAllPartyDPSdata')
 		lastDps = []
 		currentbossId = ''
 
@@ -810,7 +810,7 @@ function TDM(d) {
 		if(isBoss(gId) && currentZone != 950) syncParty()
 
 		currentbossId = gId
-		log('setCurBoss currentbossId' + currentbossId)
+		//log('setCurBoss currentbossId' + currentbossId)
 		return true
 	}
 
@@ -819,7 +819,7 @@ function TDM(d) {
 		if(party.length == 0) {
 			readBackup()
 			if(party.length == 0) return
-			log(me)
+			//log(me)
 		}
 	}
 
@@ -889,11 +889,8 @@ function TDM(d) {
 			{
 				// remove previous Targets when hit a new boss (exept HH)
 				if(isBoss(targetId) && currentZone != 950) {
-					for(var key in party[memberIndex].Targets){
-						log('removing Targets = {} :'+key + ' ' + party[memberIndex].name)
-					}
 					party[memberIndex].Targets = {}
-					log('New targetId :' + targetId + ' ' + party[memberIndex].name)
+					//log('New targetId :' + targetId + ' ' + party[memberIndex].name)
 				}
 				party[memberIndex].Targets[targetId] = {}
 				party[memberIndex].Targets[targetId].battlestarttime = Date.now()
@@ -1126,7 +1123,7 @@ function TDM(d) {
 
 		if(isBoss(id) && Boss[id].hpPer <= 0 && dpsmsg !== '')
 		{
-			log('addSkillLog : ' + id)
+			//log('addSkillLog : ' + id)
 			addSkillLog(dpsmsg,id)
 			dpsmsg[0].battleendtime = NPCs[npcIndex].battleendtime
 			saveDpsData(dpsmsg)
@@ -1196,28 +1193,28 @@ function TDM(d) {
 	    if(Object.keys(me).length != 0) {
 		    me.currentbossId = currentbossId
 		    fs.writeFileSync(path.join(backupPath,'_me.json'), JSON.stringify(me, null, '\t'))
-		    log('_me.json written')
+		    //log('_me.json written')
 	    }
 
 	    //if(Object.keys(currentParty).length != 0) {
 		    fs.writeFileSync(path.join(backupPath,'_currentParty.json'), JSON.stringify(currentParty, null, '\t'))
-		    log('_currentParty.json written')
+		    //log('_currentParty.json written')
 	    //}
 
 	    if(party.length != 0) {
 		    fs.writeFileSync(path.join(backupPath,'_party.json'), JSON.stringify(party, null, '\t'))
-		    log('_party.json written')
+		    //log('_party.json written')
 	    }
 	    if(NPCs.length != 0) {
 		    fs.writeFileSync(path.join(backupPath,'_NPCs.json'), JSON.stringify(NPCs, null, '\t'))
-		    log('_NPCs.json written')
+		    //log('_NPCs.json written')
 	    }
 	    if(Object.keys(Boss).length != 0) {
 		    	for(var key in Boss )
 		    		if(Boss[key].enragedTimer)
 					Boss[key].enragedTimer = {}
 		    fs.writeFileSync(path.join(backupPath,'_Boss.json'), JSON.stringify(Boss, null, '\t'))
-		    log('_Boss.json written')
+		    //log('_Boss.json written')
 	    }
     }
 
@@ -1231,37 +1228,37 @@ function TDM(d) {
 	    }
 	    try{
 		    if (fs.existsSync(path.join(backupPath,'_me.json'))) {
-			    log('_me.json read')
+			    //log('_me.json read')
 			    var data = fs.readFileSync(path.join(backupPath,'_me.json'),"utf-8")
 			    me = {}
 			    me = JSON.parse(data)
 			    currentbossId = me.currentbossId
-			    log('currentbossId ' + currentbossId)
+			    //log('currentbossId ' + currentbossId)
 		    }
 
 		    if (fs.existsSync(path.join(backupPath,'_party.json'))) {
 
-			    log('_party.json read')
+			    //log('_party.json read')
 			    data = fs.readFileSync(path.join(backupPath,'_party.json'),"utf-8")
 			    party = []
 			    party = JSON.parse(data)
 		    }
 
 		    if (fs.existsSync(path.join(backupPath,'_currentParty.json'))) {
-			    log('_currentParty.json read')
+			    //log('_currentParty.json read')
 			    data = fs.readFileSync(path.join(backupPath,'_currentParty.json'),"utf-8")
 			    currentParty = {}
 			    currentParty = JSON.parse(data)
 		    }
 		    if (fs.existsSync(path.join(backupPath,'_Boss.json'))) {
-			    log('_Boss.json read')
+			    //log('_Boss.json read')
 			    data = fs.readFileSync(path.join(backupPath,'_Boss.json'),"utf-8")
 			    Boss = {}
 			    Boss = JSON.parse(data)
 		    }
 		    if (fs.existsSync(path.join(backupPath,'_NPCs.json'))) {
 
-			    log('_NPCs.json read')
+			    //log('_NPCs.json read')
 			    data = fs.readFileSync(path.join(backupPath,'_NPCs.json'),"utf-8")
 			    NPCs = []
 			    NPCs = JSON.parse(data)
