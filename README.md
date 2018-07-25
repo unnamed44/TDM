@@ -6,11 +6,13 @@
 
 Tera DPS monitor.(TDM)
 
-Internal dps UI
+Internal/External dps UI
 
 For those who have a problem to see dps in RAID
 
 For those who have a problem with reset data upon dying
+
+For those who have a lag when you press skill log analysis
 
 [Discord](https://discord.gg/JRa7FXd)
 
@@ -31,25 +33,27 @@ For those who have a problem with reset data upon dying
 
 (If you are using pinkie's proxy double click on the file pinkie_proxy_patch.bat)
 
+4. Set region in config.json
+
 ## Optional data (for dev)
 
    module manager [manager](https://github.com/Mathicha/manager)
 
-## Usage
-
-- It pops up automatically when you spawn in a dungeon
-- Type "!dps u" if you want to open UI
-- Set region in config.json
-
 ## Functions
 
+- Enraged notifier
+- Notify high damage on screen with skill image and number
+- DPS history(circular history: max 30 BAM) is shown in the UI
+- Simple skill log and analysis
+- rank system
+
+## Usage
+
+- Type "!dps u" if you want to open UI or reload ui
+- It pops up automatically when you spawn in a dungeon
 - If you don't want the dps meter to pop up, press Close button. (X button on title is not the same)
 - You can automate party leaving message by setting party_leaving_msg in config.json. Then press LeaveParty button.
-- Reset clears history and npc data, Data is reset by switching charactors anyway.
-- DPS history is shown in the UI
-- To whisper the lastest dps to a user, type one's name in the input then press the button
-- Enraged notifier on UI
-- External UI (default web browser)
+- To whisper the lastest/history dps to a user, type one's name in the input then press the button
 
 ## Credits
 
@@ -57,4 +61,4 @@ Bluehole Studio
 
 Meishu,Pinkipi,Caali
 
-GIO/neowutran
+GIO/neowutran - for monster data, class image
