@@ -756,11 +756,9 @@ window.addEventListener('error', function(e) {
 	}
 })
 
-
-
-window.addEventListener('resize', function(event){
-  // do stuff here
-  	var width = window.innerWidth;
+function resizeDiv()
+{
+	var width = window.innerWidth;
 	var height = window.innerHeight;
 
 	var divhight = 'height:' + (height - 55) + 'px'
@@ -771,12 +769,18 @@ window.addEventListener('resize', function(event){
 	document.getElementById('manager').setAttribute("style",divhight);
 	document.getElementById('custom').setAttribute("style",divhight);
 	document.getElementById('wrapper').style.display = "block";
+}
 
+window.addEventListener('resize', function(event){
+  // do stuff here
+	resizeDiv()
 });
 
 window.onload = function() {
 
 	if(typeof _tera_client_proxy_ === 'undefined') {
+		//window.resizeTo(320, 250);
+		resizeDiv()
 	}
 	else {
 		_tera_client_proxy_.resize_to(320, 250)
