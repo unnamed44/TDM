@@ -328,7 +328,8 @@ function ExtUICB()
 		window.open(window.location.href, 'TDM', 'height=240,width=200,top=0,left=0,directories=no,titlebar=nostatus=no,toolbar=no,menubar=no,navigationbar=no,location=no,resizable=no,scrollbars=no');
 	}
 	else {
-		openWebsite('http://' + c.host + ':'+ c.port)
+		//openWebsite('http://' + c.host + ':'+ c.port)
+		openWebsite(window.location.href)
 	}
 	CloseDps()
 }
