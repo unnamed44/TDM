@@ -774,10 +774,11 @@ function TDM(d) {
 
 	function isPartyMember(gId,name){
 		for(var i in party){
-			if(name===party[i].name) {
+			if(name===party[i].name) { // TODO : need to check server ID
 				// set new gId
-				party[i].gameId = gId
-				return true
+				//party[i].gameId = gId
+				party.splice(i,1)
+				i--
 			}
 		}
 
