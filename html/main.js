@@ -482,15 +482,16 @@ function skillLogCB()
 {
 	slog = []
 	slog = JSON.parse(this.responseText)
-	//console.log(slog)
+	//console.log(this.responseText)
 	var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="dpsStastic()">Stastic</button><br>'
 	html += '<table class="stastics"><tr><th>Time</th><th>Skill Name</th><th>Damage</th></tr>'
 	for(var i in slog){
 			html+='<tr>'
 			html+='<td>' +(new Date(slog[i].Time)).toTimeString().slice(0,8)+ '</td>'
 			html+='<td>' +skillIdToName(slog[i].skillId,slog[i].isPet)+ '</td>'
-			html+='<td>' + (slog[i].crit ? nFormatter(Number(slog[i].damage),1).color('FF3000') : nFormatter(Number(slog[i].damage)),1) + '</td>'
+			html+='<td>' + (slog[i].crit ? nFormatter(Number(slog[i].damage),1).color('FF3000') : nFormatter(Number(slog[i].damage),1)) + '</td>'
 			html+='</tr>'
+			console.log(slog[i].damage)
 	}
 	html+='</table>'
 	document.getElementById("content").innerHTML = html
