@@ -491,7 +491,7 @@ function skillLogCB()
 			html+='<td>' +skillIdToName(slog[i].skillId,slog[i].isPet)+ '</td>'
 			html+='<td>' + (slog[i].crit ? nFormatter(Number(slog[i].damage),1).color('FF3000') : nFormatter(Number(slog[i].damage),1)) + '</td>'
 			html+='</tr>'
-			console.log(slog[i].damage)
+			//console.log(slog[i].damage)
 	}
 	html+='</table>'
 	document.getElementById("content").innerHTML = html
