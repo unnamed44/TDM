@@ -862,9 +862,15 @@ function TDM(d) {
 	function addMemberDamage(memberIndex,targetId,damage,crit,type,skill,pet)
 	{
 
-		var myNewBoss = false
+		if(currentZone == 950){
+		 	if(me.gameId===party[memberIndex].gameId)
+				setCurBoss(targetId)
+		}
+		else {
+			setCurBoss(targetId)
+		}
+
 		if(me.gameId===party[memberIndex].gameId && type == SKILL_TYPE_DAMAGE) {
-			myNewBoss = setCurBoss(targetId)
 			if(Long.fromString(damage).gt(notice_damage)) {
 				noticeDps(damage,skill)
 			}
@@ -1159,7 +1165,7 @@ function TDM(d) {
 		msg = Number(damage).nFormatter(1)
 		//log(skill + ':' + skill.slice(1,skill.length))
 		d.send('S_DUNGEON_EVENT_MESSAGE', 1, {
-			message: `<img src="img://skill__0__${me.templateId}__${skill.slice(1,skill.length)}" width="20" height="20" />&nbsp;${msg}`,
+			message: `<img src="img://skill__0__${me.templateId}__${skill.slice(1,skill.length-2)}00" width="20" height="20" />&nbsp;${msg}`,
 			unk1: 2, //70 : 2,
 			unk2: 0,
 			unk3: 0
@@ -1305,6 +1311,13 @@ function TDM(d) {
 		}
 		else if (arg == 't' || arg=='test') {
 			//d.toClient('S_NPC_MENU_SELECT', 1, {type:28})
+			var msg = 'TEST'
+			d.send('S_DUNGEON_EVENT_MESSAGE', 1, {
+				message: `<img src="img://skill__0__${me.templateId}__${arg2}" width="20" height="20" />&nbsp;${msg}`,
+				unk1: 2, //70 : 2,
+				unk2: 0,
+				unk3: 0
+			})
 		}
 		else if (arg == 'w' || arg=='write') {
 			writeBackup()
@@ -1322,6 +1335,12 @@ function TDM(d) {
 		command.remove('dps')
 	}
 
+	function sSkillList(e)
+	{
+		log(e)
+	}
+
+	//d.hook('S_SKILL_LIST',1, sSkillList)
 	d.hook('S_LOGIN',10, sLogin)
 	d.hook('S_SPAWN_ME',2, sSpawnMe)
 	d.hook('S_LOAD_TOPO',3, sLoadTopo)
