@@ -3,7 +3,7 @@
 */
 "use strict"
 const Command = require('command')
-const Long = require("long")
+//const Long = require("long")
 const fs = require('fs')
 const path = require('path')
 const request = require('request')
@@ -11,7 +11,6 @@ const request = require('request')
 String.prototype.color = function (hexColor) { return `<font color='#${hexColor}'>${this}</font>` }
 String.prototype.stripHTML = function () { return this.replace(/<[^>]+>/g, '') }
 String.prototype.numberWithCommas = function () { return this.replace(/\B(?=(\d{3})+(?!\d))/g, ",") }
-
 Number.prototype.nFormatter =	function (digits) {
 	var si = [
 		{ value: 1, symbol: "" },
@@ -22,19 +21,17 @@ Number.prototype.nFormatter =	function (digits) {
 		{ value: 1E15, symbol: "P" },
 		{ value: 1E18, symbol: "E" }
 	];
-	var rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
 	var i;
 	for (i = si.length - 1; i > 0; i--) {
 		if (this >= si[i].value) {
 			break;
 		}
 	}
-	return (this / si[i].value).toFixed(digits+i-1).replace(rx, "$1") + si[i].symbol;
-}
 
-Long.prototype.divThousand = function() {
-	var stringValue = this.toString()
-	return stringValue.substring(0, stringValue.length - 3)
+	var space = ''
+	for(var j = 0;j < digits; j++) space += ' '
+	var ret = (this / si[i].value) + space
+	return ret.slice(0,digits+1) + si[i].symbol;
 }
 
 const RANK_SERVER = 'http://tera.dvcoa.com.au:3000'
@@ -113,7 +110,7 @@ function TDM(d) {
 	function textDPSFormat(data)
 	{
 		var battleInfo = data.shift()
-		data.sort(function(a,b) {return Number(b.percentage) - Number(a.percentage)})
+		data.sort(function(a,b) {return b.totalDamage - a.totalDamage})
 		data.unshift(battleInfo)
 		var dpsmsg = ''
 		dpsmsg += battleInfo.monsterBattleInfo.stripHTML() + '\n'
@@ -126,8 +123,8 @@ function TDM(d) {
 			var crit = data[i].crit  + '% '.color(enable_color)
 			if(data[i].class == 6 || data[i].class == 7) crit += ' ' + data[i].healCrit  + '% '.color(disable_color)
 
-			dpsmsg 	+=data[i].name + ' | '+ Number(data[i].dps).nFormatter(1) + ' | '
-			+ Number(data[i].totalDamage).nFormatter(1) + ' | '
+			dpsmsg 	+=data[i].name + ' | '+ data[i].dps.nFormatter(4) + ' | '
+			+ data[i].totalDamage.nFormatter(4) + ' | '
 			+ data[i].percentage  + '%'.color(enable_color) + ' | '
 			+ crit + '\n'
 
@@ -291,7 +288,7 @@ function TDM(d) {
 					var data = membersDps(currentbossId)
 					if(data.length == 0) return res.status(200).json('')
 					var battleInfo = data.shift()
-					data.sort(function(a,b) {return Number(b.percentage) - Number(a.percentage)})
+					data.sort(function(a,b) {return b.totalDamage - a.totalDamage})
 					data.unshift(battleInfo)
 					return res.status(200).json(data)
 				}
@@ -406,11 +403,11 @@ function TDM(d) {
 	function sBossGageInfo(e){
 		// notified boss before battle
 		var id = e.id.toString()
-		var hpMax = e.maxHp
-		var hpCur = e.curHp
+		var hpMax = e.maxHp.toNumber()
+		var hpCur = e.curHp.toNumber()
 		//if(!isBoss(id)) setBoss(id)
 		if(!Boss[id]) setBoss(id)
-		Boss[id].hpPer = Number(hpCur.multiply(100).div(hpMax))
+		Boss[id].hpPer = hpCur * 100 / hpMax
 	}
 
 	function setBoss(id)
@@ -448,7 +445,7 @@ function TDM(d) {
 			'npcName' : e.npcName,
 			'battlestarttime' : 0,
 			'battleendtime' : 0,
-			'totalPartyDamage' : '0',
+			'totalPartyDamage' : 0,
 			'dpsmsg' : ''
 		}
 		if(getNPCIndex(e.gameId.toString()) < 0)
@@ -458,10 +455,6 @@ function TDM(d) {
 			NPCs.push(newNPC)
 			//log('sSpawnNpc '+newNPC.zoneName)
 		}
-	}
-	function BigInt(n)
-	{
-		return Number(n)
 	}
 
 	function binarySearchSkillName(d, t, s , e)
@@ -497,7 +490,7 @@ function TDM(d) {
 			var t=slog[i]
 			var id = t.skillId
 			var name = t.name
-			var damage = BigInt(t.damage)
+			var damage = t.damage
 			var c = t.crit
 
 			var found = false
@@ -506,9 +499,9 @@ function TDM(d) {
 			{
 				if(s[j].name === name)
 				{
-					s[j].wDamage = c ? s[j].wDamage : BigInt(s[j].wDamage) + damage
-					s[j].rDamage = c ? BigInt(s[j].rDamage) + damage : s[j].rDamage
-					s[j].tDamage = BigInt(s[j].rDamage) + BigInt(s[j].wDamage)
+					s[j].wDamage = c ? s[j].wDamage : s[j].wDamage + damage
+					s[j].rDamage = c ? s[j].rDamage + damage : s[j].rDamage
+					s[j].tDamage = s[j].rDamage + s[j].wDamage
 					s[j].crit = c ? s[j].crit + 1 : s[j].crit,
 					s[j].hitCount = s[j].hitCount + 1
 
@@ -522,8 +515,8 @@ function TDM(d) {
 			if(!found){
 				var d = {
 					'name' : name,
-					'wDamage' : c ? BigInt(0) : (damage),
-					'rDamage' : c ? (damage) : BigInt(0),
+					'wDamage' : c ? 0 : damage,
+					'rDamage' : c ? damage : 0,
 					'tDamage' : damage,
 					'crit' : c ? 1 : 0,
 					'hitCount' : 1
@@ -536,9 +529,7 @@ function TDM(d) {
 		//console.log(s)
 		// sort by total damage
 		s.sort(function(a,b) {
-			if(a.tDamage > b.tDamage) return -1
-			else if(a.tDamage < b.tDamage) return 1
-			else return 0
+			return b.tDamage - a.tDamage
 		})
 
 		var html = '<table class="stastics"><tr><th rowspan=2>Skill Name</th><th>White</th><th>Red</th><th>Total</th><th>Crit</th></tr>'
@@ -550,15 +541,15 @@ function TDM(d) {
 			var t = s[i].wDamage + s[i].rDamage
 			html+='<tr>'
 			html+='<td>' + s[i].name + '</td>'
-			avg = '0'
-			if(s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit)).toString()
-			html+='<td>' +Number(s[i].wDamage.toString()).nFormatter(1) + '<br>' + Number(avg).nFormatter(1) + '</td>'
-			avg = '0'
-			if(s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit)).toString()
-			html+='<td>' +Number(s[i].rDamage.toString()).nFormatter(1) + '<br>' + Number(avg).nFormatter(1) + '</td>'
-			avg = '0'
-			if(s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount)).toString()
-			html+='<td>' +Number(s[i].tDamage.toString()).nFormatter(1) + '<br>' + Number(avg).nFormatter(1) + '</td>'
+			avg = 0
+			if(s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit))
+			html+='<td>' +s[i].wDamage.nFormatter(4) + '<br>' + avg.nFormatter(4) + '</td>'
+			avg = 0
+			if(s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit))
+			html+='<td>' +s[i].rDamage.nFormatter(4) + '<br>' + avg.nFormatter(4) + '</td>'
+			avg = 0
+			if(s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount))
+			html+='<td>' +s[i].tDamage.nFormatter(4) + '<br>' + avg.nFormatter(4) + '</td>'
 			html+='<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>'+s[i].crit+'/'+s[i].hitCount+'</td>'
 			html+='</tr>'
 		}
@@ -776,10 +767,15 @@ function TDM(d) {
 		for(var i in party){
 			if(name===party[i].name) { // TODO : need to check server ID
 				// set new gId
-				//party[i].gameId = gId
-				party.splice(i,1)
+				party[i].gameId = gId
+				var removed = party.splice(i,1)
 				i--
 			}
+		}
+
+		if(typeof removed !== 'undefined'){
+			party.push(removed[0])
+			return true
 		}
 
 		for(var i in party){
@@ -834,31 +830,33 @@ function TDM(d) {
 		var target = e.target.toString()
 		var skill = e.skill.toString()
 		var type = e.type // # 0 = Hidden, 1 = Damage, 2 = Heal, 3 = MP
+		var damage = e.damage.toNumber()
 
 		//if(e.blocked) log('sEachSkillResult blocked' + party[memberIndex].name + ' ' + NPCs[getNPCIndex(target)].npcName + ' ' + e.damage + ' ' + e.crit + ' ' + e.type + ' ' + skill)
 
-		if(e.damage.gt(0)){// && !e.blocked){
+		if(damage>0){// && !e.blocked){
 			if(memberIndex >= 0){
 				// members damage
-				addMemberDamage(memberIndex,target,e.damage.toString(),e.crit,type,skill)
+				addMemberDamage(memberIndex,target,damage,e.crit,type,skill)
 			}
 			else if(memberIndex < 0){
 				// projectile
 				var ownerIndex = getPartyMemberIndex(e.owner.toString())
 				if(ownerIndex >= 0) {
 					var sourceId = e.owner.toString()
-					addMemberDamage(ownerIndex,target,e.damage.toString(),e.crit,type,skill)
+					addMemberDamage(ownerIndex,target,damage,e.crit,type,skill)
 				}
 				else{// pet
 					var petIndex=getIndexOfPetOwner(e.source.toString(),e.owner.toString())
 					if(petIndex >= 0) {
-						addMemberDamage(petIndex,target,e.damage.toString(),e.crit,type,skill,true)
+						addMemberDamage(petIndex,target,damage,e.crit,type,skill,true)
 					}
 				}
 			}
 		}
 	}
 
+	// damage : 53bit mantissa
 	function addMemberDamage(memberIndex,targetId,damage,crit,type,skill,pet)
 	{
 
@@ -871,7 +869,8 @@ function TDM(d) {
 		}
 
 		if(me.gameId===party[memberIndex].gameId && type == SKILL_TYPE_DAMAGE) {
-			if(Long.fromString(damage).gt(notice_damage)) {
+			//if(Long.fromString(damage).gt(notice_damage)) {
+			if(damage > notice_damage) {
 				noticeDps(damage,skill)
 			}
 		}
@@ -882,7 +881,8 @@ function TDM(d) {
 				NPCs[npcIndex].battlestarttime = Date.now()
 				NPCs[npcIndex].battleendtime = 0 // 지배석 버그
 			}
-			NPCs[npcIndex].totalPartyDamage = Long.fromString(NPCs[npcIndex].totalPartyDamage).add(damage).toString()
+			//NPCs[npcIndex].totalPartyDamage = Long.fromString(NPCs[npcIndex].totalPartyDamage).add(damage).toString()
+			NPCs[npcIndex].totalPartyDamage = NPCs[npcIndex].totalPartyDamage + damage
 		}
 /*
 		if(type == SKILL_TYPE_DAMAGE || type == SKILL_TYPE_HIDDEN)
@@ -902,21 +902,22 @@ function TDM(d) {
 				party[memberIndex].Targets[targetId] = {}
 				party[memberIndex].Targets[targetId].battlestarttime = Date.now()
 				party[memberIndex].Targets[targetId].damage = damage
-				party[memberIndex].Targets[targetId].critDamage = crit? damage:"0"
+				party[memberIndex].Targets[targetId].critDamage = crit? damage: 0
 				party[memberIndex].Targets[targetId].hit = 1
 				party[memberIndex].Targets[targetId].crit = crit
-				party[memberIndex].Targets[targetId].heal = "0"
-				party[memberIndex].Targets[targetId].critHeal = "0"
+				party[memberIndex].Targets[targetId].heal = 0
+				party[memberIndex].Targets[targetId].critHeal = 0
 				party[memberIndex].Targets[targetId].healHit = 0
 				party[memberIndex].Targets[targetId].healCrit = 0
 				party[memberIndex].Targets[targetId].skillLog = []
 				//log("new mon :" + party[memberIndex].Targets[targetId].damage)
 			}
 			else {
-				party[memberIndex].Targets[targetId].damage = Long.fromString(damage).add(party[memberIndex].Targets[targetId].damage).toString()
+				//party[memberIndex].Targets[targetId].damage = Long.fromString(damage).add(party[memberIndex].Targets[targetId].damage).toString()
+				party[memberIndex].Targets[targetId].damage += damage
 				party[memberIndex].Targets[targetId].hit += 1
 				if(crit) {
-					party[memberIndex].Targets[targetId].critDamage = Long.fromString(party[memberIndex].Targets[targetId].critDamage).add(damage).toString()
+					party[memberIndex].Targets[targetId].critDamage += damage
 					party[memberIndex].Targets[targetId].crit +=1
 				}
 
@@ -938,20 +939,22 @@ function TDM(d) {
 				party[memberIndex].Targets[currentbossId] = {}
 				party[memberIndex].Targets[currentbossId].battlestarttime = Date.now()
 				party[memberIndex].Targets[currentbossId].heal = damage
-				party[memberIndex].Targets[currentbossId].critHeal = crit? damage:"0"
+				party[memberIndex].Targets[currentbossId].critHeal = crit? damage:0
 				party[memberIndex].Targets[currentbossId].healHit = 1
 				party[memberIndex].Targets[currentbossId].healCrit = crit
-				party[memberIndex].Targets[currentbossId].damage = "0"
-				party[memberIndex].Targets[currentbossId].critDamage = "0"
+				party[memberIndex].Targets[currentbossId].damage = 0
+				party[memberIndex].Targets[currentbossId].critDamage = 0
 				party[memberIndex].Targets[currentbossId].hit = 0
 				party[memberIndex].Targets[currentbossId].crit = 0
 				party[memberIndex].Targets[currentbossId].skillLog = []
 			}
 			else {
-				party[memberIndex].Targets[currentbossId].heal = Long.fromString(damage).add(party[memberIndex].Targets[currentbossId].heal).toString()
+				//party[memberIndex].Targets[currentbossId].heal = Long.fromString(damage).add(party[memberIndex].Targets[currentbossId].heal).toString()
+				party[memberIndex].Targets[currentbossId].heal += damage
 				party[memberIndex].Targets[currentbossId].healHit += 1
 				if(crit){
-					party[memberIndex].Targets[currentbossId].critHeal = Long.fromString(party[memberIndex].Targets[currentbossId].critHeal).add(damage).toString()
+					//party[memberIndex].Targets[currentbossId].critHeal = Long.fromString(party[memberIndex].Targets[currentbossId].critHeal).add(damage).toString()
+					party[memberIndex].Targets[currentbossId].critHeal += damage
 					party[memberIndex].Targets[currentbossId].healCrit +=1
 				}
 			}
@@ -992,7 +995,8 @@ function TDM(d) {
 	function membersDps(targetId)
 	{
 		var endtime = 0
-		var tdamage = new Long(0,0)
+		//var totalDamage = new Long(0,0)
+		//var totalDamage = 0
 		var dpsJson= []
 
 		if(targetId==='') return lastDps
@@ -1003,7 +1007,7 @@ function TDM(d) {
 		// for despawned NPC
 		if( NPCs[npcIndex].dpsmsg !== '' ) return NPCs[npcIndex].dpsmsg
 
-		var totalPartyDamage = Long.fromString(NPCs[npcIndex].totalPartyDamage)
+		//var totalPartyDamage = Long.fromString(NPCs[npcIndex].totalPartyDamage)
 
 		endtime=NPCs[npcIndex].battleendtime
 		if(endtime == 0) endtime=Date.now()
@@ -1016,8 +1020,10 @@ function TDM(d) {
 		var minutes = "0" + Math.floor(battledurationbysec / 60);
 		var seconds = "0" + (battledurationbysec - minutes * 60);
 		var monsterBattleInfo = NPCs[npcIndex].npcName + ' '
-							+ Number(totalPartyDamage.div(battledurationbysec).toString()).nFormatter(1) + '/s '
-							+ Number(NPCs[npcIndex].totalPartyDamage).nFormatter(1) + ' '
+							//+ Number(totalPartyDamage.div(battledurationbysec).toString()).nFormatter(4) + '/s '
+							+ (NPCs[npcIndex].totalPartyDamage / battledurationbysec).nFormatter(4) + '/s '
+							//+ Number(NPCs[npcIndex].totalPartyDamage).nFormatter(4) + ' '
+							+ NPCs[npcIndex].totalPartyDamage.nFormatter(4) + ' '
 							+ minutes.substr(-2) + ":" + seconds.substr(-2)
 		monsterBattleInfo = monsterBattleInfo.color(enable_color)
 
@@ -1028,7 +1034,8 @@ function TDM(d) {
 			"monsterBattleInfo" : monsterBattleInfo,
 			"battleDuration" : battledurationbysec,
 			"battleendtime" : 0,
-			"totalPartyDamage" : totalPartyDamage.toString(),
+			//"totalPartyDamage" : totalPartyDamage.toString(),
+			"totalPartyDamage" : NPCs[npcIndex].totalPartyDamage,
 			"huntingZoneId" : NPCs[npcIndex].huntingZoneId,
 			"templateId" : NPCs[npcIndex].templateId
 		})
@@ -1042,20 +1049,26 @@ function TDM(d) {
 		}
 
 		var cname
-		var dps=0
+		var dps = 0
+		var percentage = 0
+		var crit = 0,healCrit = 0
 
 		for(var i in party){
-			if(totalPartyDamage.equals(0) || battleduration <= 0 || typeof party[i].Targets[targetId] === 'undefined') continue
+			//if(totalPartyDamage.equals(0) || battleduration <= 0 || typeof party[i].Targets[targetId] === 'undefined') continue
+			if(NPCs[npcIndex].totalPartyDamage == 0 || battleduration <= 0 || typeof party[i].Targets[targetId] === 'undefined') continue
 			cname=party[i].name
 			if(hideNames) cname='HIDDEN'
 			if(party[i].gameId===me.gameId) cname=cname.color('00FF00')
 
 
-			tdamage = Long.fromString(party[i].Targets[targetId].damage)
-			dps = tdamage.div(battledurationbysec).toString()
-			var percentage = tdamage.multiply(100).div(totalPartyDamage).toString()
+			//totalDamage = Long.fromString(party[i].Targets[targetId].damage)
+			//dps = totalDamage.div(battledurationbysec).toString()
+			//var percentage = totalDamage.multiply(100).div(totalPartyDamage).toString()
 
-			var crit = 0,healCrit = 0
+			dps = party[i].Targets[targetId].damage / battledurationbysec
+			percentage = party[i].Targets[targetId].damage * 100 / NPCs[npcIndex].totalPartyDamage
+
+
 			if(party[i].Targets[targetId].crit == 0 || party[i].Targets[targetId].hit == 0) crit = 0
 			else crit = Math.floor(party[i].Targets[targetId].crit * 100 / party[i].Targets[targetId].hit)
 
@@ -1070,7 +1083,7 @@ function TDM(d) {
 				"name" : cname,
 				"class" : party[i].class,
 				"serverId" : party[i].serverId,
-				"totalDamage" : tdamage.toString(),
+				"totalDamage" : party[i].Targets[targetId].damage,
 				"dps": dps,
 				"percentage" :percentage,
 				"crit" : crit,
@@ -1162,7 +1175,7 @@ function TDM(d) {
 	{
 		if(!notice) return
 		var msg = ''
-		msg = Number(damage).nFormatter(1)
+		msg = damage.nFormatter(4)
 		//log(skill + ':' + skill.slice(1,skill.length))
 		d.send('S_DUNGEON_EVENT_MESSAGE', 1, {
 			message: `<img src="img://skill__0__${me.templateId}__${skill.slice(1,skill.length-2)}00" width="20" height="20" />&nbsp;${msg}`,
@@ -1321,6 +1334,9 @@ function TDM(d) {
 		}
 		else if (arg == 'w' || arg=='write') {
 			writeBackup()
+		}
+		else if (arg == 'l' || arg=='loadBackup') {
+			readBackup()
 		}
 		// notice
 		else if (arg === 'n' ||  arg === 'notice') {

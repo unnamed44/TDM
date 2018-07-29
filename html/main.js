@@ -1,3 +1,29 @@
+String.prototype.color = function (hexColor) { return '<font color="#' +hexColor+'">'+ this +'</font>' }
+String.prototype.stripHTML = function () { return this.replace(/<[^>]+>/g, '') }
+String.prototype.numberWithCommas = function () { return this.replace(/\B(?=(\d{3})+(?!\d))/g, ",") }
+Number.prototype.nFormatter =	function (digits) {
+	var si = [
+		{ value: 1, symbol: "" },
+		{ value: 1E3, symbol: "k" },
+		{ value: 1E6, symbol: "M" },
+		{ value: 1E9, symbol: "G" },
+		{ value: 1E12, symbol: "T" },
+		{ value: 1E15, symbol: "P" },
+		{ value: 1E18, symbol: "E" }
+	];
+	var i;
+	for (i = si.length - 1; i > 0; i--) {
+		if (this >= si[i].value) {
+			break;
+		}
+	}
+
+	var space = ''
+	for(var j = 0;j < digits; j++) space += ' '
+	var ret = (this / si[i].value) + space
+	return ret.slice(0,digits+1) + si[i].symbol;
+}
+
 var previousDps = ''
 var TDMSettings
 var agree = false
@@ -41,16 +67,6 @@ function ajax(url, cb) {
 	x.send();
 	return;
 }
-
-
-function stripOuterHTML(str) {
-	return str.replace(/\'|^<[^>]+>|<\/[^>]+><[^\/][^>]*>|<\/[^>]+>$/g, '')
-}
-
-String.prototype.color = function (hexColor) {
-	return '<font color="#' +hexColor+'">'+ this +'</font>'
-}
-
 
 function Clipboard() {
 	var copyText = document.getElementById("txt");
@@ -204,7 +220,7 @@ function RecordTableDPSFormat(data,tableId)
 		dpsmsg 	+='<tr><td> ' + data[i].name
 				+ '<img onclick="recordedStastics(\''+ i +'\')" src="./class-icons/'+classIdToName(data[i].class).toLowerCase()+'.png' +'" />'
 				+ '<td style="display:none;">' + data[i].dps + ' </td>'
-				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + nFormatter(Number(data[i].dps),1) + '</td>'
+				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + Number(data[i].dps).nFormatter(4) + '</td>'
 				+ '<td> ' + data[i].percentage  + '%'.color('E69F00') + ' </td>'
 				+ '<td> ' +  data[i].crit  + '%'.color('E69F00') + ' </td></tr>'
 	}
@@ -255,6 +271,8 @@ function RecordsCB() {
 
 
 function Records() {
+
+	waitForThis = true
 	ajax("3R",RecordsCB)
 }
 
@@ -343,11 +361,6 @@ function numberWithCommas(x) {
 	return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
 }
 
-function BigInt(n)
-{
-	return Number(n)
-}
-
 function binarySearchSkillName(d, t, s , e)
 {
 	const m = Math.floor((s + e)/2);
@@ -401,7 +414,7 @@ function dpsStastic()
 		var t=slog[i]
 		var id = t.skillId
 		var name = t.name
-		var damage = BigInt(t.damage)
+		var damage = t.damage
 		var c = t.crit
 
 		var found = false
@@ -410,9 +423,9 @@ function dpsStastic()
 		{
 			if(s[j].name === name)
 			{
-				s[j].wDamage = c ? s[j].wDamage : BigInt(s[j].wDamage) + damage
-				s[j].rDamage = c ? BigInt(s[j].rDamage) + damage : s[j].rDamage
-				s[j].tDamage = BigInt(s[j].rDamage) + BigInt(s[j].wDamage)
+				s[j].wDamage = c ? s[j].wDamage : s[j].wDamage + damage
+				s[j].rDamage = c ? s[j].rDamage + damage : s[j].rDamage
+				s[j].tDamage = s[j].rDamage + s[j].wDamage
 				s[j].crit = c ? s[j].crit + 1 : s[j].crit,
 				s[j].hitCount = s[j].hitCount + 1
 
@@ -426,8 +439,8 @@ function dpsStastic()
 		if(!found){
 			var d = {
 				'name' : name,
-				'wDamage' : c ? BigInt(0) : (damage),
-				'rDamage' : c ? (damage) : BigInt(0),
+				'wDamage' : c ? 0 : damage,
+				'rDamage' : c ? damage : 0,
 				'tDamage' : damage,
 				'crit' : c ? 1 : 0,
 				'hitCount' : 1
@@ -440,9 +453,7 @@ function dpsStastic()
 	//console.log(s)
 	// sort by total damage
 	s.sort(function(a,b) {
-		if(a.tDamage > b.tDamage) return -1
-		else if(a.tDamage < b.tDamage) return 1
-		else return 0
+		return b.tDamage - a.tDamage
 	})
 
 	var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="skillLog(\''+_name+'\',\''+_classId+'\')">Skill Log</button><br>'
@@ -452,21 +463,21 @@ function dpsStastic()
 	//console.log(s)
 	var avg=0
 	for(var i in s){
-			//console.log(s[i].wDamage +' '+ s[i].rDamage)
-			var t = s[i].wDamage + s[i].rDamage
-			html+='<tr>'
-			html+='<td>' + s[i].name + '</td>'
-			avg = '0'
-			if(s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit)).toString()
-			html+='<td>' +nFormatter(Number(s[i].wDamage.toString()),1) + '<br>' + nFormatter(Number(avg),1) + '</td>'
-			avg = '0'
-			if(s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit)).toString()
-			html+='<td>' +nFormatter(Number(s[i].rDamage.toString()),1) + '<br>' + nFormatter(Number(avg),1) + '</td>'
-			avg = '0'
-			if(s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount)).toString()
-			html+='<td>' +nFormatter(Number(s[i].tDamage.toString()),1) + '<br>' + nFormatter(Number(avg),1) + '</td>'
-			html+='<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>'+s[i].crit+'/'+s[i].hitCount+'</td>'
-			html+='</tr>'
+		//console.log(s[i].wDamage +' '+ s[i].rDamage)
+		var t = s[i].wDamage + s[i].rDamage
+		html+='<tr>'
+		html+='<td>' + s[i].name + '</td>'
+		avg = 0
+		if(s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit))
+		html+='<td>' +s[i].wDamage.nFormatter(4) + '<br>' + avg.nFormatter(4) + '</td>'
+		avg = 0
+		if(s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit))
+		html+='<td>' +s[i].rDamage.nFormatter(4) + '<br>' + avg.nFormatter(4) + '</td>'
+		avg = 0
+		if(s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount))
+		html+='<td>' +s[i].tDamage.nFormatter(4) + '<br>' + avg.nFormatter(4) + '</td>'
+		html+='<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>'+s[i].crit+'/'+s[i].hitCount+'</td>'
+		html+='</tr>'
 	}
 	html+='</table>'
 	document.getElementById("content").innerHTML = html
@@ -485,13 +496,16 @@ function skillLogCB()
 	//console.log(this.responseText)
 	var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="dpsStastic()">Stastic</button><br>'
 	html += '<table class="stastics"><tr><th>Time</th><th>Skill Name</th><th>Damage</th></tr>'
+	var backward = 0
 	for(var i in slog){
-			html+='<tr>'
-			html+='<td>' +(new Date(slog[i].Time)).toTimeString().slice(0,8)+ '</td>'
-			html+='<td>' +skillIdToName(slog[i].skillId,slog[i].isPet)+ '</td>'
-			html+='<td>' + (slog[i].crit ? nFormatter(Number(slog[i].damage),1).color('FF3000') : nFormatter(Number(slog[i].damage),1)) + '</td>'
-			html+='</tr>'
-			//console.log(slog[i].damage)
+		backward = slog.length -1 - i
+
+		html+='<tr>'
+		html+='<td>' + (new Date(slog[backward].Time)).toTimeString().slice(0,8)+ '</td>'
+		html+='<td>' + skillIdToName(slog[backward].skillId,slog[backward].isPet)+ '</td>'
+		html+='<td>' + (slog[backward].crit ? slog[backward].damage.nFormatter(4).color('FF3000') : slog[backward].damage.nFormatter(4)) + '</td>'
+		html+='</tr>'
+		//console.log(slog[i].damage)
 	}
 	html+='</table>'
 	document.getElementById("content").innerHTML = html
@@ -573,26 +587,6 @@ function sortTable(tabeId) {
 	}
 }
 
-function nFormatter(num, digits) {
-	var si = [
-		{ value: 1, symbol: "" },
-		{ value: 1E3, symbol: "k" },
-		{ value: 1E6, symbol: "M" },
-		{ value: 1E9, symbol: "G" },
-		{ value: 1E12, symbol: "T" },
-		{ value: 1E15, symbol: "P" },
-		{ value: 1E18, symbol: "E" }
-	];
-	var rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
-	var i;
-	for (i = si.length - 1; i > 0; i--) {
-		if (num >= si[i].value) {
-			break;
-		}
-	}
-	return (num / si[i].value).toFixed(digits+i-1).replace(rx, "$1") + si[i].symbol;
-}
-
 function tableDPSFormat(data,tableId)
 {
 	var dpsmsg = ''
@@ -626,9 +620,9 @@ function tableDPSFormat(data,tableId)
 
 
 		dpsmsg 	+='<tr><td> ' + data[i].name
-				+ '<img onclick="skillLog(\''+ stripOuterHTML(data[i].name) +'\', '+data[i].class+')" src="./class-icons/'+classIdToName(data[i].class).toLowerCase()+'.png' +'" />'
+				+ '<img onclick="skillLog(\''+ data[i].name.stripHTML() +'\', '+data[i].class+')" src="./class-icons/'+classIdToName(data[i].class).toLowerCase()+'.png' +'" />'
 				+ '<td style="display:none;">' + data[i].dps + ' </td>'
-				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + nFormatter(Number(data[i].dps),1) + ' </td>'
+				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + data[i].dps.nFormatter(4) + ' </td>'
 				+ '<td> ' + data[i].percentage  + '%'.color('E69F00') + ' </td>'
 				+ '<td> ' + crit  + ' </td></tr>'
 
