@@ -29,8 +29,6 @@ Tera-proxy\bin\node_modules\
 
 3. 더블클릭 npm_install.bat
 
-(If you are using pinkie's proxy double click on the file pinkie_proxy_patch.bat)
-
 ## 선택적 데이터
 
 모듈 메니져 [manager](https://github.com/Mathicha/manager)

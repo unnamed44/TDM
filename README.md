@@ -31,8 +31,6 @@ For those who have a lag when you press skill log analysis
 
 3. Double click on the file npm_install.bat in TDM folder
 
-(If you are using pinkie's proxy double click on the file pinkie_proxy_patch.bat)
-
 4. Set region in config.json
 
 ## Optional data (for dev)
