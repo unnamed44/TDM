@@ -1066,7 +1066,7 @@ function TDM(d) {
 			//var percentage = totalDamage.multiply(100).div(totalPartyDamage).toString()
 
 			dps = party[i].Targets[targetId].damage / battledurationbysec
-			percentage = party[i].Targets[targetId].damage * 100 / NPCs[npcIndex].totalPartyDamage
+			percentage = Math.floor(party[i].Targets[targetId].damage * 100 / NPCs[npcIndex].totalPartyDamage)
 
 
 			if(party[i].Targets[targetId].crit == 0 || party[i].Targets[targetId].hit == 0) crit = 0
