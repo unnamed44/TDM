@@ -220,7 +220,7 @@ function RecordTableDPSFormat(data,tableId)
 		dpsmsg 	+='<tr><td> ' + data[i].name
 				+ '<img onclick="recordedStastics(\''+ i +'\')" src="./class-icons/'+classIdToName(data[i].class).toLowerCase()+'.png' +'" />'
 				+ '<td style="display:none;">' + data[i].dps + ' </td>'
-				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + Number(data[i].dps).nFormatter(4) + '</td>'
+				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + Number(data[i].dps).nFormatter(3) + '</td>'
 				+ '<td> ' + data[i].percentage  + '%'.color('E69F00') + ' </td>'
 				+ '<td> ' +  data[i].crit  + '%'.color('E69F00') + ' </td></tr>'
 	}
@@ -469,13 +469,13 @@ function dpsStastic()
 		html+='<td>' + s[i].name + '</td>'
 		avg = 0
 		if(s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit))
-		html+='<td>' +s[i].wDamage.nFormatter(4) + '<br>' + avg.nFormatter(4) + '</td>'
+		html+='<td>' +s[i].wDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
 		avg = 0
 		if(s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit))
-		html+='<td>' +s[i].rDamage.nFormatter(4) + '<br>' + avg.nFormatter(4) + '</td>'
+		html+='<td>' +s[i].rDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
 		avg = 0
 		if(s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount))
-		html+='<td>' +s[i].tDamage.nFormatter(4) + '<br>' + avg.nFormatter(4) + '</td>'
+		html+='<td>' +s[i].tDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
 		html+='<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>'+s[i].crit+'/'+s[i].hitCount+'</td>'
 		html+='</tr>'
 	}
@@ -503,7 +503,7 @@ function skillLogCB()
 		html+='<tr>'
 		html+='<td>' + (new Date(slog[backward].Time)).toTimeString().slice(0,8)+ '</td>'
 		html+='<td>' + skillIdToName(slog[backward].skillId,slog[backward].isPet)+ '</td>'
-		html+='<td>' + (slog[backward].crit ? slog[backward].damage.nFormatter(4).color('FF3000') : slog[backward].damage.nFormatter(4)) + '</td>'
+		html+='<td>' + (slog[backward].crit ? slog[backward].damage.nFormatter(3).color('FF3000') : slog[backward].damage.nFormatter(3)) + '</td>'
 		html+='</tr>'
 		//console.log(slog[i].damage)
 	}
@@ -622,7 +622,7 @@ function tableDPSFormat(data,tableId)
 		dpsmsg 	+='<tr><td> ' + data[i].name
 				+ '<img onclick="skillLog(\''+ data[i].name.stripHTML() +'\', '+data[i].class+')" src="./class-icons/'+classIdToName(data[i].class).toLowerCase()+'.png' +'" />'
 				+ '<td style="display:none;">' + data[i].dps + ' </td>'
-				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + data[i].dps.nFormatter(4) + ' </td>'
+				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + data[i].dps.nFormatter(3) + ' </td>'
 				+ '<td> ' + data[i].percentage  + '%'.color('E69F00') + ' </td>'
 				+ '<td> ' + crit  + ' </td></tr>'
 

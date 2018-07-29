@@ -123,8 +123,8 @@ function TDM(d) {
 			var crit = data[i].crit  + '% '.color(enable_color)
 			if(data[i].class == 6 || data[i].class == 7) crit += ' ' + data[i].healCrit  + '% '.color(disable_color)
 
-			dpsmsg 	+=data[i].name + ' | '+ data[i].dps.nFormatter(4) + ' | '
-			+ data[i].totalDamage.nFormatter(4) + ' | '
+			dpsmsg 	+=data[i].name + ' | '+ data[i].dps.nFormatter(3) + ' | '
+			+ data[i].totalDamage.nFormatter(3) + ' | '
 			+ data[i].percentage  + '%'.color(enable_color) + ' | '
 			+ crit + '\n'
 
@@ -543,13 +543,13 @@ function TDM(d) {
 			html+='<td>' + s[i].name + '</td>'
 			avg = 0
 			if(s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit))
-			html+='<td>' +s[i].wDamage.nFormatter(4) + '<br>' + avg.nFormatter(4) + '</td>'
+			html+='<td>' +s[i].wDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
 			avg = 0
 			if(s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit))
-			html+='<td>' +s[i].rDamage.nFormatter(4) + '<br>' + avg.nFormatter(4) + '</td>'
+			html+='<td>' +s[i].rDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
 			avg = 0
 			if(s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount))
-			html+='<td>' +s[i].tDamage.nFormatter(4) + '<br>' + avg.nFormatter(4) + '</td>'
+			html+='<td>' +s[i].tDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
 			html+='<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>'+s[i].crit+'/'+s[i].hitCount+'</td>'
 			html+='</tr>'
 		}
@@ -1020,10 +1020,10 @@ function TDM(d) {
 		var minutes = "0" + Math.floor(battledurationbysec / 60);
 		var seconds = "0" + (battledurationbysec - minutes * 60);
 		var monsterBattleInfo = NPCs[npcIndex].npcName + ' '
-							//+ Number(totalPartyDamage.div(battledurationbysec).toString()).nFormatter(4) + '/s '
-							+ (NPCs[npcIndex].totalPartyDamage / battledurationbysec).nFormatter(4) + '/s '
-							//+ Number(NPCs[npcIndex].totalPartyDamage).nFormatter(4) + ' '
-							+ NPCs[npcIndex].totalPartyDamage.nFormatter(4) + ' '
+							//+ Number(totalPartyDamage.div(battledurationbysec).toString()).nFormatter(3) + '/s '
+							+ (NPCs[npcIndex].totalPartyDamage / battledurationbysec).nFormatter(3) + '/s '
+							//+ Number(NPCs[npcIndex].totalPartyDamage).nFormatter(3) + ' '
+							+ NPCs[npcIndex].totalPartyDamage.nFormatter(3) + ' '
 							+ minutes.substr(-2) + ":" + seconds.substr(-2)
 		monsterBattleInfo = monsterBattleInfo.color(enable_color)
 
@@ -1175,7 +1175,7 @@ function TDM(d) {
 	{
 		if(!notice) return
 		var msg = ''
-		msg = damage.nFormatter(4)
+		msg = damage.nFormatter(3)
 		//log(skill + ':' + skill.slice(1,skill.length))
 		d.send('S_DUNGEON_EVENT_MESSAGE', 1, {
 			message: `<img src="img://skill__0__${me.templateId}__${skill.slice(1,skill.length-2)}00" width="20" height="20" />&nbsp;${msg}`,
