@@ -17,11 +17,11 @@ Number.prototype.nFormatter =	function (digits) {
 			break;
 		}
 	}
-
+	var rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
 	var space = ''
 	for(var j = 0;j < digits; j++) space += ' '
 	var ret = (this / si[i].value) + space
-	return ret.slice(0,digits+1) + si[i].symbol;
+	return ret.slice(0,digits+1).replace(rx, "$1") + si[i].symbol;
 }
 
 var previousDps = ''
