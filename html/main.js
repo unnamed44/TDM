@@ -35,7 +35,7 @@ var 	_name = ''
 var	_classId = ''
 var _record = {}
 var _recordfilename = ''
-
+var enable_color = 'E69F00',disable_color = '56B4E9'
 // manager ui
 function manager_ajax(url, cb) {
 	var x = new XMLHttpRequest();
@@ -216,8 +216,7 @@ function RecordTableDPSFormat(data,tableId)
 			continue
 		}
 
-
-		dpsmsg 	+='<tr><td> ' + data[i].name
+		dpsmsg 	+='<tr><td> ' + (TDMSettings.hideNames ? '****' : data[i].name)
 				+ '<img onclick="recordedStastics(\''+ i +'\')" src="./class-icons/'+classIdToName(data[i].class).toLowerCase()+'.png' +'" />'
 				+ '<td style="display:none;">' + data[i].dps + ' </td>'
 				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + Number(data[i].dps).nFormatter(3) + '</td>'
@@ -280,14 +279,14 @@ function Records() {
 function SettingsCB()
 {
 	TDMSettings = JSON.parse(this.responseText)
-	document.getElementById("NoticeDamageAdd").innerHTML = TDMSettings.noticeDamage
-	document.getElementById("Notice").innerHTML = TDMSettings.notice
-	document.getElementById("BossOnly").innerHTML = TDMSettings.bossOnly
-	document.getElementById("HideNames").innerHTML = TDMSettings.hideNames
-	document.getElementById("SkillLog").innerHTML = TDMSettings.skillLog
-	document.getElementById("RankSystem").innerHTML = TDMSettings.rankSystem
-	document.getElementById("AllUsers").innerHTML = TDMSettings.allUsers
-	document.getElementById("Debug").innerHTML = TDMSettings.debug
+	document.getElementById("NoticeDamageAdd").innerHTML = TDMSettings.noticeDamage ? TDMSettings.noticeDamage.toString().numberWithCommas().color(enable_color) : TDMSettings.noticeDamage.toString().numberWithCommas().strike().color(disable_color)
+	document.getElementById("Notice").innerHTML = TDMSettings.notice ? 'notice'.color(enable_color) : 'notice'.strike().color(disable_color)
+	document.getElementById("BossOnly").innerHTML = TDMSettings.bossOnly ? 'Boss Only'.color(enable_color) : 'Boss Only'.strike().color(disable_color)
+	document.getElementById("HideNames").innerHTML = TDMSettings.hideNames ? 'hideNames'.color(enable_color) : 'hideNames'.strike().color(disable_color)
+	document.getElementById("SkillLog").innerHTML = TDMSettings.skillLog ? 'skillLog'.color(enable_color) : 'skillLog'.strike().color(disable_color)
+	document.getElementById("RankSystem").innerHTML = TDMSettings.rankSystem ? 'rankSystem'.color(enable_color) : 'rankSystem'.strike().color(disable_color)
+	document.getElementById("AllUsers").innerHTML = TDMSettings.allUsers ? 'allUsers'.color(enable_color) : 'allUsers'.strike().color(disable_color)
+	document.getElementById("Debug").innerHTML = TDMSettings.debug ? 'debug'.color(enable_color) : 'debug'.strike().color(disable_color)
 	document.getElementById("debug").innerHTML = 'party:'+ TDMSettings.partyLengh + '| NPCs:' + TDMSettings.NPCsLength
 }
 
@@ -593,8 +592,6 @@ function tableDPSFormat(data,tableId)
 	var enragedBar = 0
 	var class_image=''
 
-	//console.log(data)
-
 	dpsmsg += '<table id="'+tableId+'">'
 
 	for(var i in data){
@@ -619,10 +616,11 @@ function tableDPSFormat(data,tableId)
 		if(data[i].class == 6 || data[i].class == 7) crit += ' ' + data[i].healCrit  + '%'.color('56B4E9')
 
 
-		dpsmsg 	+='<tr><td> ' + data[i].name
+		dpsmsg 	+='<tr><td> ' + (TDMSettings.hideNames? '****' : data[i].name)
 				+ '<img onclick="skillLog(\''+ data[i].name.stripHTML() +'\', '+data[i].class+')" src="./class-icons/'+classIdToName(data[i].class).toLowerCase()+'.png' +'" />'
 				+ '<td style="display:none;">' + data[i].dps + ' </td>'
 				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + data[i].dps.nFormatter(3) + ' </td>'
+				//+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + data[i].dps + ' </td>'
 				+ '<td> ' + data[i].percentage  + '%'.color('E69F00') + ' </td>'
 				+ '<td> ' + crit  + ' </td></tr>'
 
@@ -781,7 +779,9 @@ window.onload = function() {
 		_tera_client_proxy_.resize_to(320, 250)
 		_tera_client_proxy_.set_title('Tera DPS Monitor')
 	}
+	Settings()
 	readConfig()
 	refreshDPS()
 	getVersion()
+
 }
