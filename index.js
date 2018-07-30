@@ -118,7 +118,7 @@ function TDM(d) {
 			//if(i == 0) continue
 			if(data[i].hasOwnProperty('enraged')) continue
 			var name = '****'
-			if(!hideNames) name = data[i].name			
+			if(!hideNames) name = data[i].name
 
 			var crit = data[i].crit  + '% '.color(enable_color)
 			if(data[i].class == 6 || data[i].class == 7) crit += ' ' + data[i].healCrit  + '% '.color(disable_color)
@@ -1379,18 +1379,6 @@ function TDM(d) {
 		}
 	}
 
-	d.hook('*', 'raw', (code, data, fromServer) => {
-		let file = path.join(__dirname, '..', '..', 'tera-proxy-' + Date.now() + '.log')
-		//fs.appendFileSync(file, (fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code) + ' ' + data.toString('hex') + '\n')
-		//log((fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code) + ' ' + data.toString('hex') + '\n')
-
-		//if((d.base.protocolMap.code.get(code) || code).includes('S_NPC_'))
-			//log((fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code))
-	})
-
-
-
-
 	function resetNpc(e){
 		var id = e.npc.toString()
 		var npcIndex = getNPCIndex(id)
@@ -1454,14 +1442,17 @@ function TDM(d) {
 		}
 	}
 
-
-	d.hook('S_NPC_OCCUPIER_INFO',1, sNpcOccupierInfo)
-	//d.hook('S_USER_SITUATION',1, sLog)
-
 	function sLog(e)
 	{
 		log(e)
 	}
+
+	/*d.hook('*', 'raw', (code, data, fromServer) => {
+		let file = path.join(__dirname, '..', '..', 'tera-proxy-' + Date.now() + '.log')
+		//fs.appendFileSync(file, (fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code) + ' ' + data.toString('hex') + '\n')
+		//log((fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code) + ' ' + data.toString('hex') + '\n')
+		//log((fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code))
+	})*/
 
 	d.hook('S_LOGIN',10, sLogin)
 	d.hook('S_SPAWN_ME',2, sSpawnMe)
@@ -1480,6 +1471,7 @@ function TDM(d) {
 	d.hook('S_SPAWN_USER',12, sSpawnUser)
 	d.hook('S_NPC_STATUS',1, sNpcStatus)
 	d.hook('S_EACH_SKILL_RESULT',d.base.majorPatchVersion < 74 ? 10 : 12, {order: 200}, sEachSkillResult)
+	d.hook('S_NPC_OCCUPIER_INFO',1, sNpcOccupierInfo)
 }
 
 module.exports = TDM
