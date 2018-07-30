@@ -1146,6 +1146,8 @@ function TDM(d) {
 
 		var dpsmsg = membersDps(id)
 
+		if(!popup)toChat(textDPSFormat(dpsmsg))
+
 		if(isBoss(id) && Boss[id].hpPer > 0)
 			log('Boss despawn , templateId zoneId :' + NPCs[npcIndex].templateId +':'+ NPCs[npcIndex].huntingZoneId + ' HP :' + Boss[id].hpPer)
 		// GG
