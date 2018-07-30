@@ -117,12 +117,13 @@ function TDM(d) {
 		for(var i in data){
 			//if(i == 0) continue
 			if(data[i].hasOwnProperty('enraged')) continue
-			if(hideNames) data[i].name='HIDDEN'
+			var name = '****'
+			if(!hideNames) name = data[i].name			
 
 			var crit = data[i].crit  + '% '.color(enable_color)
 			if(data[i].class == 6 || data[i].class == 7) crit += ' ' + data[i].healCrit  + '% '.color(disable_color)
 
-			dpsmsg 	+=data[i].name + ' | '+ data[i].dps.nFormatter(3) + ' | '
+			dpsmsg 	+= name + ' | '+ data[i].dps.nFormatter(3) + ' | '
 			+ data[i].totalDamage.nFormatter(3) + ' | '
 			+ data[i].percentage  + '%'.color(enable_color) + ' | '
 			+ crit + '\n'
