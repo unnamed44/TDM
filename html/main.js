@@ -145,13 +145,13 @@ function ResetCB(){
 function Reset() {
 	ajax("100S",ResetCB)
 }
-function CloseDpsCB() {
+function NoPopUpCB() {
 	if(typeof _tera_client_proxy_ !== 'undefined') {
 		_tera_client_proxy_.close()
 	}
 }
-function CloseDps() {
-	ajax("P",CloseDpsCB)
+function NoPopUp() {
+	ajax("P",NoPopUpCB)
 }
 
 // settings
@@ -370,7 +370,7 @@ function ExtUICB()
 		//openWebsite('http://' + c.host + ':'+ c.port)
 		openWebsite(window.location.href)
 	}
-	CloseDps()
+	NoPopUp()
 }
 
 function ExtUI()
