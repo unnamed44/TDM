@@ -663,7 +663,7 @@ function refreshCB()
 	_skillInfo = []
 	_petsSkillInfo = []
 	var res = JSON.parse(this.responseText)
-	console.log(res)
+	//console.log(res)
 	if(res === '' ) return
 	var result = tableDPSFormat(res,"dpsTable")
 	if(result === previousDps) return
