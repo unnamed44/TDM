@@ -1376,7 +1376,7 @@ function TDM(d) {
 	{
 		if(currentbossId){
 			for(var i in party)
-				if(party[i].gameId === e.gameid.toString())
+				if(party[i].gameId === e.gameId.toString())
 					party[i].Targets[currentbossId].dead++
 		}
 	}
