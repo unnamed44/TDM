@@ -1454,7 +1454,7 @@ function TDM(d) {
 
 	function sChangeEvetMatchingState(e)
 	{
-		if(!e.searching)
+		//if(!e.searching)
 			sendCommand = [{'command': 'matching alarm'}]
 	}
 
