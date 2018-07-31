@@ -1454,10 +1454,8 @@ function TDM(d) {
 
 	function sChangeEvetMatchingState(e)
 	{
-		//e.searching
-		sendCommand = [{
-			'command': 'matching alarm'
-		}]
+		if(!e.searching)
+			sendCommand = [{'command': 'matching alarm'}]
 	}
 
 	d.hook('*', 'raw', (code, data, fromServer) => {
