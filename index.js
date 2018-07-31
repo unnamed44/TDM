@@ -74,6 +74,7 @@ function TDM(d) {
 	party = [],
 	currentParty = {},
 	lastDps= [],
+	sendCommand = [],
 	currentbossId = '',
 	currentZone = 0,
 	allUsers = false,
@@ -290,7 +291,12 @@ function TDM(d) {
 					var battleInfo = data.shift()
 					data.sort(function(a,b) {return b.totalDamage - a.totalDamage})
 					data.unshift(battleInfo)
-					return res.status(200).json(data)
+					if(sendCommand.length > 0){
+						var combined = data.concat(sendCommand)
+						sendCommand = []
+						return res.status(200).json(combined)
+					}
+					else return res.status(200).json(data)
 				}
 				//reank system
 				if(req_value == 2){
@@ -1344,14 +1350,9 @@ function TDM(d) {
 			toChat('notice_damage : ' + notice_damage)
 		}
 		else if (arg == 't' || arg=='test') {
-			//d.toClient('S_NPC_MENU_SELECT', 1, {type:28})
-			var msg = 'TEST'
-			d.send('S_DUNGEON_EVENT_MESSAGE', 1, {
-				message: `<img src="img://skill__0__${me.templateId}__${arg2}" width="20" height="20" />&nbsp;${msg}`,
-				unk1: 2, //70 : 2,
-				unk2: 0,
-				unk3: 0
-			})
+			sendCommand = [{
+				'command': 'matching alarm'
+			}]
 		}
 		else if (arg == 'w' || arg=='write') {
 			writeBackup()
@@ -1446,15 +1447,27 @@ function TDM(d) {
 
 	function sLog(e)
 	{
-		log(e)
+		if(debug)
+			log(e)
 	}
 
-	/*d.hook('*', 'raw', (code, data, fromServer) => {
+
+	function sChangeEvetMatchingState(e)
+	{
+		//e.searching
+		sendCommand = [{
+			'command': 'matching alarm'
+		}]
+	}
+
+	d.hook('*', 'raw', (code, data, fromServer) => {
+		return
+		if(!debug) return
 		let file = path.join(__dirname, '..', '..', 'tera-proxy-' + Date.now() + '.log')
 		//fs.appendFileSync(file, (fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code) + ' ' + data.toString('hex') + '\n')
 		//log((fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code) + ' ' + data.toString('hex') + '\n')
-		//log((fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code))
-	})*/
+		log((fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code))
+	})
 
 	d.hook('S_LOGIN',10, sLogin)
 	d.hook('S_SPAWN_ME',2, sSpawnMe)
@@ -1469,6 +1482,7 @@ function TDM(d) {
 	d.hook('S_LEAVE_PARTY_MEMBER',2,sLeavePartyMember)
 	d.hook('S_LEAVE_PARTY',1, sLeaveparty)
 	d.hook('S_PARTY_MEMBER_LIST',6,sPartyMemberList)
+	d.hook('S_CHANGE_EVENT_MATCHING_STATE',1,sChangeEvetMatchingState)
 	d.hook('S_DESPAWN_USER', 3, sDespawnUser)
 	d.hook('S_SPAWN_USER',12, sSpawnUser)
 	d.hook('S_NPC_STATUS',1, sNpcStatus)

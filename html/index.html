@@ -6,21 +6,21 @@
 </head>
 <body>
 	<div class="tab">
-		<button class="tablinks active" onclick="openTab(event,'wrapper')">DPS</button>
-		<button class="tablinks" onclick="openTab(event,'records')">Records</button>
-		<button class="tablinks"  onclick="openTab(event,'settings')">Settings</button>
-		<button class="tablinks" onclick="CloseDps()">Close</button>
+		<button class="tablinks active" onmousedown="clickSound.play()" onclick="openTab(event,'wrapper')">DPS</button>
+		<button class="tablinks" onmousedown="clickSound.play()" onclick="openTab(event,'records')">Records</button>
+		<button class="tablinks" onmousedown="clickSound.play()" onclick="openTab(event,'settings')">Settings</button>
+		<button class="tablinks" onmousedown="clickSound.play()" onclick="CloseDps()">Close</button>
 	</div>
 	<div  id="wrapper" class="tabcontent">
 		<div  id="content">
 		</div >
 		<input class=ipt type="text" size="1" id="name" value="">
-		<button class=btn onclick="Whisper()">Whisper</button>
-		<button class=btn onclick="ToParty()">ToParty</button>
-		<button class=btn onclick="ToGuild()">ToGuild</button>
-		<button class=btn onclick="LeaveParty()">LeaveParty</button>
-		<button class=btn onclick="Reset()">Reset</button><br>
-		<button class=btn onclick="HideNames()">HideNames</button>
+		<button class=btn onmousedown="clickSound.play()" onclick="Whisper()">Whisper</button>
+		<button class=btn onmousedown="clickSound.play()" onclick="ToParty()">ToParty</button>
+		<button class=btn onmousedown="clickSound.play()" onclick="ToGuild()">ToGuild</button>
+		<button class=btn onmousedown="clickSound.play()" onclick="LeaveParty()">LeaveParty</button>
+		<button class=btn onmousedown="clickSound.play()" onclick="Reset()">Reset</button><br>
+		<button class=btn onmousedown="clickSound.play()" onclick="HideNames()">HideNames</button>
 		<div  id="skillLog">
 		</div >
 	</div>
@@ -30,37 +30,39 @@
 	</div>
 	<div  id="settings" class="tabcontent">
 		<div class="tab">
-			<button class="tablinks" onclick="openTab(event,'manager')">Module Manager</button>
-			<button class="tablinks" onclick="openTab(event,'custom')">Custom Commands</button>
-			<button class="tablinks" onclick="Update()">Update TDM</button>
-			<button class="tablinks" onclick="useBrowser('http://tera.dvcoa.com.au:3000')"> Rank System</button>
-			<button class="tablinks" onclick="openWebsite('https://discord.gg/JRa7FXd')">TDM Discord</button>
-			<button class="tablinks" onclick="openWebsite('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=C6BU555NMQJD6')">Donate to dev</button>
-			<button class="tablinks" onclick="useBrowser('https://www.gnu.org/licenses/gpl-3.0-standalone.html')">LICENSE</button>
-			<button class="tablinks" onclick="useBrowserHelp()">Usage</button>
-			<button class="tablinks" onclick="ExtUI()">ExtUI</button>
+			<button class="tablinks" onmousedown="clickSound.play()" onclick="openTab(event,'manager')">Module Manager</button>
+			<button class="tablinks" onmousedown="clickSound.play()" onclick="openTab(event,'custom')">Custom Commands</button>
+			<button class="tablinks" onmousedown="clickSound.play()" onclick="Update()">Update TDM</button>
+			<button class="tablinks" onmousedown="clickSound.play()" onclick="useBrowser('http://tera.dvcoa.com.au:3000')"> Rank System</button>
+			<button class="tablinks" onmousedown="clickSound.play()" onclick="openWebsite('https://discord.gg/JRa7FXd')">TDM Discord</button>
+			<button class="tablinks" onmousedown="clickSound.play()" onclick="openWebsite('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=C6BU555NMQJD6')">Donate to dev</button>
+			<button class="tablinks" onmousedown="clickSound.play()" onclick="useBrowser('https://www.gnu.org/licenses/gpl-3.0-standalone.html')">LICENSE</button>
+			<button class="tablinks" onmousedown="clickSound.play()" onclick="useBrowserHelp()">Usage</button>
+			<button class="tablinks" onmousedown="clickSound.play()" onclick="ExtUI()">ExtUI</button>
 		</div>
 		<br><br>
 		<table>
 			<tr>
-				<td><button class=btn onclick="NoticeDamageAdd()">Notice value</button></td><td><p id="NoticeDamageAdd"></p></td>
-				<td><button class=btn onclick="Notice()">Notice</button></td><td><p id="Notice"></p></td>
+				<td><button class=btn onmousedown="clickSound.play()" onclick="NoticeDamageAdd()">Notice value</button></td><td><p id="NoticeDamageAdd"></p></td>
+				<td><button class=btn onmousedown="clickSound.play()" onclick="Notice()">Notice</button></td><td><p id="Notice"></p></td>
 			</tr>
 			<tr>
-				<td><button class=btn onclick="BossOnly()">bossOnly</button></td><td><p id="BossOnly"></p></td>
-				<td><button class=btn onclick="HideNames()">HideNames</button></td><td><p id="HideNames"></p></td>
+				<td><button class=btn onmousedown="clickSound.play()" onclick="BossOnly()">bossOnly</button></td><td><p id="BossOnly"></p></td>
+				<td><button class=btn onmousedown="clickSound.play()" onclick="HideNames()">HideNames</button></td><td><p id="HideNames"></p></td>
 			</tr>
 			<tr>
-				<td><button class=btn onclick="RankSystem()">SendDataTo</button></td><td><p id="RankSystem"></p></td>
-				<td><button class=btn onclick="AllUsers()">All DPS</button><br></td><td><p id="AllUsers"></p></td>
+				<td><button class=btn onmousedown="clickSound.play()" onclick="RankSystem()">SendDataTo</button></td><td><p id="RankSystem"></p></td>
+				<td><button class=btn onmousedown="clickSound.play()" onclick="AllUsers()">All DPS</button><br></td><td><p id="AllUsers"></p></td>
 			</tr>
 			<tr>
-				<td><button class=btn onclick="SkillLog()">SkillLog</button></td><td><p id="SkillLog"></p></td>
-				<td><button class=btn onclick="Debug()">Debug</button></td><td><p id="Debug"></p></td>
+				<td><button class=btn onmousedown="clickSound.play()" onclick="SkillLog()">SkillLog</button></td><td><p id="SkillLog"></p></td>
+				<td><button class=btn onmousedown="clickSound.play()" onclick="Debug()">Debug</button></td><td><p id="Debug"></p></td>
 			</tr>
 		</table>
 		<br>
 		<p id="version"></p>
+
+
 
 		<br><br><br><br><br><br><br><br>
 		<br><br><br><br><br><br><br><br>

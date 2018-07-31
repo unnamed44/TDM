@@ -25,7 +25,7 @@ Number.prototype.nFormatter =	function (digits) {
 }
 
 var previousDps = ''
-var TDMSettings
+
 var agree = false
 var waitForThis = false
 var slog = []
@@ -36,6 +36,27 @@ var	_classId = ''
 var _record = {}
 var _recordfilename = ''
 var enable_color = 'E69F00',disable_color = '56B4E9'
+
+var TDMSettings = {
+	"noticeDamage" : 1,
+	"notice" : true,
+	"bossOnly" : true,
+	"hideNames" : true,
+	"skillLog" : true,
+	"rankSystem" : true,
+	"allUsers" : false,
+	"debug" : true,
+	"partyLengh" : 0,
+	"NPCsLength" : 0
+}
+
+var enragedSound = new Audio();
+var clickSound = new Audio();
+var eventSound = new Audio();
+enragedSound.src = "audio/enraged.mp3";
+clickSound.src = "audio/click.mp3";
+eventSound.src = "audio/event.mp3";
+
 // manager ui
 function manager_ajax(url, cb) {
 	var x = new XMLHttpRequest();
@@ -45,6 +66,7 @@ function manager_ajax(url, cb) {
 	x.send();
 	return;
 }
+
 function onClick(val)
 {
 	manager_ajax(val,null)
@@ -599,9 +621,12 @@ function tableDPSFormat(data,tableId)
 			if(data[i].etimer > 0)
 			{
 				enragedBar = data[i].etimer * 100 / 36
+				enragedSound.volume = 0.500000
+				enragedSound.play()
 				dpsmsg += '<tr><th colspan="4" style="background: url(\'./icons/enraged_bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar +'% 10%;">'
 			}
 			else {
+				enragedSound.pause()
 				enragedBar = data[i].eCountdown * 10
 				dpsmsg += '<tr><th colspan="4" style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar +'% 10%;">'
 			}
@@ -610,7 +635,10 @@ function tableDPSFormat(data,tableId)
 			dpsmsg += '<br>' + data[i].monsterBattleInfo + '</th></tr>'
 			continue
 		}
-
+		if(data[i].command){
+			if(data[i].command === 'matching alarm') eventSound.play()
+			continue
+		}
 
 		var crit = data[i].crit  + '%'.color('E69F00')
 		if(data[i].class == 6 || data[i].class == 7) crit += ' ' + data[i].healCrit  + '%'.color('56B4E9')
@@ -624,7 +652,7 @@ function tableDPSFormat(data,tableId)
 				+ '<td> ' + data[i].percentage  + '%'.color('E69F00') + ' </td>'
 				+ '<td> ' + crit  + ' </td></tr>'
 
-		//if(data[i].stastics){}
+
 	}
 	dpsmsg += '</table>'
 	return dpsmsg
@@ -635,6 +663,7 @@ function refreshCB()
 	_skillInfo = []
 	_petsSkillInfo = []
 	var res = JSON.parse(this.responseText)
+	console.log(res)
 	if(res === '' ) return
 	var result = tableDPSFormat(res,"dpsTable")
 	if(result === previousDps) return
