@@ -747,11 +747,11 @@ function TDM(d) {
 				if(NPCs[j].owner===party[i].gameId){
 					// pet attack
 					if(NPCs[j].gameId===sid) {
-						return i
+						return [i,NPCs[j].npcName]
 					}
 					// pet projectile
 					if(NPCs[j].gameId===oid) {
-						return i
+						return [i,NPCs[j].npcName]
 					}
 				}
 			}
@@ -860,7 +860,6 @@ function TDM(d) {
 		var damage = e.damage.toNumber()
 
 		//if(e.blocked && e.damage.toNumber() > 0) log('sEachSkillResult blocked' + ' ' +  e.damage + ' ' + e.crit + ' ' + e.type + ' ' + skill)
-
 		if(damage>0){// && !e.blocked){
 			if(memberIndex >= 0){
 				// members damage
@@ -874,9 +873,12 @@ function TDM(d) {
 					addMemberDamage(ownerIndex,target,damage,e.crit,type,skill)
 				}
 				else{// pet
-					var petIndex=getIndexOfPetOwner(e.source.toString(),e.owner.toString())
-					if(petIndex >= 0) {
-						addMemberDamage(petIndex,target,damage,e.crit,type,skill,true)
+					var ret = getIndexOfPetOwner(e.source.toString(),e.owner.toString())
+					var petOwnerIndex = ret[0]
+					var petName = ret[1]
+					if(petOwnerIndex >= 0) {
+						//log(petOwnerIndex +' ' + petName)
+						addMemberDamage(petOwnerIndex,target,damage,e.crit,type,skill,true,petName)
 					}
 				}
 			}
@@ -884,7 +886,7 @@ function TDM(d) {
 	}
 
 	// damage : 53bit mantissa
-	function addMemberDamage(memberIndex,targetId,damage,crit,type,skill,pet)
+	function addMemberDamage(memberIndex,targetId,damage,crit,type,skill,pet,petName)
 	{
 
 		if(currentZone == 950){
@@ -909,8 +911,8 @@ function TDM(d) {
 			}
 			NPCs[npcIndex].totalPartyDamage = NPCs[npcIndex].totalPartyDamage + damage
 		}
-/*
-		if(type == SKILL_TYPE_DAMAGE || type == SKILL_TYPE_HIDDEN)
+
+/*		if(type == SKILL_TYPE_DAMAGE || type == SKILL_TYPE_HIDDEN)
 			log('addMemberDamage ' + type + ' ' + party[memberIndex].name + ' ' + NPCs[npcIndex].npcName + ' ' + damage + ' ' + crit + ' ' + skill + ' ' + pet)
 		else
 			log('addMemberDamage ' + type + ' ' + party[memberIndex].name + ' ' + damage + ' ' + crit + ' ' + skill + ' ' + pet)
@@ -951,6 +953,7 @@ function TDM(d) {
 			var skilldata = {
 				'skillId' : skill,
 				'isPet' : pet,
+				'petName' : petName,
 				'type' : type,
 				'Time' : Date.now(),
 				'damage' : damage,
@@ -987,6 +990,7 @@ function TDM(d) {
 			var skilldata = {
 				'skillId' : skill,
 				'isPet' : pet,
+				'petName' : petName,				
 				'type' : type,
 				'Time' : Date.now(),
 				'damage' : damage,
@@ -1454,7 +1458,6 @@ function TDM(d) {
 
 	function sChangeEvetMatchingState(e)
 	{
-		//if(!e.searching)
 			sendCommand = [{'command': 'matching alarm'}]
 	}
 
