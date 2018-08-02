@@ -383,13 +383,11 @@ function numberWithCommas(x) {
 
 function binarySearchSkillName(d, t, s , e)
 {
-
 	const m = Math.floor((s + e)/2);
 	var target = Number(t)
 	var id = Number(d[m].id)
-	//console.log(d[s].id + ' ' + d[e].id + ' ' + id + ' ' + target)
 	if (target == id) return d[m].skillName;
-	if (e - 1 == s) return t // fail to find
+	if (e - 1 == s) return 'undefined'
   	if (target > id) return binarySearchSkillName(d,t,m,e);
   	if (target < id) return binarySearchSkillName(d,t,s,m);
 }
@@ -517,7 +515,7 @@ function skillLogCB()
 function getSkillInfoCB()
 {
 	var si = JSON.parse(this.responseText)
-	_skillInfo = si
+	_skillInfo = si.slice(181,si.length)
 	//console.log(_skillInfo)
 	ajax("2L"+_name,skillLogCB)
 }
