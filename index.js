@@ -1462,14 +1462,14 @@ function TDM(d) {
 			sendCommand = [{'command': 'matching alarm'}]
 	}
 
-	d.hook('*', 'raw', (code, data, fromServer) => {
+	/*d.hook('*', 'raw', (code, data, fromServer) => {
 		return
 		if(!debug) return
 		let file = path.join(__dirname, '..', '..', 'tera-proxy-' + Date.now() + '.log')
 		//fs.appendFileSync(file, (fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code) + ' ' + data.toString('hex') + '\n')
 		//log((fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code) + ' ' + data.toString('hex') + '\n')
 		log((fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code))
-	})
+	})*/
 
 	d.hook('S_LOGIN',10, sLogin)
 	d.hook('S_SPAWN_ME',2, sSpawnMe)

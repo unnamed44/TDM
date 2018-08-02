@@ -514,8 +514,8 @@ function skillLogCB()
 
 function getSkillInfoCB()
 {
-	var si = JSON.parse(this.responseText)
-	_skillInfo = si.slice(181,si.length)
+	_skillInfo = JSON.parse(this.responseText)
+	//_skillInfo = si.slice(181,si.length)
 	//console.log(_skillInfo)
 	ajax("2L"+_name,skillLogCB)
 }
