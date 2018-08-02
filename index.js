@@ -325,7 +325,8 @@ function TDM(d) {
 					return res.status(200).json('ok')
 				}
 				// skill info
-				var _si = skillInfo.getPetsSkillsJson().concat(skillInfo.getSkillsJson(classIdToName(req_value)))
+				var _si = skillInfo.getSkillsJson(classIdToName(req_value))
+				//var _si = skillInfo.getPetsSkillsJson().concat(skillInfo.getSkillsJson(classIdToName(req_value)))
 				return res.status(200).json(_si)
 			case "U":
 				if(!debug) {
@@ -990,7 +991,7 @@ function TDM(d) {
 			var skilldata = {
 				'skillId' : skill,
 				'isPet' : pet,
-				'petName' : petName,				
+				'petName' : petName,
 				'type' : type,
 				'Time' : Date.now(),
 				'damage' : damage,
@@ -1195,8 +1196,8 @@ function TDM(d) {
 				log(party[index])
 				continue
 			}
-			//var _si = skillInfo.getSkillsJson(classIdToName(party[index].class))
-			var _si = skillInfo.getPetsSkillsJson().concat(skillInfo.getSkillsJson(classIdToName(party[index].class)))
+			var _si = skillInfo.getSkillsJson(classIdToName(party[index].class))
+			//var _si = skillInfo.getPetsSkillsJson().concat(skillInfo.getSkillsJson(classIdToName(party[index].class)))
 			d[i]['stastics'] = dpsStastic(party[index].Targets[targetId].skillLog,_si)
 			//log(d[i]['stastics'])
 		}

@@ -30,7 +30,6 @@ var agree = false
 var waitForThis = false
 var slog = []
 var _skillInfo = []
-var _petsSkillInfo = []
 var 	_name = ''
 var	_classId = ''
 var _record = {}
@@ -393,31 +392,11 @@ function binarySearchSkillName(d, t, s , e)
   	if (target < id) return binarySearchSkillName(d,t,s,m);
 }
 
-function searchPetSkillName(id)
-{
-	return 'Pet skill ' + id
-	var pid = id.split(':').shift()
-	var skillId = id.split(':').pop()
-	//console.log(id)
-	//console.log(pid + '-' + skillId)
-	for(var i in _petsSkillInfo)
-	{
-			if(_petsSkillInfo[i].id === pid && _petsSkillInfo[i].className === skillId) return _petsSkillInfo[i].petName + ':'+ _petsSkillInfo[i].skillName
-	}
-	return 'Unknown pet skill'
-}
-
-function skillIdToName(id,pet)
+function skillIdToName(id)
 {
 	if(_skillInfo.length == 0) return 'skill tsv missing'
 	var sid = id.slice(1,id.length)
-	//if(pet == true) return 'pet skill'
-	if(pet == true) {
-		return searchPetSkillName(sid)
-	}
-	else {
-		return binarySearchSkillName(_skillInfo, sid, 0, _skillInfo.length - 1)
-	}
+	return binarySearchSkillName(_skillInfo, sid, 0, _skillInfo.length - 1)
 }
 
 function dpsStastic()
@@ -427,7 +406,8 @@ function dpsStastic()
 	// set skill name
 	for (var i in slog)
 	{
-		slog[i]['name'] = skillIdToName(slog[i].skillId,slog[i].isPet)
+		if(slog[i].isPet) slog[i]['name'] = slog[i].petName
+		else slog[i]['name'] = skillIdToName(slog[i].skillId)
 	}
 
 	for(var i in slog)
@@ -523,7 +503,7 @@ function skillLogCB()
 
 		html+='<tr>'
 		html+='<td>' + (new Date(slog[backward].Time)).toTimeString().slice(0,8)+ '</td>'
-		html+='<td>' + skillIdToName(slog[backward].skillId,slog[backward].isPet)+ '</td>'
+		html+='<td>' + (slog[backward].isPet? slog[backward].petName : skillIdToName(slog[backward].skillId)) + '</td>'
 		html+='<td>' + (slog[backward].crit ? slog[backward].damage.nFormatter(3).color('FF3000') : slog[backward].damage.nFormatter(3)) + '</td>'
 		html+='</tr>'
 		//console.log(slog[i].damage)
@@ -535,14 +515,8 @@ function skillLogCB()
 function getSkillInfoCB()
 {
 	var si = JSON.parse(this.responseText)
-
-	_petsSkillInfo = si.slice(0,181)
 	_skillInfo = si.slice(181,si.length)
-
-	//console.log(_petsSkillInfo)
 	//console.log(_skillInfo)
-
-
 	ajax("2L"+_name,skillLogCB)
 }
 
@@ -661,7 +635,6 @@ function tableDPSFormat(data,tableId)
 function refreshCB()
 {
 	_skillInfo = []
-	_petsSkillInfo = []
 	var res = JSON.parse(this.responseText)
 	//console.log(res)
 	if(res === '' ) return
@@ -802,6 +775,7 @@ window.onload = function() {
 
 	if(typeof _tera_client_proxy_ === 'undefined') {
 		//window.resizeTo(320, 250);
+		document.body.style.zoom="200%"
 		resizeDiv()
 	}
 	else {
