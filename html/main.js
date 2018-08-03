@@ -515,7 +515,6 @@ function skillLogCB()
 function getSkillInfoCB()
 {
 	_skillInfo = JSON.parse(this.responseText)
-	//_skillInfo = si.slice(181,si.length)
 	//console.log(_skillInfo)
 	ajax("2L"+_name,skillLogCB)
 }
@@ -775,7 +774,7 @@ window.onload = function() {
 
 	if(typeof _tera_client_proxy_ === 'undefined') {
 		//window.resizeTo(320, 250);
-		document.body.style.zoom="200%"
+		//document.body.style.zoom="200%"
 		resizeDiv()
 	}
 	else {
