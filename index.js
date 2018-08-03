@@ -603,7 +603,9 @@ function TDM(d) {
 			Boss[id].etimer = 36
 			setEnragedTime(id,null)
 			Boss[id].enragedTimer = setInterval( () => {
-				setEnragedTime(id,Boss[id].enragedTimer)
+				if(typeof Boss[id] !== 'undefined')
+					setEnragedTime(id,Boss[id].enragedTimer)
+				else log('Boss[id] === undefined')
 			}, 1000)
 		} else if (e.enraged === 1 && Boss[id].enraged) {
 			//log(Boss[id].hpPer + ' Eraged but already set ' + id + ' '+ e.target)
@@ -1443,8 +1445,8 @@ function TDM(d) {
 
 	function sNpcOccupierInfo(e)
 	{
-
 		if(e.cid.toNumber() == 0){
+			//log(e)
 			log('sNpcOccupierInfo reset ' + e.cid)
 			resetNpc(e)
 		}
