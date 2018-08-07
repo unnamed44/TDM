@@ -278,6 +278,7 @@ function printDateInFormat(m)
 function RecordsCB() {
 	var res = JSON.parse(this.responseText)
 	var html = '<br><table>'
+	res.reverse()
 	for(var i in res)
 	{
 		html	+='<tr><td><button class="btn" onclick="clickRecordsFile(\''+res[i]+'\')">View</button></td>'
@@ -497,14 +498,15 @@ function skillLogCB()
 	//console.log(this.responseText)
 	var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="dpsStastic()">Stastic</button><br>'
 	html += '<table class="stastics"><tr><th>Time</th><th>Skill Name</th><th>Damage</th></tr>'
-	var backward = 0
+	//var backward = 0
+	slog.reverse()
 	for(var i in slog){
-		backward = slog.length -1 - i
+		//backward = slog.length -1 - i
 
 		html+='<tr>'
-		html+='<td>' + (new Date(slog[backward].Time)).toTimeString().slice(0,8)+ '</td>'
-		html+='<td>' + (slog[backward].isPet? slog[backward].petName : skillIdToName(slog[backward].skillId)) + '</td>'
-		html+='<td>' + (slog[backward].crit ? slog[backward].damage.nFormatter(3).color('FF3000') : slog[backward].damage.nFormatter(3)) + '</td>'
+		html+='<td>' + (new Date(slog[i].Time)).toTimeString().slice(0,8)+ '</td>'
+		html+='<td>' + (slog[i].isPet? slog[i].petName : skillIdToName(slog[i].skillId)) + '</td>'
+		html+='<td>' + (slog[i].crit ? slog[i].damage.nFormatter(3).color('FF3000') : slog[i].damage.nFormatter(3)) + '</td>'
 		html+='</tr>'
 		//console.log(slog[i].damage)
 	}
