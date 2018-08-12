@@ -33,7 +33,7 @@ For those who have a lag when you press skill log analysis
 
 4. Set region in config.json
 
-## Optional data (for dev)
+## Optional - module manager ui (for dev)
 
    module manager [manager](https://github.com/Mathicha/manager)
 
@@ -41,17 +41,16 @@ For those who have a lag when you press skill log analysis
 
 - Enraged notifier
 - Notify high damage on screen with skill image and number
-- DPS history(circular history: max 30 BAM) is shown in the UI
+- DPS history records(circular history: max 30)
 - Simple skill log and analysis
-- rank system
+- rank system (The system is unstable because poor network and server system - arm processor )
 
 ## Usage
 
 - Type "!dps u" if you want to open UI or reload ui
-- It pops up automatically when you spawn in a dungeon
-- If you don't want the dps meter to pop up, press Close button. (X button on title is not the same)
+- If you don't want the dps meter to pop up, press NoPupup or ExtUi. (X button on title is not the same)
 - You can automate party leaving message by setting party_leaving_msg in config.json. Then press LeaveParty button.
-- To whisper the lastest/history dps to a user, type one's name in the input then press the button
+- To whisper the lastest/records dps to a user, type one's name in the input then press the button
 
 ## Credits
 
