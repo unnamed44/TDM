@@ -112,7 +112,7 @@ function validate(evt) {
 function warningMsg() {
 	if (agree) return true
 	if (typeof _tera_client_proxy_ !== 'undefined') {
-		_tera_client_proxy_.alert("请记住，TDM数据不是为了嘲笑别人。自己承担通过发送DPS数据，账号被取缔的风险。如果你同意的话，再按一下。");
+		_tera_client_proxy_.alert("请记住, TDM数据不是为了嘲笑别人. 自己承担通过发送DPS数据, 而导致账号被取缔的风险. 如果你同意的话, 再按一下按钮.");
 	}
 	agree = true
 	return false
