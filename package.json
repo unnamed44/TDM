@@ -7,12 +7,12 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/xmljson/TDM.git"
+		"url": "git+https://github.com/zc149352394/TDM.git"
 	},
 	"author": "TDM",
 	"license": "GPL-3.0",
 	"bugs": {
 		"url": "https://discord.gg/gPe7d9e"
 	},
-	"homepage": "https://github.com/xmljson/TDM#readme"
+	"homepage": "https://github.com/zc149352394/TDM#readme"
 }
