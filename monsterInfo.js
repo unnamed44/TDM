@@ -42,7 +42,7 @@ function MonsterInfo(r,u) {
 				console.log(err)
 			}
 		}
-		//console.log('createDoc')
+		// console.log('createDoc')
 		createXmlDoc()
 	}
 
@@ -64,7 +64,7 @@ function MonsterInfo(r,u) {
 			for (var i in zone) {
 				if (zone[i].getAttribute("id") == Number(npc.huntingZoneId)) {
 					npc.zoneName = zone[i].getAttribute("name")
-					//console.log(npc.zoneName)
+					// console.log(npc.zoneName)
 					break
 				}
 			}
@@ -72,7 +72,7 @@ function MonsterInfo(r,u) {
 			for (var j in mon) {
 				if(mon[j].getAttribute("id") == Number(npc.templateId)) {
 					npc.npcName = mon[j].getAttribute("name")
-					//console.log(npc.npcName)
+					// console.log(npc.npcName)
 					break
 				}
 			}

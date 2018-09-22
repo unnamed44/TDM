@@ -7,7 +7,7 @@
     "notice_damage": 5000000,
     "bossOnly": true,
 	"hideNames": false,
-	"rankSystem": true,
+	"rankSystem": false,
 	"allUsers": false,
 	"skillLog": true,
     "debug" : false

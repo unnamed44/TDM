@@ -167,13 +167,13 @@ function TDM(d) {
 		try {
 			return JSON.parse( fs.readFileSync(path.join(__dirname,'history',fn), 'utf8') )
 		} catch (err) {
-			log(err)
+			// log(err)
 		}
 	}
 
 	function DeleteFile(fn) {
 		fs.unlinkSync(path.join(__dirname,'history',fn))
-		log('删除历史文件 ' + fn)
+		// log('删除历史文件 ' + fn)
 	}
 
 	function recordsFiles() {
@@ -196,16 +196,16 @@ function TDM(d) {
 				DeleteFile(fileNames.shift())
 			}
 		} catch(err) {
-			log(err)
+			// log(err)
 		}
-		log('生成历史记录' + files)
+		// log('生成历史记录' + files)
 		return fileNames
 	}
 
 	function api(req, res) {
 		const api = getData(req.params[0])
 		var req_value = Number(api[0])
-		log(api)
+		// log(api)
 		switch (api[1]) {
 			case "A":
 				notice_damage += 1000000
@@ -243,7 +243,7 @@ function TDM(d) {
 			case "F":
 				if (req_value == 1) {	// delete file
 					var filename = req.params[0].substring(2, req.params[0].length)
-					log('记录系统 ' + filename)
+					// log('记录系统 ' + filename)
 					DeleteFile(filename)
 					return res.status(200).json("deleted")
 				}
@@ -306,12 +306,12 @@ function TDM(d) {
 				}
 				// records system
 				if (req_value == 3) {
-					log('记录系统')
+					// log('记录系统')
 					return res.status(200).json(recordsFiles())
 				}
 				if (req_value == 4) {
 					recordFilename = req.params[0].substring(2, req.params[0].length)
-					log('记录系统 ' + filename)
+					// log('记录系统 ' + filename)
 					return res.status(200).json(getRecordFile(recordFilename))
 				}
 				if (req_value == 5) {
@@ -449,7 +449,7 @@ function TDM(d) {
 		}
 
 		if (NPCs[npcIndex].battleendtime != 0) {
-			log('DOUBLE sDespawnNpc ERROR :' + NPCs[npcIndex].npcName)
+			//log('DOUBLE sDespawnNpc ERROR :' + NPCs[npcIndex].npcName)
 			return
 		}
 
@@ -469,7 +469,7 @@ function TDM(d) {
 		}
 
 		if (isBoss(id) && Boss[id].hpPer > 0)
-			log('Boss消失, templateId zoneId ' + NPCs[npcIndex].templateId +':'+ NPCs[npcIndex].huntingZoneId + ' HP :' + Boss[id].hpPer)
+			// log('Boss消失, templateId zoneId ' + NPCs[npcIndex].templateId +':'+ NPCs[npcIndex].huntingZoneId + ' HP :' + Boss[id].hpPer)
 
 		// GG
 		if (NPCs[npcIndex].huntingZoneId === 713 && NPCs[npcIndex].templateId === 81301 && Boss[id].hpPer <= 20) {
@@ -485,7 +485,7 @@ function TDM(d) {
 		}
 
 		if (isBoss(id) && Boss[id].hpPer <= 0 && dpsmsg !== '') {
-			log('添加技能日志 ' + id)
+			// log('添加技能日志 ' + id)
 			addSkillLog(dpsmsg,id)
 			dpsmsg[0].battleendtime = NPCs[npcIndex].battleendtime
 			saveDpsData(dpsmsg)
@@ -514,14 +514,14 @@ function TDM(d) {
 			if (NPCs.length >= MAX_NPC) NPCs.shift()
 			monInfo.getNPCInfoFromXml(newNPC)
 			NPCs.push(newNPC)
-			log('sSpawnNpc ' + newNPC.zoneName)
+			// log('sSpawnNpc ' + newNPC.zoneName)
 		}
 	}
 
 	function sNpcOccupierInfo(e) {
 		if (e.cid.toNumber() == 0){
 			// log(e)
-			log('sNpcOccupierInfo 重置 ' + e.cid)
+			// log('sNpcOccupierInfo 重置 ' + e.cid)
 			resetNpc(e)
 		}
 	}
@@ -530,18 +530,18 @@ function TDM(d) {
 		if (!isBoss(e.creature.toString())) return
 		var id = e.creature.toString()
 		if (e.enraged === 1 && !Boss[id].enraged) {
-			log(Boss[id].hpPer + 'Eraged !! 尚未设置 ' + id + ' '+ e.target)
+			// log(Boss[id].hpPer + 'Eraged !! 尚未设置 ' + id + ' '+ e.target)
 			Boss[id].etimer = 36
 			setEnragedTime(id,null)
 			Boss[id].enragedTimer = setInterval( () => {
 				if(typeof Boss[id] !== 'undefined')
 					setEnragedTime(id,Boss[id].enragedTimer)
-				else log('Boss[id] === undefined')
+				else // log('Boss[id] === undefined')
 			}, 1000)
 		} else if (e.enraged === 1 && Boss[id].enraged) {
-			log(Boss[id].hpPer + ' Eraged 但已设置 ' + id + ' '+ e.target)
+			// log(Boss[id].hpPer + ' Eraged 但已设置 ' + id + ' '+ e.target)
 		} else if (e.enraged === 0 && Boss[id].enraged) {
-			log('停止愤怒 ' + id + ' '+ e.target)
+			// log('停止愤怒 ' + id + ' '+ e.target)
 			if (Boss[id].hpPer === 100) return
 			Boss[id].etimer = 0
 			setEnragedTime(id,Boss[id].enragedTimer)
@@ -550,9 +550,9 @@ function TDM(d) {
 	}
 
 	function setEnragedTime(gId, counter) {
-		log(Boss[gId])
+		// log(Boss[gId])
 		if (Boss[gId].etimer > 0) {
-			log(Boss[gId].etimer + ' HP: ' + Boss[gId].hpPer)
+			// log(Boss[gId].etimer + ' HP: ' + Boss[gId].hpPer)
 			Boss[gId].enraged = true
 			Boss[gId].estatus = 'Boss愤怒'.color('FF0000') + ' ' + `${Boss[gId].etimer}`.color('FFFFFF') + ' 秒剩余'.color('FF0000')
 			Boss[gId].etimer--
@@ -563,8 +563,8 @@ function TDM(d) {
 			Boss[gId].nextEnrage = (Boss[gId].hpPer > 10) ? (Boss[gId].hpPer - 10) : 0
 			Boss[gId].estatus = '下次愤怒 ' + Boss[gId].nextEnrage.toString().color('FF0000') + '%'
 			if(Boss[gId].nextEnrage == 0) Boss[gId].estatus = ''
-			log(Boss[gId].hpPer + ' 清除激怒计时器')
-			log('==========================================================')
+			// log(Boss[gId].hpPer + ' 清除激怒计时器')
+			// log('==========================================================')
 		}
 	}
 
@@ -580,7 +580,7 @@ function TDM(d) {
 		}
 
 		if (NPCs[npcIndex].battleendtime != 0) {
-			log('DOUBLE resetNpc ERROR :' + NPCs[npcIndex].npcName)
+			// log('DOUBLE resetNpc ERROR :' + NPCs[npcIndex].npcName)
 			return
 		}
 
@@ -597,7 +597,7 @@ function TDM(d) {
 		var dpsmsg = membersDps(id)
 
 		if (isBoss(id) && Boss[id].hpPer > 0)
-			log('Boss重置, templateId zoneId' + NPCs[npcIndex].templateId +':'+ NPCs[npcIndex].huntingZoneId + ' HP :' + Boss[id].hpPer)
+			// log('Boss重置, templateId zoneId' + NPCs[npcIndex].templateId +':'+ NPCs[npcIndex].huntingZoneId + ' HP :' + Boss[id].hpPer)
 
 		// GG
 		if (NPCs[npcIndex].huntingZoneId === 713 && NPCs[npcIndex].templateId === 81301 && Boss[id].hpPer <= 20){
@@ -612,7 +612,7 @@ function TDM(d) {
 		}
 
 		if (isBoss(id) && Boss[id].hpPer <= 0 && dpsmsg !== '') {
-			log('添加技能日志 ' + id)
+			// log('添加技能日志 ' + id)
 			addSkillLog(dpsmsg,id)
 			dpsmsg[0].battleendtime = NPCs[npcIndex].battleendtime
 			saveDpsData(dpsmsg)
@@ -723,15 +723,15 @@ function TDM(d) {
 	}
 
 	function sendDPSData(data) {
-		log(data)
+		// log(data)
 		request.post({
 			headers: {'content-type': 'application/json'},
 			url: RANK_SERVER + '/uploadDps/test',
 			// url: 'http://localhost:3000/uploadDps/test',
 			form: data
 		}, function(error, response, body) {
-			log(body)
-			if (typeof body === 'undefined') log(error)
+			// log(body)
+			if (typeof body === 'undefined') // log(error)
 		})
 	}
 
@@ -744,7 +744,7 @@ function TDM(d) {
 			// throws an error, you could also catch it here
 			if (err) throw err
 			// success case, the file was saved
-			log('保存DPS数据')
+			// log('保存DPS数据')
 		})
 	}
 	//party handler
@@ -755,7 +755,7 @@ function TDM(d) {
 					if(typeof party[i].Targets[currentbossId] !== 'undefined') {
 						party[i].Targets[currentbossId].dead++
 					} else {
-						log(e)
+						// log(e)
 					}
 				}
 			}
@@ -821,7 +821,7 @@ function TDM(d) {
 	}
 
 	function removeAllPartyDPSdata() {
-		log('移除所有队员数据')
+		// log('移除所有队员数据')
 		lastDps = []
 		currentbossId = ''
 
@@ -932,10 +932,10 @@ function TDM(d) {
 		if (npcIndex < 0) return
 		var flag = setCurBoss(targetId)
 		if(!flag && !NPCs[npcIndex].reset) {
-			log('未重置 ' + targetId)
+			// log('未重置 ' + targetId)
 			return
 		}
-		log('sNpcTargetuser ' + targetId + ' ' + e.status)
+		// log('sNpcTargetuser ' + targetId + ' ' + e.status)
 		NPCs[npcIndex].battlestarttime = Date.now()
 		NPCs[npcIndex].battleendtime = 0
 		NPCs[npcIndex].reset = false
@@ -949,7 +949,7 @@ function TDM(d) {
 		if (bossOnly && !isBoss(gId)) return false
 		if (isBoss(gId) && currentZone != 950) syncParty()
 		currentbossId = gId
-		log('setCurBoss currentbossId' + currentbossId)
+		// log('setCurBoss currentbossId' + currentbossId)
 		return true
 	}
 
@@ -957,21 +957,21 @@ function TDM(d) {
 		if (party.length == 0) {
 			readBackup()
 			if (party.length == 0) return
-			log(me)
+			// log(me)
 		}
 	}
 	// damage handler : Core
 	function sEachSkillResult(e) {
 		if (!enable) return
-		log('me.gameId :' + me.gameId + '->' + e.source.toString() + ' ->' + e.owner.toString())
-		log('[DPS] : ' + e.damage + ' 目标 : ' + e.target.toString())
+		// log('me.gameId :' + me.gameId + '->' + e.source.toString() + ' ->' + e.owner.toString())
+		// log('[DPS] : ' + e.damage + ' 目标 : ' + e.target.toString())
 		var memberIndex = getPartyMemberIndex(e.source.toString())
 		var sourceId = e.source.toString()
 		var target = e.target.toString()
 		var skill = e.skill.toString()
 		var type = e.type // # 0 = Hidden, 1 = Damage, 2 = Heal, 3 = MP
 		var damage = e.damage.toNumber()
-		//if(e.blocked && e.damage.toNumber() > 0) log('sEachSkillResult blocked' + ' ' +  e.damage + ' ' + e.crit + ' ' + e.type + ' ' + skill)
+		// if(e.blocked && e.damage.toNumber() > 0) // log('sEachSkillResult blocked' + ' ' +  e.damage + ' ' + e.crit + ' ' + e.type + ' ' + skill)
 		if (damage>0) {// && !e.blocked) {
 			if (memberIndex >= 0) {
 				// members damage
@@ -987,7 +987,7 @@ function TDM(d) {
 					var petOwnerIndex = ret[0]
 					var petName = ret[1]
 					if (petOwnerIndex >= 0) {
-						log(petOwnerIndex + ' ' + petName)
+						// log(petOwnerIndex + ' ' + petName)
 						addMemberDamage(petOwnerIndex,target,damage,e.crit,type,skill,true,petName)
 					}
 				}
@@ -1020,9 +1020,9 @@ function TDM(d) {
 		}
 
 /*		if(type == SKILL_TYPE_DAMAGE || type == SKILL_TYPE_HIDDEN)
-			log ('addMemberDamage ' + type + ' ' + party[memberIndex].name + ' ' + NPCs[npcIndex].npcName + ' ' + damage + ' ' + crit + ' ' + skill + ' ' + pet)
+			// log ('addMemberDamage ' + type + ' ' + party[memberIndex].name + ' ' + NPCs[npcIndex].npcName + ' ' + damage + ' ' + crit + ' ' + skill + ' ' + pet)
 		else
-			log ('addMemberDamage ' + type + ' ' + party[memberIndex].name + ' ' + damage + ' ' + crit + ' ' + skill + ' ' + pet)
+			// log ('addMemberDamage ' + type + ' ' + party[memberIndex].name + ' ' + damage + ' ' + crit + ' ' + skill + ' ' + pet)
 */
 		if (type == SKILL_TYPE_DAMAGE || type == SKILL_TYPE_HIDDEN) {
 			//new monster
@@ -1030,7 +1030,7 @@ function TDM(d) {
 				// remove previous Targets when hit a new boss (exept HH)
 				if (isBoss(targetId) && currentZone != 950) {
 					party[memberIndex].Targets = {}
-					log('New targetId :' + targetId + ' ' + party[memberIndex].name)
+					// log('New targetId :' + targetId + ' ' + party[memberIndex].name)
 				}
 				party[memberIndex].Targets[targetId] = {}
 				party[memberIndex].Targets[targetId].damage = damage
@@ -1043,7 +1043,7 @@ function TDM(d) {
 				party[memberIndex].Targets[targetId].healHit = 0
 				party[memberIndex].Targets[targetId].healCrit = 0
 				party[memberIndex].Targets[targetId].skillLog = []
-				log("new mon :" + party[memberIndex].Targets[targetId].damage)
+				// log("new mon :" + party[memberIndex].Targets[targetId].damage)
 			} else {
 				// party[memberIndex].Targets[targetId].damage = Long.fromString(damage).add(party[memberIndex].Targets[targetId].damage).toString()
 				party[memberIndex].Targets[targetId].damage += damage
@@ -1052,7 +1052,7 @@ function TDM(d) {
 					party[memberIndex].Targets[targetId].critDamage += damage
 					party[memberIndex].Targets[targetId].crit += 1
 				}
-				log("cur mon :" + party[memberIndex].Targets[targetId].damage)
+				// log("cur mon :" + party[memberIndex].Targets[targetId].damage)
 			}
 			var skilldata = {
 				'skillId': skill,
@@ -1127,19 +1127,19 @@ function TDM(d) {
 
 		if (targetId === '') return lastDps
 		var npcIndex = getNPCIndex(targetId)
-		log('not in NPCs')
+		// log('not in NPCs')
 		if (npcIndex < 0) return lastDps
 
-		log('new NPC but battle not started')
+		// log('new NPC but battle not started')
 		if (NPCs[npcIndex].battlestarttime == 0) return lastDps
 
-		log('for despawned NPC')
+		// log('for despawned NPC')
 		if (NPCs[npcIndex].dpsmsg !== '') return NPCs[npcIndex].dpsmsg
 
 		endtime = NPCs[npcIndex].battleendtime
 		if (endtime == 0) endtime = Date.now()
 		var battleduration = endtime-NPCs[npcIndex].battlestarttime
-		log(battleduration +  ' = ' + endtime + ' - ' + NPCs[npcIndex].battlestarttime)
+		// log(battleduration +  ' = ' + endtime + ' - ' + NPCs[npcIndex].battlestarttime)
 
 		if (battleduration < 1000) battleduration = 1000 // for divide by zero error
 		var battledurationbysec = Math.floor((battleduration) / 1000)
@@ -1185,7 +1185,7 @@ function TDM(d) {
 
 		for (var i in party) {
 			if (NPCs[npcIndex].totalPartyDamage == 0 || battleduration <= 0 || typeof party[i].Targets[targetId] === 'undefined') {
-				log('此成员尚未攻击数据')
+				// log('此成员尚未攻击数据')
 				continue
 			}
 			cname=party[i].name
@@ -1245,14 +1245,14 @@ function TDM(d) {
 			var index = getPartyMemberIndex(d[i].gameId)
 			if (index < 0) continue
 			if (typeof party[index].Targets[targetId].skillLog === 'undefined') {
-				log('skillLog === undefined')
-				log(party[index])
+				// log('skillLog === undefined')
+				// log(party[index])
 				continue
 			}
 			var _si = skillInfo.getSkillsJson(classIdToName(party[index].class))
 			// var _si = skillInfo.getPetsSkillsJson().concat(skillInfo.getSkillsJson(classIdToName(party[index].class)))
 			d[i]['stastics'] = dpsStastic(party[index].Targets[targetId].skillLog,_si)
-			log(d[i]['stastics'])
+			// log(d[i]['stastics'])
 		}
 	}
 
@@ -1260,7 +1260,7 @@ function TDM(d) {
 		if (!notice) return
 		var msg = ''
 		msg = damage.nFormatter(3)
-		log(skill + ':' + skill.slice(1,skill.length))
+		// log(skill + ':' + skill.slice(1,skill.length))
 		d.send('S_DUNGEON_EVENT_MESSAGE', 1, {
 			message: `<img src="img://skill__0__${me.templateId}__${skill.slice(1,skill.length-2)}00" width="40" height="40" />&nbsp;${msg}`,
 			unk1: 2, //70 : 2,
@@ -1298,22 +1298,22 @@ function TDM(d) {
 		if (Object.keys(me).length != 0) {
 			me.currentbossId = currentbossId
 			fs.writeFileSync(path.join(backupPath, '_me.json'), JSON.stringify(me, null, '\t'))
-			log('_me.json 写入')
+			// log('_me.json 写入')
 		}
 
 		if (Object.keys(currentParty).length != 0) {
 			fs.writeFileSync(path.join(backupPath, '_currentParty.json'), JSON.stringify(currentParty, null, '\t'))
-			log('_currentParty.json 写入')
+			// log('_currentParty.json 写入')
 	    }
 
 		if(party.length != 0) {
 			fs.writeFileSync(path.join(backupPath, '_party.json'), JSON.stringify(party, null, '\t'))
-			log('_party.json 写入')
+			// log('_party.json 写入')
 		}
 
 		if(NPCs.length != 0) {
 			fs.writeFileSync(path.join(backupPath, '_NPCs.json'), JSON.stringify(NPCs, null, '\t'))
-			log('_NPCs.json 写入')
+			// log('_NPCs.json 写入')
 		}
 
 		if (Object.keys(Boss).length != 0) {
@@ -1321,7 +1321,7 @@ function TDM(d) {
 				if(Boss[key].enragedTimer)
 				Boss[key].enragedTimer = {}
 				fs.writeFileSync(path.join(backupPath, '_Boss.json'), JSON.stringify(Boss, null, '\t'))
-				log('_Boss.json 写入')
+				// log('_Boss.json 写入')
 			}
 		}
 
@@ -1332,47 +1332,47 @@ function TDM(d) {
 		var backupPath = path.join(__dirname, 'backup')
 
 		if (!fs.existsSync(backupPath)) {
-			log('备份目录不存在')
+			// log('备份目录不存在')
 			return
 		} try {
 			if (fs.existsSync(path.join(backupPath, '_me.json'))) {
-				log('_me.json 读取')
+				// log('_me.json 读取')
 				var data = fs.readFileSync(path.join(backupPath, '_me.json'), "utf-8")
 				me = {}
 				me = JSON.parse(data)
 				currentbossId = me.currentbossId
-				log('currentbossId ' + currentbossId)
+				// log('currentbossId ' + currentbossId)
 			}
 
 			if (fs.existsSync(path.join(backupPath, '_party.json'))) {
-				log('_party.json 读取')
+				// log('_party.json 读取')
 				data = fs.readFileSync(path.join(backupPath, '_party.json'), "utf-8")
 				party = []
 				party = JSON.parse(data)
 			}
 
 			if (fs.existsSync(path.join(backupPath, '_currentParty.json'))) {
-				log('_currentParty.json 读取')
+				// log('_currentParty.json 读取')
 				data = fs.readFileSync(path.join(backupPath, '_currentParty.json'), "utf-8")
 				currentParty = {}
 				currentParty = JSON.parse(data)
 			}
 
 			if (fs.existsSync(path.join(backupPath,'_Boss.json'))) {
-				log('_Boss.json 读取')
+				// log('_Boss.json 读取')
 				data = fs.readFileSync(path.join(backupPath, '_Boss.json'), "utf-8")
 				Boss = {}
 				Boss = JSON.parse(data)
 			}
 
 			if (fs.existsSync(path.join(backupPath, '_NPCs.json'))) {
-				log('_NPCs.json 读取')
+				// log('_NPCs.json 读取')
 				data = fs.readFileSync(path.join(backupPath, '_NPCs.json'), "utf-8")
 				NPCs = []
 				NPCs = JSON.parse(data)
 			}
 		} catch(err) {
-		    log(err)
+		    // log(err)
 	    }
 
     }
@@ -1445,9 +1445,9 @@ function TDM(d) {
 		return
 		if (!debug) return
 		let file = path.join(__dirname, '..', '..', 'tera-proxy-' + Date.now() + '.log')
-		//fs.appendFileSync(file, (fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code) + ' ' + data.toString('hex') + '\n')
-		//log ((fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code) + ' ' + data.toString('hex') + '\n')
-		log ((fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code))
+		// fs.appendFileSync(file, (fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code) + ' ' + data.toString('hex') + '\n')
+		// log ((fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code) + ' ' + data.toString('hex') + '\n')
+		// log ((fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code))
 	})*/
 
 	d.hook('S_LOGIN',10, sLogin)
