@@ -19,13 +19,13 @@ const errorHandler = {
 	},
 }
 
-function MonsterInfo(r,u){
-	let 	update = u,
+function MonsterInfo(r,u) {
+	let update = u,
 		region = 'NA',
 		doc = null,
 		monsterfile
 
-	if(r === 'EU') region = 'EU-EN'
+	if (r === 'EU') region = 'EU-EN'
 	else region = r
 	monsterfile = path.join(__dirname, '/monsters-'+ region + '.xml')
 
@@ -33,15 +33,12 @@ function MonsterInfo(r,u){
 		CheckFiles()
 	}
 
-	async function CheckFiles()
-	{
+	async function CheckFiles() {
 		if (!fs.existsSync(monsterfile)) {
 			var monsterUrl = `${TeraDataUrl}/monsters/monsters-${region}.xml`
-			try{
+			try {
 				var result = await update.download(monsterUrl,monsterfile)
-			}
-			catch(err)
-			{
+			} catch(err) {
 				console.log(err)
 			}
 		}
@@ -49,10 +46,7 @@ function MonsterInfo(r,u){
 		createXmlDoc()
 	}
 
-
-	function createXmlDoc()
-	{
-
+	function createXmlDoc() {
 		// moster xml file
 		const parser = new xmldom.DOMParser({ errorHandler })
 		doc = parser.parseFromString(fs.readFileSync(monsterfile, "utf-8"), 'text/xml')
@@ -62,32 +56,27 @@ function MonsterInfo(r,u){
 		}
 	}
 
-	this.getNPCInfoFromXml = function (npc)
-	{
+	this.getNPCInfoFromXml = function (npc) {
 		var zone,mon
 		if (!doc) return false
-		try{
+		try {
 			var zone = doc.getElementsByTagName("Zone")
-			for(var i in zone)
-			{
-				if(zone[i].getAttribute("id") == Number(npc.huntingZoneId)) {
+			for (var i in zone) {
+				if (zone[i].getAttribute("id") == Number(npc.huntingZoneId)) {
 					npc.zoneName = zone[i].getAttribute("name")
 					//console.log(npc.zoneName)
 					break
 				}
 			}
-
 			var mon = zone[i].getElementsByTagName("Monster")
-			for(var j in mon)
-			{
+			for (var j in mon) {
 				if(mon[j].getAttribute("id") == Number(npc.templateId)) {
 					npc.npcName = mon[j].getAttribute("name")
 					//console.log(npc.npcName)
 					break
 				}
 			}
-		}
-		catch(err){
+		} catch(err) {
 			return false
 		}
 		return true

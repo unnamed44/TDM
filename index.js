@@ -1,5 +1,5 @@
 /**
-* Created on 2018-05-21.
+* Created on 2018-09-22.
 */
 "use strict"
 const Command = require('command')
@@ -8,9 +8,10 @@ const path = require('path')
 const request = require('request')
 
 String.prototype.color = function (hexColor) { return `<font color='#${hexColor}'>${this}</font>` }
-String.prototype.stripHTML = function () { return this.replace(/<[^>]+>/g, '') }
 String.prototype.numberWithCommas = function () { return this.replace(/\B(?=(\d{3})+(?!\d))/g, ",") }
-Number.prototype.nFormatter =	function (digits) {
+String.prototype.stripHTML = function () { return this.replace(/<[^>]+>/g, '') }
+
+Number.prototype.nFormatter = function (digits) {
 	var si = [
 		{ value: 1, symbol: "" },
 		{ value: 1E3, symbol: "k" },
@@ -33,7 +34,6 @@ Number.prototype.nFormatter =	function (digits) {
 	return ret.slice(0,digits+1).replace(rx, "$1") + si[i].symbol;
 }
 
-
 function TDM(d) {
 
 	const UI = require('./ui')
@@ -52,53 +52,52 @@ function TDM(d) {
 	const MAX_PARTY_MEMBER = 30
 	const MAX_NPC = 100
 	const MAX_BOSS = 50
-
-	//# 0 = Hidden, 1 = Damage, 2 = Heal, 3 = MP
-	const SKILL_TYPE_HIDDEN=0
-	const SKILL_TYPE_DAMAGE=1
-	const SKILL_TYPE_HEAL=2
-	const SKILL_TYPE_MP=3
+	// # 0 = Hidden, 1 = Damage, 2 = Heal, 3 = MP
+	const SKILL_TYPE_HIDDEN = 0
+	const SKILL_TYPE_DAMAGE = 1
+	const SKILL_TYPE_HEAL = 2
+	const SKILL_TYPE_MP = 3
 
 	let enable = config.enable,
-	notice = config.notice,
-	notice_damage = config.notice_damage,
-	debug = config.debug,
-	leaving_msg = config.party_leaving_msg,
-	bossOnly = config.bossOnly,
-	region = config.region
-
+		region = config.region,
+		popup = config.popup,
+		leaving_msg = config.party_leaving_msg,
+		notice = config.notice,
+		notice_damage = config.notice_damage,
+		bossOnly = config.bossOnly,
+		hideNames = config.hideNames,
+		rankSystem = config.rankSystem,
+		allUsers = config.allUsers,
+		skillLog = config.skillLog,
+		debug = config.debug
 
 	let me = {},
-	Boss = {},
-	NPCs = [],
-	party = [],
-	currentParty = {},
-	lastDps= [],
-	sendCommand = [],
-	currentbossId = '',
-	currentZone = 0,
-	allUsers = false,
-	maxSize = false,
-	hideNames = false,
-	skillLog = true,
-	popup = true,
-	rankSystem = true,
-	recordFilename = ''
+		Boss = {},
+		NPCs = [],
+		party = [],
+		currentParty = {},
+		lastDps= [],
+		sendCommand = [],
+		currentbossId = '',
+		currentZone = 0,
+		maxSize = false,
+		recordFilename = ''
 
-	let enable_color = 'E69F00',
-	disable_color = '56B4E9'
+	let enable_color = '56B4E9',
+		disable_color = 'E69F00'
+
 	var update = new Update('version')
 	var skillInfo = new SkillInfo(region,update)
 	var monInfo = new MonsterInfo(region,update)
 	var managerUi = new ManagerUi(d)
+
 	update.checkUpdate()
 	skillInfo.checkFiles()
 	monInfo.checkFiles()
 	setMe()
-
 	// awesomnium web browser UI
 	ui.use(UI.static(__dirname + '/html'))
-	var router = require('./router/main')(ui,api,managerUi.api)
+	var router = require('./router/main')(ui, api, managerUi.api)
 
 	function getData(param) {
 		var paramRegex = /(\d*)(\D)/
@@ -107,24 +106,29 @@ function TDM(d) {
 		return data
 	}
 
-	function textDPSFormat(data)
-	{
+	function textDPSFormat(data) {
 		var battleInfo = data.shift()
-		data.sort(function(a,b) {return b.totalDamage - a.totalDamage})
+		data.sort(function(a, b) { return b.totalDamage - a.totalDamage })
 		data.unshift(battleInfo)
 		var dpsmsg = ''
 		dpsmsg += battleInfo.monsterBattleInfo.stripHTML() + '\n'
-		dpsmsg += 'NAME | DPS | Damage | Dmg Percent | Crit dmg (heal) \n'
-		for(var i in data){
-			//if(i == 0) continue
-			if(data[i].hasOwnProperty('enraged')) continue
+		dpsmsg += '名字 | DPS | 总伤害 | 比例 | 暴击率(治疗) \n'
+		for (var i in data) {
+			// if(i == 0) continue
+			if (data[i].hasOwnProperty('enraged')) continue
+
 			var name = '****'
-			if(!hideNames) name = data[i].name
-
+			if (!hideNames) {
+				name = data[i].name
+			}
+			
 			var crit = data[i].crit  + '% '.color(enable_color)
-			if(data[i].class == 6 || data[i].class == 7) crit += ' ' + data[i].healCrit  + '% '.color(disable_color)
-
-			dpsmsg 	+= name + ' | '+ data[i].dps.nFormatter(3) + ' | '
+			if (data[i].class == 6 || data[i].class == 7) {
+				crit += ' ' + data[i].healCrit  + '% '.color(disable_color)
+			}
+			
+			dpsmsg += name + ' | '
+			+ data[i].dps.nFormatter(3) + '/s | '
 			+ data[i].totalDamage.nFormatter(3) + ' | '
 			+ data[i].percentage  + '%'.color(enable_color) + ' | '
 			+ crit + '\n'
@@ -133,17 +137,25 @@ function TDM(d) {
 		return dpsmsg
 	}
 
-	function sendByEachLine(where,dpsjson)
-	{
-
+	function sendByEachLine(where, dpsjson) {
 		let i = 0
 		var msg = textDPSFormat(dpsjson).stripHTML()
 		let msgs = msg.split('\n'),
 		CounterId = setInterval( () => {
-			//log(msgs)
+			// log(msgs)
 			if (msgs.length > 0) {
-				if(typeof where === 'string') d.toServer('C_WHISPER', 1, {"target": where,"message": msgs.shift()})
-				if(typeof where === 'number') d.toServer('C_CHAT', 1, {"channel":where,"message": msgs.shift()})
+				if (typeof where === 'string') {
+					d.toServer('C_WHISPER', 1, {
+						"target": where,
+						"message": msgs.shift()
+					})
+				}
+				if (typeof where === 'number') {
+					d.toServer('C_CHAT', 1, {
+						"channel": where,
+						"message": msgs.shift()
+					})
+				}
 			} else {
 				clearInterval(CounterId)
 				CounterId = -1
@@ -151,117 +163,105 @@ function TDM(d) {
 		}, 1000)
 	}
 
-	function getRecordFile(fn)
-	{
-		try{
+	function getRecordFile(fn) {
+		try {
 			return JSON.parse( fs.readFileSync(path.join(__dirname,'history',fn), 'utf8') )
-		}
-		catch(err)
-		{
+		} catch (err) {
 			log(err)
 		}
 	}
 
-	function DeleteFile(fn)
-	{
+	function DeleteFile(fn) {
 		fs.unlinkSync(path.join(__dirname,'history',fn))
-		//log('deleted history file : ' + fn)
+		log('删除历史文件 ' + fn)
 	}
 
-	function recordsFiles()
-	{
-		try{
+	function recordsFiles() {
+		try {
 			const { join } = require('path')
 			const { lstatSync, readdirSync ,renameSync} = require('fs')
 			const isDirectory = source => lstatSync(source).isDirectory()
 			const getDataFiles = source =>
-				readdirSync(source).map(function(name){
-					if(!isDirectory(join(source, name)) && name.includes('.json'))
+				readdirSync(source).map(function(name) {
+					if (!isDirectory(join(source, name)) && name.includes('.json'))
 						return name
 				})
 
 			var files = getDataFiles(join(__dirname,'history'))
-			var fileNames = files.filter(function( element ) {
+			var fileNames = files.filter(function (element) {
 				   return element !== undefined;
 				});
 
-
-			for(;fileNames.length > MAX_RECORD_FILE;) {
+			for (;fileNames.length > MAX_RECORD_FILE;) {
 				DeleteFile(fileNames.shift())
 			}
-		}
-		catch(err)
-		{
+		} catch(err) {
 			log(err)
 		}
-		//log(files)
+		log('生成历史记录' + files)
 		return fileNames
 	}
 
 	function api(req, res) {
 		const api = getData(req.params[0])
 		var req_value = Number(api[0])
-		//log(api)
-		switch(api[1]) {
+		log(api)
+		switch (api[1]) {
 			case "A":
 				notice_damage += 1000000
-				if(notice_damage > 20000000) notice_damage = 1000000
-				send('Notice damage is ' + notice_damage.toString().numberWithCommas())
+				if (notice_damage > 20000000) notice_damage = 1000000
+					send('设定高伤害通知值 ' + notice_damage.toString().numberWithCommas().clr('56B4E9'))
 				return res.status(200).json(notice_damage.toString())
 			case "B":
 				debug = !debug
-				statusToChat('Debug mode',debug)
+				statusToChat('Debug模式 ', debug)
 				return res.status(200).json("ok")
 			case "C":
-				if(req_value == 1 || req_value == 2){
-					if(recordFilename !== ''){
-						sendByEachLine(req_value,getRecordFile(recordFilename))
+				if (req_value == 1 || req_value == 2) {
+					if (recordFilename !== '') {
+						sendByEachLine(req_value, getRecordFile(recordFilename))
 						return res.status(200).json('ok')
 					}
 					var data = membersDps(currentbossId)
-					if(data.length == 0 ) return res.status(200).json('ok')
-					sendByEachLine(req_value,data)
+					if (data.length == 0 ) return res.status(200).json('ok')
+					sendByEachLine(req_value, data)
 					return res.status(200).json('ok')
 				}
 
-				if(req_value == 3) return res.status(200).json(customCommand)
-				if(req_value == 4){
+				if (req_value == 3) return res.status(200).json(customCommand)
+				if (req_value == 4) {
 					var cmd = req.params[0].substring(2, req.params[0].length)
 					sendExec(cmd)
 					return res.status(200).json('ok')
 				}
-
 			case "D":
 				notice_damage = req_value
-				send('Notice damage is ' + notice_damage.toString().numberWithCommas())
+				send('设定高伤害通知值 ' + notice_damage.toString().numberWithCommas().clr('56B4E9'))
 				return res.status(200).json(notice_damage.toString())
 			case "E":
 				return res.status(200).json(require('./ui_config.json'))
 			case "F":
-				if(req_value == 1){ // delete file
+				if (req_value == 1) {	// delete file
 					var filename = req.params[0].substring(2, req.params[0].length)
-					//log('records system ' + filename)
+					log('记录系统 ' + filename)
 					DeleteFile(filename)
 					return res.status(200).json("deleted")
 				}
 				return res.status(200).json('ok')
 			case "I":
 				hideNames = !hideNames
-				statusToChat('hideNames',hideNames)
+				statusToChat('隐藏昵称 ', hideNames)
 				return res.status(200).json("ok")
 			case "L":
-				if(req_value == 1) // skill Log enable/disable
-				{
+				if (req_value == 1) {	// skill Log enable/disable
 					skillLog = !skillLog
-					statusToChat('skillLog',skillLog)
+					statusToChat('技能日志 ', skillLog)
 					return res.status(200).json("ok")
 				}
-				if(req_value == 2) // skill Log
-				{
+				if (req_value == 2) {	// skill Log
 					var name = req.params[0].substring(2, req.params[0].length)
-					for(var i in party)
-					{
-						if(party[i].name === name) {
+					for (var i in party) {
+						if (party[i].name === name) {
 							return res.status(200).json(party[i].Targets[currentbossId].skillLog)
 						}
 					}
@@ -270,72 +270,72 @@ function TDM(d) {
 				return res.status(200).json('ok')
 			case "N":
 				notice = !notice
-				statusToChat('notice damage',notice)
+				statusToChat('高伤害通知 ', notice)
 				return res.status(200).json("ok")
 			case "O":
 				bossOnly = !bossOnly
-				statusToChat('boss Only',bossOnly)
+				statusToChat('只算BOSS ', bossOnly)
 				return res.status(200).json("ok")
 			case "P":
 				popup = false
-				statusToChat('dps popup',popup)
+				statusToChat('DPS面板 ', popup)
 				return res.status(200).json("ok")
 			case "Q":
 				update.update()
-				return res.status(200).json("restart proxy after downloads finish.")
+				return res.status(200).json('下载完成后重新启动代理')
 			case "R":
 				// Refresh DPS window
-				if(req_value == 1){
+				if (req_value == 1) {
 					var data = membersDps(currentbossId)
-					if(data.length == 0) return res.status(200).json('')
+					if (data.length == 0) return res.status(200).json('')
 					var battleInfo = data.shift()
-					data.sort(function(a,b) {return b.totalDamage - a.totalDamage})
+					data.sort(function (a,b) {return b.totalDamage - a.totalDamage})
 					data.unshift(battleInfo)
-					if(sendCommand.length > 0){
+					if (sendCommand.length > 0) {
 						var combined = data.concat(sendCommand)
 						sendCommand = []
 						return res.status(200).json(combined)
 					}
 					else return res.status(200).json(data)
 				}
-				//reank system
-				if(req_value == 2){
+				// reank system
+				if (req_value == 2) {
 					rankSystem = !rankSystem
-					statusToChat('rankSystem',rankSystem)
+					statusToChat('上传数据 ', rankSystem)
 					return res.status(200).json("ok")
 				}
-				//records system
-				if(req_value == 3){
-					//log('records system')
+				// records system
+				if (req_value == 3) {
+					log('记录系统')
 					return res.status(200).json(recordsFiles())
 				}
-				if(req_value == 4){
+				if (req_value == 4) {
 					recordFilename = req.params[0].substring(2, req.params[0].length)
-					//log('records system ' + filename)
+					log('记录系统 ' + filename)
 					return res.status(200).json(getRecordFile(recordFilename))
 				}
-				if(req_value == 5){
+				if (req_value == 5) {
 					recordFilename = ''
 					return res.status(200).json("ok")
 				}
 			case "S":
-				//reset
-				if(req_value == 100){
+				// reset
+				if (req_value == 100) {
 					removeAllPartyDPSdata()
 					return res.status(200).json('ok')
 				}
 				// skill info
 				var _si = skillInfo.getSkillsJson(classIdToName(req_value))
-				//var _si = skillInfo.getPetsSkillsJson().concat(skillInfo.getSkillsJson(classIdToName(req_value)))
+				// var _si = skillInfo.getPetsSkillsJson().concat(skillInfo.getSkillsJson(classIdToName(req_value)))
 				return res.status(200).json(_si)
 			case "U":
-				if(!debug) {
-					toChat('This button is only for debug mode')
+				if (!debug) {
+					toChat('此按钮仅用于调试模式')
 					return res.status(200).json("no")
 				}
-				allUsers = maxSize =  !allUsers
+				allUsers = maxSize = !allUsers
 				ui.open()
-				statusToChat('Count all dps',allUsers)
+				statusToChat('全部DPS ', allUsers)
 				return res.status(200).json("ok")
 			case "V":
 				var ver = []
@@ -343,263 +343,194 @@ function TDM(d) {
 				return res.status(200).json(ver)
 			case "W":
 				var wname = req.params[0].substring(2, req.params[0].length)
-				if(wname === '') return res.status(200).json('ok')
-				if(recordFilename !== ''){
+				if (wname === '') return res.status(200).json('ok')
+				if (recordFilename !== '') {
 					sendByEachLine(wname,getRecordFile(recordFilename))
 					return res.status(200).json('ok')
-				}
-				else{
+				} else {
 					var data = membersDps(currentbossId)
-					if( data.length == 0 ) return res.status(200).json('ok')
+					if ( data.length == 0 ) return res.status(200).json('ok')
 					sendByEachLine(wname,data)
 					return res.status(200).json('ok')
 				}
 				return res.status(200).json('ok')
 			case "X":
-				if(!debug) {
-					toChat('This button is only for debug mode')
+				if (!debug) {
+					toChat('此按钮仅用于调试模式')
 					return res.status(200).json("no")
 				}
-				sendExec('reload TDM')
+				sendExec('重新加载TDM')
 				return res.status(200).json("ok")
 			case "Y":
 				return res.status(200).json(getSettings())
 			case "Z":
-				if(maxSize) return res.status(200).json('320,700')
-				else return res.status(200).json('320,250')
+				if (maxSize) return res.status(200).json('320,700')
+				else return res.status(200).json('280,240')
 			default:
 				return res.status(404).send("404")
 		}
 	}
-
 	// packet handle
-	function sLogin(e){
+	function sLogin(e) {
 		me = {
-			"gameId":e.gameId.toString(),
-			"serverId":e.serverId.toString(),
-			"playerId":e.playerId.toString(),
-			"templateId":e.templateId.toString(),
-			"name":e.name.toString(),
-			"class":Number((e.templateId - 1).toString().slice(-2))
+			"gameId": e.gameId.toString(),
+			"serverId": e.serverId.toString(),
+			"playerId": e.playerId.toString(),
+			"templateId": e.templateId.toString(),
+			"name": e.name.toString(),
+			"class": Number((e.templateId - 1).toString().slice(-2))
 		}
 		putMeInParty(me)
 	}
 
-	function sSpawnMe(e){
-		me.gameId=e.gameId.toString()
+	function sSpawnMe(e) {
+		me.gameId = e.gameId.toString()
 		if (!popup) return
 		ui.open()
-		//log('sSpawnMe :' + currentbossId)
+		// log('sSpawnMe :' + currentbossId)
 	}
 
-
-	function sLoadTopo(e){
+	function sLoadTopo(e) {
 		// gg reset
-		//if(e.zone === 9714) d.toServer('C_RESET_ALL_DUNGEON', 1, {})
+		// if(e.zone === 9714) d.toServer('C_RESET_ALL_DUNGEON', 1, {})
 		currentZone = e.zone
 	}
 
-	function sAnswerInteractive(e){
-		if(debug){
+	function sAnswerInteractive(e) {
+		if (debug) {
 			d.send('C_REQUEST_USER_PAPERDOLL_INFO', 1, {
 				name: e.name
 			})
 		}
 	}
 
-	function sBossGageInfo(e){
+	function sBossGageInfo(e) {
 		// notified boss before battle
 		var id = e.id.toString()
 		var hpMax = e.maxHp.toNumber()
 		var hpCur = e.curHp.toNumber()
-		//if(!isBoss(id)) setBoss(id)
-		if(!Boss[id]) setBoss(id)
+		// if(!isBoss(id)) setBoss(id)
+		if (!Boss[id]) setBoss(id)
 		Boss[id].hpPer = Math.floor(hpCur * 100 / hpMax)
 	}
 
-	function setBoss(id)
-	{
+	function setBoss(id) {
 		Boss[id] = {
-			"enraged" : false,
-			"etimer" : 0,
-			"nextEnrage" : 0,
-			"hpPer" : 0,
-			"enragedTimer" : 0,
-			"estatus" : ''
+			"enraged": false,
+			"etimer": 0,
+			"nextEnrage": 0,
+			"hpPer": 0,
+			"enragedTimer": 0,
+			"estatus": ''
 		}
 
-		if(Object.keys(Boss).length >= MAX_BOSS){
-			for(var key in Boss) {
+		if (Object.keys(Boss).length >= MAX_BOSS) {
+			for (var key in Boss) {
 				delete Boss[key]
 				break
 			}
 		}
 	}
 
-	function isBoss(id)
-	{
-		if(!Boss[id]) return false
+	function isBoss(id) {
+		if (!Boss[id]) return false
 		else return true
 	}
 
-	function sSpawnNpc(e){
-		var newNPC = {
-			'gameId' : e.gameId.toString(),
-			'owner' : e.owner.toString(),
-			'huntingZoneId' : e.huntingZoneId,
-			'templateId' : e.templateId,
-			'zoneName' : 'unknown',
-			'npcName' : e.npcName,
-			'reset' : false,
-			'battlestarttime' : 0,
-			'battleendtime' : 0,
-			'totalPartyDamage' : 0,
-			'dpsmsg' : ''
+	function sDespawnNpc(e) {
+		var id = e.gameId.toString()
+		var npcIndex = getNPCIndex(id)
+		var duration = 0
+		if (npcIndex <0) return
+		// remove : no battle, pet
+		if (NPCs[npcIndex].battlestarttime == 0 || NPCs[npcIndex].owner !== "0") {
+			NPCs.splice(npcIndex,1)
+			return
 		}
-		if(getNPCIndex(e.gameId.toString()) < 0)
-		{
-			if(NPCs.length >= MAX_NPC) NPCs.shift()
+
+		if (NPCs[npcIndex].battleendtime != 0) {
+			log('DOUBLE sDespawnNpc ERROR :' + NPCs[npcIndex].npcName)
+			return
+		}
+
+		NPCs[npcIndex].battleendtime = Date.now()
+		duration = NPCs[npcIndex].battleendtime - NPCs[npcIndex].battlestarttime
+
+		if (isBoss(id)) {
+			Boss[id].enraged = false
+			Boss[id].etimer = 0
+			Boss[id].estatus = ''
+		}
+
+		var dpsmsg = membersDps(id)
+
+		if (!popup) {
+			toChat(textDPSFormat(dpsmsg))
+		}
+
+		if (isBoss(id) && Boss[id].hpPer > 0)
+			log('Boss消失, templateId zoneId ' + NPCs[npcIndex].templateId +':'+ NPCs[npcIndex].huntingZoneId + ' HP :' + Boss[id].hpPer)
+
+		// GG
+		if (NPCs[npcIndex].huntingZoneId === 713 && NPCs[npcIndex].templateId === 81301 && Boss[id].hpPer <= 20) {
+			Boss[id].hpPer = 0
+		}
+
+		// 듀리안
+		if (NPCs[npcIndex].huntingZoneId === 468 && NPCs[npcIndex].templateId === 2000 && Boss[id].hpPer <= 10) {
+			Boss[id].hpPer = 0
+		}
+		if (NPCs[npcIndex].huntingZoneId === 768 && NPCs[npcIndex].templateId === 2000 && Boss[id].hpPer <= 10) {
+			Boss[id].hpPer = 0
+		}
+
+		if (isBoss(id) && Boss[id].hpPer <= 0 && dpsmsg !== '') {
+			log('添加技能日志 ' + id)
+			addSkillLog(dpsmsg,id)
+			dpsmsg[0].battleendtime = NPCs[npcIndex].battleendtime
+			saveDpsData(dpsmsg)
+			if (rankSystem) {
+				sendDPSData(dpsmsg)
+			}
+		}
+		NPCs[npcIndex].dpsmsg = dpsmsg
+	}
+
+	function sSpawnNpc(e) {
+		var newNPC = {
+			'gameId': e.gameId.toString(),
+			'owner': e.owner.toString(),
+			'huntingZoneId': e.huntingZoneId,
+			'templateId': e.templateId,
+			'zoneName': 'unknown',
+			'npcName': e.npcName,
+			'reset': false,
+			'battlestarttime': 0,
+			'battleendtime': 0,
+			'totalPartyDamage': 0,
+			'dpsmsg': ''
+		}
+		if (getNPCIndex(e.gameId.toString()) < 0) {
+			if (NPCs.length >= MAX_NPC) NPCs.shift()
 			monInfo.getNPCInfoFromXml(newNPC)
 			NPCs.push(newNPC)
-			//log('sSpawnNpc '+newNPC.zoneName)
+			log('sSpawnNpc ' + newNPC.zoneName)
 		}
 	}
 
-	function binarySearchSkillName(d, t, s , e)
-	{
-		const m = Math.floor((s + e)/2);
-		var target = Number(t)
-		var id = Number(d[m].id)
-		if (target == id) return d[m].skillName;
-		if (e - 1 == s) return 'undefined'
-	  	if (target > id) return binarySearchSkillName(d,t,m,e);
-	  	if (target < id) return binarySearchSkillName(d,t,s,m);
-	}
-
-	function skillIdToName(id,_skillInfo)
-	{
-		if(_skillInfo.length == 0) return 'skill tsv missing'
-		var sid = id.slice(1,id.length)
-		return binarySearchSkillName(_skillInfo, sid, 0, _skillInfo.length - 1)
-	}
-
-	function dpsStastic(slog,sInfo)
-	{
-		var s= []
-		// set skill name
-		slog.forEach((sl) =>{
-			sl['name'] = skillIdToName(sl.skillId,sInfo)
-		})
-
-		slog.forEach((t) =>{
-			var id = t.skillId
-			var name = t.name
-			var damage = t.damage
-			var c = t.crit
-			var found = false
-			// search skill id and insert data
-			for (var j in s)
-			{
-				var stas = s[j]
-				if(stas.name === name)
-				{
-					stas.wDamage = c ? stas.wDamage : stas.wDamage + damage
-					stas.rDamage = c ? stas.rDamage + damage : stas.rDamage
-					stas.tDamage = stas.rDamage + stas.wDamage
-					stas.crit = c ? stas.crit + 1 : stas.crit,
-					stas.hitCount = stas.hitCount + 1
-					//console.log( stas.wDamage + ' ' + stas.wDamage)
-					found = true
-					break
-				}
-			}
-			// not found push a new entity
-			if(!found){
-				var d = {
-					'name' : name,
-					'wDamage' : c ? 0 : damage,
-					'rDamage' : c ? damage : 0,
-					'tDamage' : damage,
-					'crit' : c ? 1 : 0,
-					'hitCount' : 1
-				}
-
-				s.push(d)
-				//console.log('pushed ' + id)
-			}
-		})
-
-
-		//console.log(s)
-		// sort by total damage
-		s.sort(function(a,b) {
-			return b.tDamage - a.tDamage
-		})
-
-		var html = '<table class="stastics"><tr><th rowspan=2>Skill Name</th><th>White</th><th>Red</th><th>Total</th><th>Crit</th></tr>'
-		html += '<tr><th>Avrage</th><th>Avrage</th><th>Avrage</th><th>Red/Total</th></tr>'
-		//console.log(s)
-		var avg=0
-		for(var i in s){
-			//console.log(s[i].wDamage +' '+ s[i].rDamage)
-			var t = s[i].wDamage + s[i].rDamage
-			html+='<tr>'
-			html+='<td>' + s[i].name + '</td>'
-			avg = 0
-			if(s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit))
-			html+='<td>' +s[i].wDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
-			avg = 0
-			if(s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit))
-			html+='<td>' +s[i].rDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
-			avg = 0
-			if(s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount))
-			html+='<td>' +s[i].tDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
-			html+='<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>'+s[i].crit+'/'+s[i].hitCount+'</td>'
-			html+='</tr>'
+	function sNpcOccupierInfo(e) {
+		if (e.cid.toNumber() == 0){
+			// log(e)
+			log('sNpcOccupierInfo 重置 ' + e.cid)
+			resetNpc(e)
 		}
-		html+='</table>'
-		s = []
-		return html
 	}
 
-	function sendDPSData(data)
-	{
-		//log(data)
-		request.post({
-			headers: {'content-type': 'application/json'},
-			url: RANK_SERVER + '/uploadDps/test',
-			//url: 'http://localhost:3000/uploadDps/test',
-			form: data
-		}, function(error, response, body){
-			//log(body)
-			if(typeof body === 'undefined') log(error)
-		})
-	}
-
-	function saveDpsData(data)
-	{
-		// save first
-		var json = JSON.stringify(data, null, '\t')
-
-		var filename = path.join(__dirname,'history',Date.now()+'.json')
-
-		if (!fs.existsSync(path.join(__dirname,'history'))) fs.mkdirSync(path.join(__dirname,'history'))
-
-		fs.writeFile(filename, json, 'utf8', (err) => {
-			// throws an error, you could also catch it here
-			if (err) throw err
-			// success case, the file was saved
-			//log('dps data saved!')
-		})
-
-	}
-
-	function sNpcStatus(e){
-		if(!isBoss(e.creature.toString())) return
+	function sNpcStatus(e) {
+		if (!isBoss(e.creature.toString())) return
 		var id = e.creature.toString()
-
 		if (e.enraged === 1 && !Boss[id].enraged) {
-			//log(Boss[id].hpPer + ' Eraged !! not set yet ' + id + ' '+ e.target)
+			log(Boss[id].hpPer + 'Eraged !! 尚未设置 ' + id + ' '+ e.target)
 			Boss[id].etimer = 36
 			setEnragedTime(id,null)
 			Boss[id].enragedTimer = setInterval( () => {
@@ -608,9 +539,9 @@ function TDM(d) {
 				else log('Boss[id] === undefined')
 			}, 1000)
 		} else if (e.enraged === 1 && Boss[id].enraged) {
-			//log(Boss[id].hpPer + ' Eraged but already set ' + id + ' '+ e.target)
+			log(Boss[id].hpPer + ' Eraged 但已设置 ' + id + ' '+ e.target)
 		} else if (e.enraged === 0 && Boss[id].enraged) {
-			//log('Stopped enraged ' + id + ' '+ e.target)
+			log('停止愤怒 ' + id + ' '+ e.target)
 			if (Boss[id].hpPer === 100) return
 			Boss[id].etimer = 0
 			setEnragedTime(id,Boss[id].enragedTimer)
@@ -618,50 +549,240 @@ function TDM(d) {
 		}
 	}
 
-	function setEnragedTime(gId,counter)
-	{
-		//log(Boss[gId])
+	function setEnragedTime(gId, counter) {
+		log(Boss[gId])
 		if (Boss[gId].etimer > 0) {
-			//log(Boss[gId].etimer + ' HP: ' + Boss[gId].hpPer)
+			log(Boss[gId].etimer + ' HP: ' + Boss[gId].hpPer)
 			Boss[gId].enraged = true
-			Boss[gId].estatus = 'Boss Enraged'.color('FF0000') + ' ' + `${Boss[gId].etimer}`.color('FFFFFF') + ' seconds left'.color('FF0000')
+			Boss[gId].estatus = 'Boss愤怒'.color('FF0000') + ' ' + `${Boss[gId].etimer}`.color('FFFFFF') + ' 秒剩余'.color('FF0000')
 			Boss[gId].etimer--
 		} else {
 			clearInterval(counter)
 			Boss[gId].etimer = 0
 			Boss[gId].enraged = false
 			Boss[gId].nextEnrage = (Boss[gId].hpPer > 10) ? (Boss[gId].hpPer - 10) : 0
-			Boss[gId].estatus = 'Next enraged at ' + Boss[gId].nextEnrage.toString().color('FF0000') + '%'
+			Boss[gId].estatus = '下次愤怒 ' + Boss[gId].nextEnrage.toString().color('FF0000') + '%'
 			if(Boss[gId].nextEnrage == 0) Boss[gId].estatus = ''
-			//log(Boss[gId].hpPer + ' cleared enraged timer by Timer')
-			//log('==========================================================')
+			log(Boss[gId].hpPer + ' 清除激怒计时器')
+			log('==========================================================')
 		}
 	}
 
-	//party handler
-	function sLeavePartyMember(e){
+	function resetNpc(e) {
+		var id = e.npc.toString()
+		var npcIndex = getNPCIndex(id)
+		var duration = 0
+		if (npcIndex <0) return
+		// remove : no battle, pet
+		if (NPCs[npcIndex].battlestarttime == 0 || NPCs[npcIndex].owner !== "0") {
+			NPCs.splice(npcIndex,1)
+			return
+		}
+
+		if (NPCs[npcIndex].battleendtime != 0) {
+			log('DOUBLE resetNpc ERROR :' + NPCs[npcIndex].npcName)
+			return
+		}
+
+		NPCs[npcIndex].battleendtime = Date.now()
+		duration = NPCs[npcIndex].battleendtime - NPCs[npcIndex].battlestarttime
+		NPCs[npcIndex].reset = true
+
+		if (isBoss(id)) {
+			Boss[id].enraged = false
+			Boss[id].etimer = 0
+			Boss[id].estatus = ''
+		}
+
+		var dpsmsg = membersDps(id)
+
+		if (isBoss(id) && Boss[id].hpPer > 0)
+			log('Boss重置, templateId zoneId' + NPCs[npcIndex].templateId +':'+ NPCs[npcIndex].huntingZoneId + ' HP :' + Boss[id].hpPer)
+
+		// GG
+		if (NPCs[npcIndex].huntingZoneId === 713 && NPCs[npcIndex].templateId === 81301 && Boss[id].hpPer <= 20){
+			Boss[id].hpPer = 0
+		}
+		// 듀리안
+		if (NPCs[npcIndex].huntingZoneId === 468 && NPCs[npcIndex].templateId === 2000 && Boss[id].hpPer <= 10){
+			Boss[id].hpPer = 0
+		}
+		if (NPCs[npcIndex].huntingZoneId === 768 && NPCs[npcIndex].templateId === 2000 && Boss[id].hpPer <= 10){
+			Boss[id].hpPer = 0
+		}
+
+		if (isBoss(id) && Boss[id].hpPer <= 0 && dpsmsg !== '') {
+			log('添加技能日志 ' + id)
+			addSkillLog(dpsmsg,id)
+			dpsmsg[0].battleendtime = NPCs[npcIndex].battleendtime
+			saveDpsData(dpsmsg)
+			// if(rankSystem) sendDPSData(dpsmsg)
+		}
+		NPCs[npcIndex].dpsmsg = dpsmsg
 	}
 
-	function sLeaveparty(){
+	function binarySearchSkillName(d, t, s , e) {
+		const m = Math.floor((s + e)/2);
+		var target = Number(t);
+		var id = Number(d[m].id);
+		if (target == id) return d[m].skillName;
+		if (e - 1 == s) return 'undefined';
+	  	if (target > id) return binarySearchSkillName(d,t,m,e);
+	  	if (target < id) return binarySearchSkillName(d,t,s,m);
+	}
+
+	function skillIdToName(id, _skillInfo) {
+		if(_skillInfo.length == 0) return 'skill tsv missing'
+		var sid = id.slice(1,id.length)
+		return binarySearchSkillName(_skillInfo, sid, 0, _skillInfo.length - 1)
+	}
+
+	function dpsStastic(slog, sInfo) {
+		var s= []
+		// set skill name
+		slog.forEach((sl) => {
+			sl['name'] = skillIdToName(sl.skillId, sInfo)
+		})
+
+		slog.forEach((t) => {
+			var id = t.skillId
+			var name = t.name
+			var damage = t.damage
+			var c = t.crit
+			var found = false
+			// search skill id and insert data
+			for (var j in s) {
+				var stas = s[j]
+				if (stas.name === name) {
+					stas.wDamage = c ? stas.wDamage : stas.wDamage + damage
+					stas.rDamage = c ? stas.rDamage + damage : stas.rDamage
+					stas.tDamage = stas.rDamage + stas.wDamage
+					stas.crit = c ? stas.crit + 1 : stas.crit,
+					stas.hitCount = stas.hitCount + 1
+					// console.log( stas.wDamage + ' ' + stas.wDamage)
+					found = true
+					break
+				}
+			}
+			// not found push a new entity
+			if (!found) {
+				var d = {
+					'name': name,
+					'wDamage': c ? 0 : damage,
+					'rDamage': c ? damage : 0,
+					'tDamage': damage,
+					'crit': c ? 1 : 0,
+					'hitCount': 1
+				}
+
+				s.push(d)
+				// console.log('pushed ' + id)
+			}
+		})
+		// console.log(s)
+		// sort by total damage
+		s.sort(function (a, b) {
+			return b.tDamage - a.tDamage
+		})
+		var html = `<table class="stastics">
+					<tr>
+						<th rowspan=2>技能名称</th>
+						<th>白字</th>
+						<th>红字</th>
+						<th>合计</th>
+						<th>暴击率</th>
+					</tr>`
+		html += `<tr>
+					<th>平均</th>
+					<th>平均</th>
+					<th>平均</th>
+					<th>红字/合计</th>
+				</tr>`
+		// console.log(s)
+		var avg = 0
+		for (var i in s) {
+			// console.log(s[i].wDamage +' '+ s[i].rDamage)
+			var t = s[i].wDamage + s[i].rDamage
+			html += '<tr>'
+			html += '<td>' + s[i].name + '</td>'
+			avg = 0
+			if (s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit))
+			html += '<td>' + s[i].wDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
+			avg = 0
+			if (s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit))
+			html+='<td>' + s[i].rDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
+			avg = 0
+			if (s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount))
+			html += '<td>' + s[i].tDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
+			html += '<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>' + s[i].crit + '/' + s[i].hitCount + '</td>'
+			html += '</tr>'
+		}
+		html += '</table>'
+		s = []
+		return html
+	}
+
+	function sendDPSData(data) {
+		log(data)
+		request.post({
+			headers: {'content-type': 'application/json'},
+			url: RANK_SERVER + '/uploadDps/test',
+			// url: 'http://localhost:3000/uploadDps/test',
+			form: data
+		}, function(error, response, body) {
+			log(body)
+			if (typeof body === 'undefined') log(error)
+		})
+	}
+
+	function saveDpsData(data) {
+		// save first
+		var json = JSON.stringify(data, null, '\t')
+		var filename = path.join(__dirname,'history',Date.now()+'.json')
+		if (!fs.existsSync(path.join(__dirname,'history'))) fs.mkdirSync(path.join(__dirname,'history'))
+		fs.writeFile(filename, json, 'utf8', (err) => {
+			// throws an error, you could also catch it here
+			if (err) throw err
+			// success case, the file was saved
+			log('保存DPS数据')
+		})
+	}
+	//party handler
+	function sDeadLocation(e) {
+		if (currentbossId) {
+			for (var i in party) {
+				if (party[i].gameId === e.gameId.toString()) {
+					if(typeof party[i].Targets[currentbossId] !== 'undefined') {
+						party[i].Targets[currentbossId].dead++
+					} else {
+						log(e)
+					}
+				}
+			}
+		}
+	}
+
+	function sLeaveparty() {
 		currentParty = {}
 	}
 
-	function sPartyMemberList(e){
+	function sLeavePartyMember(e) {
+	}
+
+	function sPartyMemberList(e) {
 		allUsers = false
 		currentParty = {}
 		e.members.forEach(member => {
-
 			currentParty[member.gameId.toString()] = member.name
-
 			var newPartyMember = {
-				'gameId' : member.gameId.toString(),
-				'serverId' : member.serverId.toString(),
-				'playerId' : member.playerId.toString(),
-				'name' : member.name,
-				'class' : member.class,
-				'Targets' : {}
+				'gameId': member.gameId.toString(),
+				'serverId': member.serverId.toString(),
+				'playerId': member.playerId.toString(),
+				'name': member.name,
+				'class': member.class,
+				'Targets': {}
 			}
-			if(!isPartyMember(member.gameId.toString(), member.name)) {
+			if (!isPartyMember(member.gameId.toString(), member.name)) {
 				for(;party.length >= MAX_PARTY_MEMBER;) {
 					party.shift()
 				}
@@ -670,38 +791,37 @@ function TDM(d) {
 		})
 	}
 
-	function sDespawnUser(e){
+	function sDespawnUser(e) {
 		// only allUsers mode
-		if(!allUsers) return
+		if (!allUsers) return
 		var id = e.gameId.toString()
-		for(var i in party){
-			if(id===party[i].gameId) {
+		for (var i in party) {
+			if (id === party[i].gameId) {
 				party.splice(i,1)
 				break
 			}
 		}
 	}
 
-	function sSpawnUser(e){
-		if(!allUsers) return
-		//var uclass = Number((e.templateId - 1).toString().slice(-2)).toString()
+	function sSpawnUser(e) {
+		if (!allUsers) return
+		// var uclass = Number((e.templateId - 1).toString().slice(-2)).toString()
 		var uclass = (e.templateId - 10101) % 100;
 		var newPartyMember = {
-			'gameId' : e.gameId.toString(),
-			'serverId' : e.serverId.toString(),
-			'playerId' : e.playerId.toString(),
-			'name' : e.name,
-			'class' : uclass,
+			'gameId': e.gameId.toString(),
+			'serverId': e.serverId.toString(),
+			'playerId': e.playerId.toString(),
+			'name': e.name,
+			'class': uclass,
 			'Targets': {}
 		}
-		if(!isPartyMember(e.gameId.toString(),e.name) ) {
+		if (!isPartyMember(e.gameId.toString(), e.name)) {
 			party.push(newPartyMember)
 		}
 	}
 
-	function removeAllPartyDPSdata()
-	{
-		//log('removeAllPartyDPSdata')
+	function removeAllPartyDPSdata() {
+		log('移除所有队员数据')
 		lastDps = []
 		currentbossId = ''
 
@@ -715,45 +835,46 @@ function TDM(d) {
 		})
 	}
 
-	function leaveParty()
-	{
-		if(leaving_msg!=''){
+	function leaveParty() {
+		if (leaving_msg!='') {
 			d.toServer('C_CHAT', 1, {
 				"channel": 1,
 				"message": leaving_msg
 			})
 		}
-		setTimeout(function(){ d.toServer('C_LEAVE_PARTY', 1, { }) }, 1000)
+		setTimeout(
+			function() {
+				d.toServer('C_LEAVE_PARTY', 1, {
+				})
+			}, 1000
+		)
 	}
 
-	function putMeInParty(m)
-	{
+	function putMeInParty(m) {
 		var newPartyMember = {
-			'gameId' : m.gameId,
-			'playerId' : m.playerId,
-			'serverId' : m.serverId,
-			'templateId' : m.templateId,
-			'name' : m.name,
-			'class' : m.class,
+			'gameId': m.gameId,
+			'playerId': m.playerId,
+			'serverId': m.serverId,
+			'templateId': m.templateId,
+			'name': m.name,
+			'class': m.class,
 			'Targets': {}
 		}
-
-		if(!isPartyMember(me.gameId,m.name)) {
+		if (!isPartyMember(me.gameId, m.name)) {
 			party.push(newPartyMember)
 		}
 	}
 
-	function getIndexOfPetOwner(sid,oid)
-	{
-		for(var i in party){
-			for(var j in NPCs){
-				if(NPCs[j].owner===party[i].gameId){
+	function getIndexOfPetOwner(sid, oid) {
+		for (var i in party) {
+			for (var j in NPCs) {
+				if (NPCs[j].owner === party[i].gameId) {
 					// pet attack
-					if(NPCs[j].gameId===sid) {
+					if (NPCs[j].gameId === sid) {
 						return [i,NPCs[j].npcName]
 					}
 					// pet projectile
-					if(NPCs[j].gameId===oid) {
+					if (NPCs[j].gameId === oid) {
 						return [i,NPCs[j].npcName]
 					}
 				}
@@ -762,153 +883,136 @@ function TDM(d) {
 		return -1
 	}
 
-	function getNPCIndex(gId){
-		for(var i in NPCs){
-			if(gId===NPCs[i].gameId) return i
+	function getNPCIndex(gId) {
+		for (var i in NPCs) {
+			if (gId === NPCs[i].gameId) return i
 		}
 		return -1
 	}
 
-	function isPartyMember(gId,name){
-		for(var i in party){
-			if(name===party[i].name) { // TODO : need to check server ID
+	function isPartyMember(gId, name) {
+		for (var i in party) {
+			if (name === party[i].name) { // TODO : need to check server ID
 				// set new gId
 				party[i].gameId = gId
 				var removed = party.splice(i,1)
 				i--
 			}
 		}
-
-		if(typeof removed !== 'undefined'){
+		if (typeof removed !== 'undefined') {
 			party.push(removed[0])
 			return true
 		}
-
-		for(var i in party){
-			if(gId===party[i].gameId) return true
+		for (var i in party) {
+			if (gId === party[i].gameId) return true
 		}
 		return false
 	}
 
-	function getPartyMemberIndex(id){
-		for(var i in party){
-			if(id===party[i].gameId) return i
+	function getPartyMemberIndex(id) {
+		for (var i in party) {
+			if (id === party[i].gameId) return i
 		}
 		return -1
 	}
 
-	function syncParty()
-	{
-		party.forEach(member =>{
-			if(typeof currentParty[member.gameId] === 'undefiend' && member.gameId !== me.gameId) member.Targets = {}
+	function syncParty() {
+		party.forEach(member => {
+			if (typeof currentParty[member.gameId] === 'undefiend' && member.gameId !== me.gameId) {
+				member.Targets = {}
+			}
 		})
 	}
-
 	// aggro
-	function sNpcTargetuser(e){
-		if(!e.status) return
+	function sNpcTargetuser(e) {
+		if (!e.status) return
 		var targetId = e.target.toString()
 		var npcIndex = getNPCIndex(targetId)
-		if(bossOnly && !isBoss(targetId)) return
-		if(npcIndex < 0) return
-
+		if (bossOnly && !isBoss(targetId)) return
+		if (npcIndex < 0) return
 		var flag = setCurBoss(targetId)
-
-		if(!flag && !NPCs[npcIndex].reset)
-		{
-			log('no reset ' + targetId)
+		if(!flag && !NPCs[npcIndex].reset) {
+			log('未重置 ' + targetId)
 			return
 		}
-
 		log('sNpcTargetuser ' + targetId + ' ' + e.status)
-
 		NPCs[npcIndex].battlestarttime = Date.now()
 		NPCs[npcIndex].battleendtime = 0
 		NPCs[npcIndex].reset = false
 		NPCs[npcIndex].dpsmsg = ''
-		if(isBoss(targetId)) party.forEach((member) => { member.Targets = {} })
+		if (isBoss(targetId))
+			party.forEach((member) => { member.Targets = {} })
 	}
 
-	function setCurBoss(gId)
-	{
-		if(currentbossId === gId) return false
-		if(bossOnly && !isBoss(gId)) return false
-
-		if(isBoss(gId) && currentZone != 950) syncParty()
-
+	function setCurBoss(gId) {
+		if (currentbossId === gId) return false
+		if (bossOnly && !isBoss(gId)) return false
+		if (isBoss(gId) && currentZone != 950) syncParty()
 		currentbossId = gId
-		//log('setCurBoss currentbossId' + currentbossId)
+		log('setCurBoss currentbossId' + currentbossId)
 		return true
 	}
 
-	function setMe()
-	{
-		if(party.length == 0) {
+	function setMe() {
+		if (party.length == 0) {
 			readBackup()
-			if(party.length == 0) return
-			//log(me)
+			if (party.length == 0) return
+			log(me)
 		}
 	}
-
 	// damage handler : Core
-	function sEachSkillResult(e){
-		if(!enable) return
-		//log('me.gameId :'+ me.gameId + '->'+ e.source.toString() +' ->'+ e.owner.toString())
-		//log('[DPS] : ' + e.damage + ' target : ' + e.target.toString())
+	function sEachSkillResult(e) {
+		if (!enable) return
+		log('me.gameId :' + me.gameId + '->' + e.source.toString() + ' ->' + e.owner.toString())
+		log('[DPS] : ' + e.damage + ' 目标 : ' + e.target.toString())
 		var memberIndex = getPartyMemberIndex(e.source.toString())
 		var sourceId = e.source.toString()
 		var target = e.target.toString()
 		var skill = e.skill.toString()
 		var type = e.type // # 0 = Hidden, 1 = Damage, 2 = Heal, 3 = MP
 		var damage = e.damage.toNumber()
-
 		//if(e.blocked && e.damage.toNumber() > 0) log('sEachSkillResult blocked' + ' ' +  e.damage + ' ' + e.crit + ' ' + e.type + ' ' + skill)
-		if(damage>0){// && !e.blocked){
-			if(memberIndex >= 0){
+		if (damage>0) {// && !e.blocked) {
+			if (memberIndex >= 0) {
 				// members damage
 				addMemberDamage(memberIndex,target,damage,e.crit,type,skill)
-			}
-			else if(memberIndex < 0){
+			} else if (memberIndex < 0) {
 				// projectile
 				var ownerIndex = getPartyMemberIndex(e.owner.toString())
-				if(ownerIndex >= 0) {
+				if (ownerIndex >= 0) {
 					var sourceId = e.owner.toString()
 					addMemberDamage(ownerIndex,target,damage,e.crit,type,skill)
-				}
-				else{// pet
+				} else { // pet
 					var ret = getIndexOfPetOwner(e.source.toString(),e.owner.toString())
 					var petOwnerIndex = ret[0]
 					var petName = ret[1]
-					if(petOwnerIndex >= 0) {
-						//log(petOwnerIndex +' ' + petName)
+					if (petOwnerIndex >= 0) {
+						log(petOwnerIndex + ' ' + petName)
 						addMemberDamage(petOwnerIndex,target,damage,e.crit,type,skill,true,petName)
 					}
 				}
 			}
 		}
 	}
-
 	// damage : 53bit mantissa
-	function addMemberDamage(memberIndex,targetId,damage,crit,type,skill,pet,petName)
-	{
+	function addMemberDamage(memberIndex, targetId, damage, crit, type, skill, pet, petName) {
 
-		if(currentZone == 950){
-		 	if(me.gameId===party[memberIndex].gameId)
+		if (currentZone == 950) {
+		 	if (me.gameId === party[memberIndex].gameId)
 				setCurBoss(targetId)
-		}
-		else {
+		} else {
 			setCurBoss(targetId)
 		}
 
-		if(me.gameId===party[memberIndex].gameId && type == SKILL_TYPE_DAMAGE) {
-			if(damage > notice_damage) {
+		if (me.gameId === party[memberIndex].gameId && type == SKILL_TYPE_DAMAGE) {
+			if (damage > notice_damage) {
 				noticeDps(damage,skill)
 			}
 		}
 
 		var npcIndex = getNPCIndex(targetId)
-		if(npcIndex >= 0 ){
-			if(NPCs[npcIndex].battlestarttime == 0){
+		if (npcIndex >= 0 ) {
+			if (NPCs[npcIndex].battlestarttime == 0) {
 				NPCs[npcIndex].battlestarttime = Date.now()
 				NPCs[npcIndex].battleendtime = 0 // 지배석 버그
 			}
@@ -916,18 +1020,17 @@ function TDM(d) {
 		}
 
 /*		if(type == SKILL_TYPE_DAMAGE || type == SKILL_TYPE_HIDDEN)
-			log('addMemberDamage ' + type + ' ' + party[memberIndex].name + ' ' + NPCs[npcIndex].npcName + ' ' + damage + ' ' + crit + ' ' + skill + ' ' + pet)
+			log ('addMemberDamage ' + type + ' ' + party[memberIndex].name + ' ' + NPCs[npcIndex].npcName + ' ' + damage + ' ' + crit + ' ' + skill + ' ' + pet)
 		else
-			log('addMemberDamage ' + type + ' ' + party[memberIndex].name + ' ' + damage + ' ' + crit + ' ' + skill + ' ' + pet)
+			log ('addMemberDamage ' + type + ' ' + party[memberIndex].name + ' ' + damage + ' ' + crit + ' ' + skill + ' ' + pet)
 */
-		if(type == SKILL_TYPE_DAMAGE || type == SKILL_TYPE_HIDDEN) {
+		if (type == SKILL_TYPE_DAMAGE || type == SKILL_TYPE_HIDDEN) {
 			//new monster
-			if(typeof party[memberIndex].Targets[targetId] === 'undefined')
-			{
+			if (typeof party[memberIndex].Targets[targetId] === 'undefined') {
 				// remove previous Targets when hit a new boss (exept HH)
-				if(isBoss(targetId) && currentZone != 950) {
+				if (isBoss(targetId) && currentZone != 950) {
 					party[memberIndex].Targets = {}
-					//log('New targetId :' + targetId + ' ' + party[memberIndex].name)
+					log('New targetId :' + targetId + ' ' + party[memberIndex].name)
 				}
 				party[memberIndex].Targets[targetId] = {}
 				party[memberIndex].Targets[targetId].damage = damage
@@ -940,33 +1043,30 @@ function TDM(d) {
 				party[memberIndex].Targets[targetId].healHit = 0
 				party[memberIndex].Targets[targetId].healCrit = 0
 				party[memberIndex].Targets[targetId].skillLog = []
-				//log("new mon :" + party[memberIndex].Targets[targetId].damage)
-			}
-			else {
-				//party[memberIndex].Targets[targetId].damage = Long.fromString(damage).add(party[memberIndex].Targets[targetId].damage).toString()
+				log("new mon :" + party[memberIndex].Targets[targetId].damage)
+			} else {
+				// party[memberIndex].Targets[targetId].damage = Long.fromString(damage).add(party[memberIndex].Targets[targetId].damage).toString()
 				party[memberIndex].Targets[targetId].damage += damage
 				party[memberIndex].Targets[targetId].hit += 1
-				if(crit) {
+				if (crit) {
 					party[memberIndex].Targets[targetId].critDamage += damage
-					party[memberIndex].Targets[targetId].crit +=1
+					party[memberIndex].Targets[targetId].crit += 1
 				}
-
-				//log("cur mon :" + party[memberIndex].Targets[targetId].damage)
+				log("cur mon :" + party[memberIndex].Targets[targetId].damage)
 			}
 			var skilldata = {
-				'skillId' : skill,
-				'isPet' : pet,
-				'petName' : petName,
-				'type' : type,
-				'Time' : Date.now(),
-				'damage' : damage,
-				'crit' : crit
+				'skillId': skill,
+				'isPet': pet,
+				'petName': petName,
+				'type': type,
+				'Time': Date.now(),
+				'damage': damage,
+				'crit': crit
 			}
 			party[memberIndex].Targets[targetId].skillLog.push(skilldata)
 		}
-		else if(type == SKILL_TYPE_HEAL && currentbossId)
-		{
-			if(typeof party[memberIndex].Targets[currentbossId] === 'undefined' ){
+		else if (type == SKILL_TYPE_HEAL && currentbossId) {
+			if (typeof party[memberIndex].Targets[currentbossId] === 'undefined' ) {
 				party[memberIndex].Targets[currentbossId] = {}
 				party[memberIndex].Targets[currentbossId].heal = damage
 				party[memberIndex].Targets[currentbossId].critHeal = crit? damage:0
@@ -978,72 +1078,68 @@ function TDM(d) {
 				party[memberIndex].Targets[currentbossId].hit = 0
 				party[memberIndex].Targets[currentbossId].crit = 0
 				party[memberIndex].Targets[currentbossId].skillLog = []
-			}
-			else {
-				//party[memberIndex].Targets[currentbossId].heal = Long.fromString(damage).add(party[memberIndex].Targets[currentbossId].heal).toString()
+			} else {
+				// party[memberIndex].Targets[currentbossId].heal = Long.fromString(damage).add(party[memberIndex].Targets[currentbossId].heal).toString()
 				party[memberIndex].Targets[currentbossId].heal += damage
 				party[memberIndex].Targets[currentbossId].healHit += 1
-				if(crit){
-					//party[memberIndex].Targets[currentbossId].critHeal = Long.fromString(party[memberIndex].Targets[currentbossId].critHeal).add(damage).toString()
+				if (crit) {
+					// party[memberIndex].Targets[currentbossId].critHeal = Long.fromString(party[memberIndex].Targets[currentbossId].critHeal).add(damage).toString()
 					party[memberIndex].Targets[currentbossId].critHeal += damage
-					party[memberIndex].Targets[currentbossId].healCrit +=1
+					party[memberIndex].Targets[currentbossId].healCrit += 1
 				}
 			}
-
 			var skilldata = {
-				'skillId' : skill,
-				'isPet' : pet,
-				'petName' : petName,
-				'type' : type,
-				'Time' : Date.now(),
-				'damage' : damage,
-				'crit' : crit
+				'skillId': skill,
+				'isPet': pet,
+				'petName': petName,
+				'type': type,
+				'Time': Date.now(),
+				'damage': damage,
+				'crit': crit
 			}
 			party[memberIndex].Targets[currentbossId].skillLog.push(skilldata)
 		}
-		else if(type == SKILL_TYPE_MP)
-		{
+		else if (type == SKILL_TYPE_MP) {
 
 		}
+
 	}
 
-	function getSettings()
-	{
+	function getSettings() {
 		var settings = {
-			"noticeDamage" : notice_damage,
-			"notice" : notice,
-			"bossOnly" : bossOnly,
-			"hideNames" : hideNames,
-			"skillLog" : skillLog,
-			"rankSystem" : rankSystem,
-			"allUsers" : allUsers,
-			"debug" : debug,
-			"partyLengh" : party.length,
-			"NPCsLength" : NPCs.length
+			"noticeDamage": notice_damage,
+			"notice": notice,
+			"bossOnly": bossOnly,
+			"hideNames": hideNames,
+			"skillLog": skillLog,
+			"rankSystem": rankSystem,
+			"allUsers": allUsers,
+			"debug": debug,
+			"partyLengh": party.length,
+			"NPCsLength": NPCs.length
 		}
 		return settings
 	}
 
-	function membersDps(targetId)
-	{
+	function membersDps(targetId) {
 		var endtime = 0
 		var dpsJson= []
 
-		if(targetId==='') return lastDps
+		if (targetId === '') return lastDps
 		var npcIndex = getNPCIndex(targetId)
-		//log('not in NPCs')
-		if(npcIndex < 0) return lastDps
+		log('not in NPCs')
+		if (npcIndex < 0) return lastDps
 
-		//log('new NPC but battle not started')
-		if( NPCs[npcIndex].battlestarttime == 0 ) return  lastDps
+		log('new NPC but battle not started')
+		if (NPCs[npcIndex].battlestarttime == 0) return lastDps
 
-		//log('for despawned NPC')
-		if( NPCs[npcIndex].dpsmsg !== '' ) return NPCs[npcIndex].dpsmsg
+		log('for despawned NPC')
+		if (NPCs[npcIndex].dpsmsg !== '') return NPCs[npcIndex].dpsmsg
 
-		endtime=NPCs[npcIndex].battleendtime
-		if(endtime == 0) endtime=Date.now()
+		endtime = NPCs[npcIndex].battleendtime
+		if (endtime == 0) endtime = Date.now()
 		var battleduration = endtime-NPCs[npcIndex].battlestarttime
-		//log(battleduration +  ' = '+ endtime + ' - '+ NPCs[npcIndex].battlestarttime )
+		log(battleduration +  ' = ' + endtime + ' - ' + NPCs[npcIndex].battlestarttime)
 
 		if (battleduration < 1000) battleduration = 1000 // for divide by zero error
 		var battledurationbysec = Math.floor((battleduration) / 1000)
@@ -1051,9 +1147,9 @@ function TDM(d) {
 		var minutes = "0" + Math.floor(battledurationbysec / 60);
 		var seconds = "0" + (battledurationbysec - minutes * 60);
 		var monsterBattleInfo = NPCs[npcIndex].npcName + ' '
-							//+ Number(totalPartyDamage.div(battledurationbysec).toString()).nFormatter(3) + '/s '
+							// + Number(totalPartyDamage.div(battledurationbysec).toString()).nFormatter(3) + '/s '
 							+ (NPCs[npcIndex].totalPartyDamage / battledurationbysec).nFormatter(3) + '/s '
-							//+ Number(NPCs[npcIndex].totalPartyDamage).nFormatter(3) + ' '
+							// + Number(NPCs[npcIndex].totalPartyDamage).nFormatter(3) + ' '
 							+ NPCs[npcIndex].totalPartyDamage.nFormatter(3) + ' '
 							+ minutes.substr(-2) + ":" + seconds.substr(-2)
 		monsterBattleInfo = monsterBattleInfo.color(enable_color)
@@ -1061,21 +1157,24 @@ function TDM(d) {
 		dpsJson.push({
 			"enraged": isBoss(targetId) ? Boss[targetId].estatus : '',
 			"etimer": isBoss(targetId) ? Boss[targetId].etimer : 0,
-			"eCountdown" : isBoss(targetId)&&Boss[targetId].nextEnrage !=0 ? Boss[targetId].hpPer - Boss[targetId].nextEnrage : 0,
-			"monsterBattleInfo" : monsterBattleInfo,
-			"battleDuration" : battleduration,
-			"battleendtime" : 0,
-			//"totalPartyDamage" : totalPartyDamage.toString(),
-			"totalPartyDamage" : NPCs[npcIndex].totalPartyDamage,
-			"huntingZoneId" : NPCs[npcIndex].huntingZoneId,
-			"templateId" : NPCs[npcIndex].templateId
+			"eCountdown": isBoss(targetId)&&Boss[targetId].nextEnrage !=0 ? Boss[targetId].hpPer - Boss[targetId].nextEnrage : 0,
+			"monsterBattleInfo": monsterBattleInfo,
+			"battleDuration": battleduration,
+			"battleendtime": 0,
+			//"totalPartyDamage": totalPartyDamage.toString(),
+			"totalPartyDamage": NPCs[npcIndex].totalPartyDamage,
+			"huntingZoneId": NPCs[npcIndex].huntingZoneId,
+			"templateId": NPCs[npcIndex].templateId
 		})
 
 		// remove lowest dps member if over 30
-		if(allUsers){
-			for(;party.length > MAX_PARTY_MEMBER;) {
-				if(party[party.length -1].gameId === me.gameId) party.splice(party.length -2,1)
-				else party.pop()
+		if (allUsers) {
+			for (;party.length > MAX_PARTY_MEMBER;) {
+				if (party[party.length -1].gameId === me.gameId) {
+					party.splice(party.length -2,1)
+				} else {
+					party.pop()
+				}
 			}
 		}
 
@@ -1084,135 +1183,86 @@ function TDM(d) {
 		var percentage = 0
 		var crit = 0,healCrit = 0
 
-		for(var i in party){
-			if(NPCs[npcIndex].totalPartyDamage == 0 || battleduration <= 0 || typeof party[i].Targets[targetId] === 'undefined') {
-				//log('no attack data yet for this member')
+		for (var i in party) {
+			if (NPCs[npcIndex].totalPartyDamage == 0 || battleduration <= 0 || typeof party[i].Targets[targetId] === 'undefined') {
+				log('此成员尚未攻击数据')
 				continue
 			}
 			cname=party[i].name
-			if(party[i].gameId===me.gameId) cname=cname.color('00FF00')
+			if (party[i].gameId === me.gameId) {
+				cname = cname.color('00FF00')
+			}
 
-
-			//totalDamage = Long.fromString(party[i].Targets[targetId].damage)
-			//dps = totalDamage.div(battledurationbysec).toString()
-			//var percentage = totalDamage.multiply(100).div(totalPartyDamage).toString()
+			// totalDamage = Long.fromString(party[i].Targets[targetId].damage)
+			// dps = totalDamage.div(battledurationbysec).toString()
+			// var percentage = totalDamage.multiply(100).div(totalPartyDamage).toString()
 
 			dps = Math.floor(party[i].Targets[targetId].damage / battleduration * 1000)
 			percentage = Math.floor(party[i].Targets[targetId].damage * 100 / NPCs[npcIndex].totalPartyDamage)
 
 
-			if(party[i].Targets[targetId].crit == 0 || party[i].Targets[targetId].hit == 0) crit = 0
-			else crit = Math.floor(party[i].Targets[targetId].crit * 100 / party[i].Targets[targetId].hit)
+			if (party[i].Targets[targetId].crit == 0 || party[i].Targets[targetId].hit == 0) {
+				crit = 0
+			} else {
+				crit = Math.floor(party[i].Targets[targetId].crit * 100 / party[i].Targets[targetId].hit)
+			}
 
-			if(party[i].class == 6 || party[i].class == 7)
-			{
-				if(party[i].Targets[targetId].healCrit == 0 || party[i].Targets[targetId].healHit == 0) healCrit = 0
-				else healCrit = Math.floor(party[i].Targets[targetId].healCrit * 100 / party[i].Targets[targetId].healHit)
+			if (party[i].class == 6 || party[i].class == 7) {
+				if (party[i].Targets[targetId].healCrit == 0 || party[i].Targets[targetId].healHit == 0) {
+					healCrit = 0
+				} else {
+					healCrit = Math.floor(party[i].Targets[targetId].healCrit * 100 / party[i].Targets[targetId].healHit)
+				}
 			}
 
 			dpsJson.push({
-				"gameId" : party[i].gameId,
-				"name" : cname,
-				"class" : party[i].class,
-				"serverId" : party[i].serverId,
-				"totalDamage" : party[i].Targets[targetId].damage,
+				"gameId": party[i].gameId,
+				"name": cname,
+				"class": party[i].class,
+				"serverId": party[i].serverId,
+				"totalDamage": party[i].Targets[targetId].damage,
 				"dps": dps,
-				"percentage" :percentage,
-				"crit" : crit,
-				"healCrit" : healCrit
+				"percentage": percentage,
+				"crit": crit,
+				"healCrit": healCrit
 			})
 		}
 
-
-
 		// To display last msg on ui even if boss removed from list by DESPAWN packet
-		if(bossOnly && isBoss(targetId) ) lastDps = dpsJson
-		if(!bossOnly) lastDps = dpsJson
+		if (bossOnly && isBoss(targetId) ) {
+			lastDps = dpsJson
+		}
+		if (!bossOnly) {
+			lastDps = dpsJson
+		}
 
 		return dpsJson
 	}
 
-	function sDespawnNpc(e){
-		var id = e.gameId.toString()
-		var npcIndex = getNPCIndex(id)
-		var duration = 0
-		if(npcIndex <0) return
-		// remove : no battle, pet
-		if(NPCs[npcIndex].battlestarttime == 0 || NPCs[npcIndex].owner !== "0") {
-			NPCs.splice(npcIndex,1)
-			return
-		}
-
-		if(NPCs[npcIndex].battleendtime != 0) {
-			log('DOUBLE sDespawnNpc ERROR :' + NPCs[npcIndex].npcName)
-			return
-		}
-
-		NPCs[npcIndex].battleendtime = Date.now()
-		duration = NPCs[npcIndex].battleendtime - NPCs[npcIndex].battlestarttime
-
-		if(isBoss(id)){
-			Boss[id].enraged = false
-			Boss[id].etimer = 0
-			Boss[id].estatus = ''
-		}
-
-		var dpsmsg = membersDps(id)
-
-		if(!popup)toChat(textDPSFormat(dpsmsg))
-
-		if(isBoss(id) && Boss[id].hpPer > 0)
-			log('Boss despawn , templateId zoneId :' + NPCs[npcIndex].templateId +':'+ NPCs[npcIndex].huntingZoneId + ' HP :' + Boss[id].hpPer)
-		// GG
-		if(NPCs[npcIndex].huntingZoneId === 713 && NPCs[npcIndex].templateId === 81301 && Boss[id].hpPer <= 20){
-			Boss[id].hpPer = 0
-		}
-		// 듀리안
-		if(NPCs[npcIndex].huntingZoneId === 468 && NPCs[npcIndex].templateId === 2000 && Boss[id].hpPer <= 10){
-			Boss[id].hpPer = 0
-		}
-		if(NPCs[npcIndex].huntingZoneId === 768 && NPCs[npcIndex].templateId === 2000 && Boss[id].hpPer <= 10){
-			Boss[id].hpPer = 0
-		}
-
-		if(isBoss(id) && Boss[id].hpPer <= 0 && dpsmsg !== '')
-		{
-			//log('addSkillLog : ' + id)
-			addSkillLog(dpsmsg,id)
-			dpsmsg[0].battleendtime = NPCs[npcIndex].battleendtime
-			saveDpsData(dpsmsg)
-			if(rankSystem) sendDPSData(dpsmsg)
-		}
-		NPCs[npcIndex].dpsmsg = dpsmsg
-	}
-
-	function addSkillLog(d,targetId)
-	{
-		for(var i in d)
-		{
-			if(d[i].hasOwnProperty('monsterBattleInfo')) continue
+	function addSkillLog(d, targetId) {
+		for (var i in d) {
+			if (d[i].hasOwnProperty('monsterBattleInfo')) continue
 			var index = getPartyMemberIndex(d[i].gameId)
-			if(index < 0) continue
-			if(typeof party[index].Targets[targetId].skillLog === 'undefined') {
+			if (index < 0) continue
+			if (typeof party[index].Targets[targetId].skillLog === 'undefined') {
 				log('skillLog === undefined')
 				log(party[index])
 				continue
 			}
 			var _si = skillInfo.getSkillsJson(classIdToName(party[index].class))
-			//var _si = skillInfo.getPetsSkillsJson().concat(skillInfo.getSkillsJson(classIdToName(party[index].class)))
+			// var _si = skillInfo.getPetsSkillsJson().concat(skillInfo.getSkillsJson(classIdToName(party[index].class)))
 			d[i]['stastics'] = dpsStastic(party[index].Targets[targetId].skillLog,_si)
-			//log(d[i]['stastics'])
+			log(d[i]['stastics'])
 		}
 	}
 
-	function noticeDps(damage,skill)
-	{
-		if(!notice) return
+	function noticeDps(damage, skill) {
+		if (!notice) return
 		var msg = ''
 		msg = damage.nFormatter(3)
-		//log(skill + ':' + skill.slice(1,skill.length))
+		log(skill + ':' + skill.slice(1,skill.length))
 		d.send('S_DUNGEON_EVENT_MESSAGE', 1, {
-			message: `<img src="img://skill__0__${me.templateId}__${skill.slice(1,skill.length-2)}00" width="20" height="20" />&nbsp;${msg}`,
+			message: `<img src="img://skill__0__${me.templateId}__${skill.slice(1,skill.length-2)}00" width="40" height="40" />&nbsp;${msg}`,
 			unk1: 2, //70 : 2,
 			unk2: 0,
 			unk3: 0
@@ -1220,141 +1270,157 @@ function TDM(d) {
 		return msg
 	}
 
-	function classIdToName(id)
-	{
-		if(id == 0) return 'Warrior'
-		if(id == 1) return 'Lancer'
-		if(id == 2) return 'Slayer'
-		if(id == 3) return 'Berserker'
-		if(id == 4) return 'Sorcerer'
-		if(id == 5) return 'Archer'
-		if(id == 6) return 'Priest'
-		if(id == 7) return 'Mystic'
-		if(id == 8) return 'Reaper'
-		if(id == 9) return 'Gunner'
-		if(id == 10) return 'Brawler'
-		if(id == 11) return 'Ninja'
-		if(id == 12) return 'Valkyrie'
+	function classIdToName(id) {
+		if (id == 0) return 'Warrior'
+		if (id == 1) return 'Lancer'
+		if (id == 2) return 'Slayer'
+		if (id == 3) return 'Berserker'
+		if (id == 4) return 'Sorcerer'
+		if (id == 5) return 'Archer'
+		if (id == 6) return 'Priest'
+		if (id == 7) return 'Mystic'
+		if (id == 8) return 'Reaper'
+		if (id == 9) return 'Gunner'
+		if (id == 10) return 'Brawler'
+		if (id == 11) return 'Ninja'
+		if (id == 12) return 'Valkyrie'
 		return ''
 	}
 
     function writeBackup() {
 
-	    var backupPath = path.join(__dirname,'backup')
+		var backupPath = path.join(__dirname, 'backup')
 
-	    if (!fs.existsSync(backupPath)) fs.mkdirSync(backupPath)
+		if (!fs.existsSync(backupPath)) {
+			fs.mkdirSync(backupPath)
+		}
 
-	    if(Object.keys(me).length != 0) {
-		    me.currentbossId = currentbossId
-		    fs.writeFileSync(path.join(backupPath,'_me.json'), JSON.stringify(me, null, '\t'))
-		    //log('_me.json written')
+		if (Object.keys(me).length != 0) {
+			me.currentbossId = currentbossId
+			fs.writeFileSync(path.join(backupPath, '_me.json'), JSON.stringify(me, null, '\t'))
+			log('_me.json 写入')
+		}
+
+		if (Object.keys(currentParty).length != 0) {
+			fs.writeFileSync(path.join(backupPath, '_currentParty.json'), JSON.stringify(currentParty, null, '\t'))
+			log('_currentParty.json 写入')
 	    }
 
-	    //if(Object.keys(currentParty).length != 0) {
-		    fs.writeFileSync(path.join(backupPath,'_currentParty.json'), JSON.stringify(currentParty, null, '\t'))
-		    //log('_currentParty.json written')
-	    //}
+		if(party.length != 0) {
+			fs.writeFileSync(path.join(backupPath, '_party.json'), JSON.stringify(party, null, '\t'))
+			log('_party.json 写入')
+		}
 
-	    if(party.length != 0) {
-		    fs.writeFileSync(path.join(backupPath,'_party.json'), JSON.stringify(party, null, '\t'))
-		    //log('_party.json written')
-	    }
-	    if(NPCs.length != 0) {
-		    fs.writeFileSync(path.join(backupPath,'_NPCs.json'), JSON.stringify(NPCs, null, '\t'))
-		    //log('_NPCs.json written')
-	    }
-	    if(Object.keys(Boss).length != 0) {
-		    	for(var key in Boss )
-		    		if(Boss[key].enragedTimer)
-					Boss[key].enragedTimer = {}
-		    fs.writeFileSync(path.join(backupPath,'_Boss.json'), JSON.stringify(Boss, null, '\t'))
-		    //log('_Boss.json written')
-	    }
+		if(NPCs.length != 0) {
+			fs.writeFileSync(path.join(backupPath, '_NPCs.json'), JSON.stringify(NPCs, null, '\t'))
+			log('_NPCs.json 写入')
+		}
+
+		if (Object.keys(Boss).length != 0) {
+			for (var key in Boss) {
+				if(Boss[key].enragedTimer)
+				Boss[key].enragedTimer = {}
+				fs.writeFileSync(path.join(backupPath, '_Boss.json'), JSON.stringify(Boss, null, '\t'))
+				log('_Boss.json 写入')
+			}
+		}
+
     }
 
     function readBackup() {
 
-	    var backupPath = path.join(__dirname,'backup')
+		var backupPath = path.join(__dirname, 'backup')
 
-	    if (!fs.existsSync(backupPath)) {
-		    log('backup directory doesnt exist!')
-		    return
-	    }
-	    try{
-		    if (fs.existsSync(path.join(backupPath,'_me.json'))) {
-			    //log('_me.json read')
-			    var data = fs.readFileSync(path.join(backupPath,'_me.json'),"utf-8")
-			    me = {}
-			    me = JSON.parse(data)
-			    currentbossId = me.currentbossId
-			    //log('currentbossId ' + currentbossId)
-		    }
+		if (!fs.existsSync(backupPath)) {
+			log('备份目录不存在')
+			return
+		} try {
+			if (fs.existsSync(path.join(backupPath, '_me.json'))) {
+				log('_me.json 读取')
+				var data = fs.readFileSync(path.join(backupPath, '_me.json'), "utf-8")
+				me = {}
+				me = JSON.parse(data)
+				currentbossId = me.currentbossId
+				log('currentbossId ' + currentbossId)
+			}
 
-		    if (fs.existsSync(path.join(backupPath,'_party.json'))) {
+			if (fs.existsSync(path.join(backupPath, '_party.json'))) {
+				log('_party.json 读取')
+				data = fs.readFileSync(path.join(backupPath, '_party.json'), "utf-8")
+				party = []
+				party = JSON.parse(data)
+			}
 
-			    //log('_party.json read')
-			    data = fs.readFileSync(path.join(backupPath,'_party.json'),"utf-8")
-			    party = []
-			    party = JSON.parse(data)
-		    }
+			if (fs.existsSync(path.join(backupPath, '_currentParty.json'))) {
+				log('_currentParty.json 读取')
+				data = fs.readFileSync(path.join(backupPath, '_currentParty.json'), "utf-8")
+				currentParty = {}
+				currentParty = JSON.parse(data)
+			}
 
-		    if (fs.existsSync(path.join(backupPath,'_currentParty.json'))) {
-			    //log('_currentParty.json read')
-			    data = fs.readFileSync(path.join(backupPath,'_currentParty.json'),"utf-8")
-			    currentParty = {}
-			    currentParty = JSON.parse(data)
-		    }
-		    if (fs.existsSync(path.join(backupPath,'_Boss.json'))) {
-			    //log('_Boss.json read')
-			    data = fs.readFileSync(path.join(backupPath,'_Boss.json'),"utf-8")
-			    Boss = {}
-			    Boss = JSON.parse(data)
-		    }
-		    if (fs.existsSync(path.join(backupPath,'_NPCs.json'))) {
+			if (fs.existsSync(path.join(backupPath,'_Boss.json'))) {
+				log('_Boss.json 读取')
+				data = fs.readFileSync(path.join(backupPath, '_Boss.json'), "utf-8")
+				Boss = {}
+				Boss = JSON.parse(data)
+			}
 
-			    //log('_NPCs.json read')
-			    data = fs.readFileSync(path.join(backupPath,'_NPCs.json'),"utf-8")
-			    NPCs = []
-			    NPCs = JSON.parse(data)
-		    }
-	    }
-	    catch(err)
-	    {
+			if (fs.existsSync(path.join(backupPath, '_NPCs.json'))) {
+				log('_NPCs.json 读取')
+				data = fs.readFileSync(path.join(backupPath, '_NPCs.json'), "utf-8")
+				NPCs = []
+				NPCs = JSON.parse(data)
+			}
+		} catch(err) {
 		    log(err)
 	    }
+
     }
 
 	function toChat(msg) {
-		if(!msg) return
-		send(msg)
+		if (!msg) return
+		send(msg.clr('FF0000'))		//红色
 	}
 
-	function send(msg) { command.message(`[DPS] : ` + [...arguments].join('\n  - '.color('FFFFFF'))) }
-	function sendExec(msg) { command.exec([...arguments].join('\n  - '.color('FFFFFF'))) }
+	function statusToChat(tag, val) {
+		send(`${tag}` + `${val ? '启用'.color(enable_color) : '禁用'.color(disable_color)}`)
+	}
+
+	function send(msg) {
+		command.message([...arguments].join('\n  - '.color('FFFFFF')))		//白色
+	}
+
+	function sendExec(msg) {
+		command.exec([...arguments].join('\n  - '.color('FFFFFF')))		//白色
+	}
+
+	function sLog(e) {
+		if (debug) {
+			log(e)
+		}
+	}
 
 	function log(msg) {
-		if(debug) console.log(`[${(new Date).toTimeString().slice(0,8)}] `, msg)
+		if (debug) {
+			console.log(`[${(new Date).toTimeString().slice(0,8)}] `, msg)
+		}
 	}
 
-	function statusToChat(tag,val)
-	{
-		send(`${tag} ${val ? 'enabled'.color(enable_color) : 'disabled'.color(disable_color)}`)
+	function sChangeEvetMatchingState(e) {
+		sendCommand = [{'command': 'matching alarm'}]
 	}
+
 	// command
-	command.add('dps', (arg, arg2,arg3) => {
+	command.add('dps', (arg, arg2, arg3) => {
 		// toggle
 		if (!arg) {
 			enable = true
-			statusToChat('dps calulation ',enable)
+			statusToChat('DPS计数器 ', enable)
 		}
-		else if (arg == 'u' || arg=='ui') {
+		else if (arg == 'u' || arg == 'ui') {
 			popup = true
-			statusToChat('dps popup',popup)
+			statusToChat('DPS面板 ', popup)
 			ui.open()
-		}
-		else if (arg == 'nd' || arg=='notice_damage') {
-			notice_damage = arg2
-			toChat('notice_damage : ' + notice_damage)
 		}
 		else if (arg == 't' || arg=='test') {
 			sendCommand = [{
@@ -1367,12 +1433,7 @@ function TDM(d) {
 		else if (arg == 'l' || arg=='loadBackup') {
 			readBackup()
 		}
-		// notice
-		else if (arg === 'n' ||  arg === 'notice') {
-			notice = !notice
-			statusToChat('notice',notice)
-		}
-		else send(`Invalid argument.`.color('FF0000') + ' dps or dps u/h/n/s or dps nd 1000000')
+		else send(`无效参数.`.color('FF0000') + ' dps or dps u/ui')
 	})
 
 	this.destructor = () => {
@@ -1380,100 +1441,13 @@ function TDM(d) {
 		command.remove('dps')
 	}
 
-	function sDeadLocation(e)
-	{
-		if(currentbossId){
-			for(var i in party)
-				if(party[i].gameId === e.gameId.toString())
-					if(typeof party[i].Targets[currentbossId] !== 'undefined') 
-						party[i].Targets[currentbossId].dead++
-					else log(e)
-			
-		}
-	}
-
-	function resetNpc(e){
-		var id = e.npc.toString()
-		var npcIndex = getNPCIndex(id)
-		var duration = 0
-		if(npcIndex <0) return
-		// remove : no battle, pet
-		if(NPCs[npcIndex].battlestarttime == 0 || NPCs[npcIndex].owner !== "0") {
-			NPCs.splice(npcIndex,1)
-			return
-		}
-
-		if(NPCs[npcIndex].battleendtime != 0) {
-			log('DOUBLE resetNpc ERROR :' + NPCs[npcIndex].npcName)
-			return
-		}
-
-		NPCs[npcIndex].battleendtime = Date.now()
-		duration = NPCs[npcIndex].battleendtime - NPCs[npcIndex].battlestarttime
-		NPCs[npcIndex].reset = true
-
-		if(isBoss(id)){
-			Boss[id].enraged = false
-			Boss[id].etimer = 0
-			Boss[id].estatus = ''
-		}
-
-		var dpsmsg = membersDps(id)
-
-		if(isBoss(id) && Boss[id].hpPer > 0)
-			log('Boss reset , templateId zoneId :' + NPCs[npcIndex].templateId +':'+ NPCs[npcIndex].huntingZoneId + ' HP :' + Boss[id].hpPer)
-		// GG
-		if(NPCs[npcIndex].huntingZoneId === 713 && NPCs[npcIndex].templateId === 81301 && Boss[id].hpPer <= 20){
-			Boss[id].hpPer = 0
-		}
-		// 듀리안
-		if(NPCs[npcIndex].huntingZoneId === 468 && NPCs[npcIndex].templateId === 2000 && Boss[id].hpPer <= 10){
-			Boss[id].hpPer = 0
-		}
-		if(NPCs[npcIndex].huntingZoneId === 768 && NPCs[npcIndex].templateId === 2000 && Boss[id].hpPer <= 10){
-			Boss[id].hpPer = 0
-		}
-
-		if(isBoss(id) && Boss[id].hpPer <= 0 && dpsmsg !== '')
-		{
-			//log('addSkillLog : ' + id)
-			addSkillLog(dpsmsg,id)
-			dpsmsg[0].battleendtime = NPCs[npcIndex].battleendtime
-			saveDpsData(dpsmsg)
-			//if(rankSystem) sendDPSData(dpsmsg)
-		}
-		NPCs[npcIndex].dpsmsg = dpsmsg
-	}
-
-
-	function sNpcOccupierInfo(e)
-	{
-		if(e.cid.toNumber() == 0){
-			//log(e)
-			log('sNpcOccupierInfo reset ' + e.cid)
-			resetNpc(e)
-		}
-	}
-
-	function sLog(e)
-	{
-		if(debug)
-			log(e)
-	}
-
-
-	function sChangeEvetMatchingState(e)
-	{
-			sendCommand = [{'command': 'matching alarm'}]
-	}
-
 	/*d.hook('*', 'raw', (code, data, fromServer) => {
 		return
-		if(!debug) return
+		if (!debug) return
 		let file = path.join(__dirname, '..', '..', 'tera-proxy-' + Date.now() + '.log')
 		//fs.appendFileSync(file, (fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code) + ' ' + data.toString('hex') + '\n')
-		//log((fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code) + ' ' + data.toString('hex') + '\n')
-		log((fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code))
+		//log ((fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code) + ' ' + data.toString('hex') + '\n')
+		log ((fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code))
 	})*/
 
 	d.hook('S_LOGIN',10, sLogin)
@@ -1481,20 +1455,23 @@ function TDM(d) {
 	d.hook('S_LOAD_TOPO',3, sLoadTopo)
 	d.hook('S_ANSWER_INTERACTIVE', 2, sAnswerInteractive)
 	d.hook('S_BOSS_GAGE_INFO',3, sBossGageInfo)
-	d.hook('S_NPC_TARGET_USER',1, sNpcTargetuser)
-	//d.hook('S_BOSS_BATTLE_INFO',1, sBossBattleInfo)
 	d.hook('S_SPAWN_NPC',8,{order: 200}, sSpawnNpc)
 	d.hook('S_DESPAWN_NPC',3, sDespawnNpc)
+	d.hook('S_NPC_OCCUPIER_INFO',1, sNpcOccupierInfo)
+	d.hook('S_NPC_STATUS',1, sNpcStatus)
+
 	d.hook('S_DEAD_LOCATION',2, sDeadLocation)
-	d.hook('S_LEAVE_PARTY_MEMBER',2,sLeavePartyMember)
 	d.hook('S_LEAVE_PARTY',1, sLeaveparty)
+	d.hook('S_LEAVE_PARTY_MEMBER',2,sLeavePartyMember)
 	d.hook('S_PARTY_MEMBER_LIST',6,sPartyMemberList)
-	d.hook('S_CHANGE_EVENT_MATCHING_STATE',1,sChangeEvetMatchingState)
 	d.hook('S_DESPAWN_USER', 3, sDespawnUser)
 	d.hook('S_SPAWN_USER',12, sSpawnUser)
-	d.hook('S_NPC_STATUS',1, sNpcStatus)
-	d.hook('S_EACH_SKILL_RESULT',d.base.majorPatchVersion < 74 ? 10 : 12, {order: 200}, sEachSkillResult)
-	d.hook('S_NPC_OCCUPIER_INFO',1, sNpcOccupierInfo)
+
+	d.hook('S_NPC_TARGET_USER',1, sNpcTargetuser)
+
+	d.hook('S_EACH_SKILL_RESULT', d.base.majorPatchVersion < 74 ? 10 : 12, {order: 200}, sEachSkillResult)
+
+	d.hook('S_CHANGE_EVENT_MATCHING_STATE',1,sChangeEvetMatchingState)
 }
 
 module.exports = TDM

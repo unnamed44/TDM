@@ -1,7 +1,8 @@
 String.prototype.color = function (hexColor) { return '<font color="#' +hexColor+'">'+ this +'</font>' }
 String.prototype.stripHTML = function () { return this.replace(/<[^>]+>/g, '') }
 String.prototype.numberWithCommas = function () { return this.replace(/\B(?=(\d{3})+(?!\d))/g, ",") }
-Number.prototype.nFormatter =	function (digits) {
+
+Number.prototype.nFormatter = function (digits) {
 	var si = [
 		{ value: 1, symbol: "" },
 		{ value: 1E3, symbol: "k" },
@@ -19,7 +20,7 @@ Number.prototype.nFormatter =	function (digits) {
 	}
 	var rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
 	var space = ''
-	for(var j = 0;j < digits; j++) space += ' '
+	for (var j = 0;j < digits; j++) space += ' '
 	var ret = (this / si[i].value) + space
 	return ret.slice(0,digits+1).replace(rx, "$1") + si[i].symbol;
 }
@@ -30,21 +31,21 @@ var agree = false
 var waitForThis = false
 var slog = []
 var _skillInfo = []
-var 	_name = ''
+var _name = ''
 var	_classId = ''
 var _record = {}
 var _recordfilename = ''
-var enable_color = 'E69F00',disable_color = '56B4E9'
+var enable_color = '56B4E9', disable_color = 'E69F00', crit_color = 'E69F00', healCrit_color = '56B4E9'
 
 var TDMSettings = {
-	"noticeDamage" : 1,
 	"notice" : true,
+	"noticeDamage" : 1,
 	"bossOnly" : true,
 	"hideNames" : true,
 	"skillLog" : true,
 	"rankSystem" : true,
-	"allUsers" : false,
 	"debug" : true,
+	"allUsers" : false,
 	"partyLengh" : 0,
 	"NPCsLength" : 0
 }
@@ -52,6 +53,7 @@ var TDMSettings = {
 var enragedSound = new Audio();
 var clickSound = new Audio();
 var eventSound = new Audio();
+
 enragedSound.src = "audio/enraged.mp3";
 clickSound.src = "audio/click.mp3";
 eventSound.src = "audio/event.mp3";
@@ -66,17 +68,16 @@ function manager_ajax(url, cb) {
 	return;
 }
 
-function onClick(val)
-{
-	manager_ajax(val,null)
+function onClick(val) {
+	manager_ajax(val, null)
 }
-function ManagerCB()
-{
+
+function ManagerCB() {
 	document.getElementById("manager").innerHTML = this.responseText.substring(1, this.responseText.length - 1)
 }
-function Manager()
-{
-	manager_ajax("R",ManagerCB)
+
+function Manager() {
+	manager_ajax("R", ManagerCB)
 }
 
 // TDM ui
@@ -100,136 +101,133 @@ function validate(evt) {
 	var key = theEvent.keyCode || theEvent.which;
 	key = String.fromCharCode( key );
 	var regex = /[0-9]|\./;
-	if( !regex.test(key) ) {
+	if (!regex.test(key)) {
 		theEvent.returnValue = false;
-		if(theEvent.preventDefault) theEvent.preventDefault();
+		if (theEvent.preventDefault) {
+			theEvent.preventDefault();
+		}
 	}
 }
 
-
-function warningMsg()
-{
-	if(agree) return true
-	if(typeof _tera_client_proxy_ !== 'undefined') {
-		_tera_client_proxy_.alert("Please remember TDM is not for mocking others. It is at your own risk to get banned by sending dps data. Press again if you agree with this.");
+function warningMsg() {
+	if (agree) return true
+	if (typeof _tera_client_proxy_ !== 'undefined') {
+		_tera_client_proxy_.alert("请记住，TDM数据不是为了嘲笑别人。自己承担通过发送DPS数据，账号被取缔的风险。如果你同意的话，再按一下。");
 	}
 	agree = true
 	return false
 }
 
 function Whisper() {
-	if(!warningMsg()) return
+	if (!warningMsg()) return
 	var n = document.getElementById("name").value;
-	ajax("0W"+ n,null)
+	ajax("0W" + n, null)
 }
 
 function ToGuild() {
-	if(!warningMsg()) return
-	ajax("2C",null)
+	if (!warningMsg()) return
+	ajax("2C", null)
 }
 
 function ToParty() {
-	if(!warningMsg()) return
-	ajax("1C",null)
+	if (!warningMsg()) return
+	ajax("1C", null)
 }
 
 function LeaveParty() {
-	ajax("L",null)
+	ajax("L", null)
 }
 
-function ResetCB(){
+function ResetCB() {
 	document.getElementById("content").innerHTML = '<br>'
 }
 
 function Reset() {
-	ajax("100S",ResetCB)
+	ajax("100S", ResetCB)
 }
+
 function NoPopUpCB() {
-	if(typeof _tera_client_proxy_ !== 'undefined') {
+	if (typeof _tera_client_proxy_ !== 'undefined') {
 		_tera_client_proxy_.close()
 	}
 }
+
 function NoPopUp() {
-	ajax("P",NoPopUpCB)
+	ajax("P", NoPopUpCB)
 }
 
 // settings
 function NoticeDamageAdd() {
-	ajax("A",Settings)
+	ajax("A", Settings)
 }
 
 function Debug() {
-	ajax("B",Settings)
+	ajax("B", Settings)
 }
 
 function Notice() {
-	ajax("N",Settings)
+	ajax("N", Settings)
 }
 
 function AllUsers() {
-	ajax("U",Settings)
+	ajax("U", Settings)
 }
+
 function BossOnly() {
 	ajax("O", Settings)
 }
-function HideNames()
-{
-	ajax("I",Settings)
-}
-function SkillLog()
-{
-	ajax("1L",Settings)
-}
-function RankSystem()
-{
-	ajax("2R",Settings)
-}
-function ReloadTDM()
-{
-	ajax("X",refreshCB)
+
+function HideNames() {
+	ajax("I", Settings)
 }
 
-function UpdateCB()
-{
-	var dpsmsg = this.responseText.substring(1, this.responseText.length - 1)
-	document.getElementById("content").innerHTML = dpsmsg.replace(/(\\n|\\)/gm,"");
+function SkillLog() {
+	ajax("1L", Settings)
 }
-function Update()
-{
+
+function RankSystem() {
+	ajax("2R", Settings)
+}
+
+function ReloadTDM() {
+	ajax("X", refreshCB)
+}
+
+function UpdateCB() {
+	var dpsmsg = this.responseText.substring(1, this.responseText.length - 1)
+	document.getElementById("content").innerHTML = dpsmsg.replace(/(\\n|\\)/gm, "");
+}
+
+function Update() {
 	waitForThis = true
-	ajax("Q",UpdateCB)
+	ajax("Q", UpdateCB)
 }
 
 function openweb(e) {
-	//_tera_client_proxy_.alert("TDM does not support details of skill info yet.");
+	_tera_client_proxy_.alert("TDM还不支持技能信息的细节");
 }
 
-
-function recordedStastics(index)
-{
+function recordedStastics(index) {
 	document.getElementById("content").innerHTML = _record[index].stastics
 }
 
-function RecordTableDPSFormat(data,tableId)
-{
+function RecordTableDPSFormat(data, tableId) {
 	var dpsmsg = ''
 	var enragedBar = 0
 	var class_image=''
 
 	//console.log(data)
 
-	dpsmsg += '<table class="" id="'+tableId+'">'
+	dpsmsg += '<table class="" id="' + tableId + '">'
 
-	for(var i in data){
-		if(data[i].monsterBattleInfo) {
-			if(data[i].etimer > 0)
-			{
+	for (var i in data) {
+		if (data[i].monsterBattleInfo) {
+			if (data[i].etimer > 0) {
 				enragedBar = data[i].etimer * 100 / 36
-				dpsmsg += '<tr><th colspan="4" style="background: url(\'./icons/enraged_bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar +'% 10%;">'
-			}
-			else {
+				dpsmsg += '<tr><th colspan="4" style="background: url(\'./icons/enraged_bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar + '% 10%;">'
+			} else {
 				enragedBar = data[i].eCountdown * 10
-				dpsmsg += '<tr><th colspan="4" style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar +'% 10%;">'
+				dpsmsg += '<tr><th colspan="4" style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar + '% 10%;">'
 			}
 
 			dpsmsg += data[i].enraged
@@ -237,69 +235,79 @@ function RecordTableDPSFormat(data,tableId)
 			continue
 		}
 
-		dpsmsg 	+='<tr><td> ' + (TDMSettings.hideNames ? '****' : data[i].name)
-				+ '<img onclick="recordedStastics(\''+ i +'\')" src="./class-icons/'+classIdToName(data[i].class).toLowerCase()+'.png' +'" />'
+		dpsmsg 	+= '<tr><td> ' + (TDMSettings.hideNames ? '****' : data[i].name)
+				+ '<img onclick="recordedStastics(\''+ i +'\')" src="./class-icons/' + classIdToName(data[i].class).toLowerCase() + '.png' +'" />'
 				+ '<td style="display:none;">' + data[i].dps + ' </td>'
-				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + Number(data[i].dps).nFormatter(3) + '</td>'
+				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: ' + data[i].percentage+'% 20%;">' + Number(data[i].dps).nFormatter(3) + '</td>'
 				+ '<td> ' + data[i].percentage  + '%'.color('E69F00') + ' </td>'
-				+ '<td> ' +  data[i].crit  + '%'.color('E69F00') + ' </td></tr>'
+				+ '<td> ' + data[i].crit + '%'.color(crit_color) + ' </td></tr>'
 	}
 	dpsmsg += '</table>'
 	return dpsmsg
 }
 
-
 // records tab
 function clickRecordsCB() {
 	_record = JSON.parse(this.responseText)
-	if(_record === '') return
-	document.getElementById("content").innerHTML = RecordTableDPSFormat(_record,"recordTable");
+	if (_record === '') return
+	document.getElementById("content").innerHTML = RecordTableDPSFormat(_record, "recordTable");
 	sortTable("recordTable")
 }
 
 function clickRecordsFile(filename) {
 	_recordfilename = filename
-	ajax("4R"+filename,clickRecordsCB)
+	ajax("4R" + filename, clickRecordsCB)
 }
 
 function DeleteFile(filename) {
-	ajax("1F"+filename)
+	ajax("1F" + filename)
 }
 
-function printDateInFormat(m)
-{
-   var result="";
-   var d = new Date(m);
-   result += d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate() +
-             " "+ d.getHours()+":"+d.getMinutes()+":"+d.getSeconds()
-   return result;
+function printDateInFormat(m) {
+	var result = "";
+	var d = new Date(m);
+
+	var yy = d.getFullYear();
+	var mo = d.getMonth() + 1;
+	var dd = d.getDate();
+	var hh = d.getHours();
+	var mm = d.getMinutes();
+	var ss = d.getSeconds();
+
+	hh = hh < 10 ? '0' + hh : hh;
+	mo = mo < 10 ? '0' + mo : mo;
+	dd = dd < 10 ? '0' + dd : dd;
+	hh = hh < 10 ? '0' + hh : hh;
+	mm = mm < 10 ? '0' + mm : mm;
+	ss = ss < 10 ? '0' + ss : ss;
+
+	result += yy + "/" + mo + "/" + dd + " " + hh + ":" + mm + ":" + ss
+	return result;
 }
 
 function RecordsCB() {
 	var res = JSON.parse(this.responseText)
-	var html = '<br><table>'
+	var html = '<table>'
 	res.reverse()
-	for(var i in res)
-	{
-		html	+='<tr><td><button class="btn" onclick="clickRecordsFile(\''+res[i]+'\')">View</button></td>'
-			+ '<td>' + printDateInFormat(Number(res[i].split('.')[0])) + '</td>'
-			//+ '<td><button class="btn" onclick="DeleteFile(\''+res[i]+'\')">delete</button></td></tr>'
+	for (var i in res) {
+		html += '<tr>' +
+					'<td><button class="btn" onclick="clickRecordsFile(\'' + res[i]+'\')">项目</button></td>' +
+					'<td>' + printDateInFormat(Number(res[i].split('.')[0])) + '</td>' +
+					'<td><button class="btn" onclick="DeleteFile(\'' + res[i] + '\')">删除</button></td>' +
+				'</tr>'
 	}
-	html += '</table>'
+	html += '</table><br>'
 
 	document.getElementById("content").innerHTML = html;
 }
 
-
 function Records() {
-
 	waitForThis = true
-	ajax("3R",RecordsCB)
+	ajax("3R", RecordsCB)
 }
 
 // setting tab
-function SettingsCB()
-{
+function SettingsCB() {
 	TDMSettings = JSON.parse(this.responseText)
 	document.getElementById("NoticeDamageAdd").innerHTML = TDMSettings.noticeDamage ? TDMSettings.noticeDamage.toString().numberWithCommas().color(enable_color) : TDMSettings.noticeDamage.toString().numberWithCommas().strike().color(disable_color)
 	document.getElementById("Notice").innerHTML = TDMSettings.notice ? 'notice'.color(enable_color) : 'notice'.strike().color(disable_color)
@@ -312,78 +320,70 @@ function SettingsCB()
 	document.getElementById("debug").innerHTML = 'party:'+ TDMSettings.partyLengh + '| NPCs:' + TDMSettings.NPCsLength
 }
 
-function Settings(){
-	ajax("Y",SettingsCB)
+function Settings() {
+	ajax("Y", SettingsCB)
 }
 
 // dps tab
-function DPS(){
-	ajax("5R",null) // reset recordFilename
-	if(waitForThis == true) return refreshDPS()
+function DPS() {
+	ajax("5R", null) // reset recordFilename
+	if (waitForThis == true) return refreshDPS()
 	waitForThis = false
 	previousDps = 'NEW'
 }
 
 // Custom tab
-function excuteCCmd(evt,cmd)
-{
+function excuteCCmd(evt, cmd) {
 	//document.getElementById("debug").innerHTML = cmd
-	ajax("4C"+cmd,null)
+	ajax("4C" + cmd, null)
 }
 
-function CustomCB()
-{
+function CustomCB() {
 	var data = JSON.parse(this.responseText)
 	var html = ''
 	//'<table><tr><td>'
-	for(var key in data){
-		html += '<button class=btn onclick="excuteCCmd(event,\''+ key +'\')">' + data[key] + '</button><br>'
+	for (var key in data) {
+		html += '<button class=btn onclick="excuteCCmd(event,\'' + key +'\')">' + data[key] + '</button><br>'
 	}
 	//document.getElementById("debug").innerHTML = html
 	document.getElementById("custom").innerHTML = html
 }
 
-function Custom(){
-	ajax("3C",CustomCB)
+function Custom() {
+	ajax("3C", CustomCB)
 }
 
-function getVersionCB()
-{
+function getVersionCB() {
 	var c = JSON.parse(this.responseText)
 	document.getElementById("version").innerHTML = c[0]
 }
 
-function getVersion()
-{
-	ajax("V",getVersionCB)
+function getVersion() {
+	ajax("V", getVersionCB)
 }
 
-function ExtUICB()
-{
+function ExtUICB() {
 	//console.log(this.responseText)
 	var c = JSON.parse(this.responseText)
-	if(typeof _tera_client_proxy_ === 'undefined') {
+	if (typeof _tera_client_proxy_ === 'undefined') {
 		//window.open(window.location.href, 'TDM', 'titlebar=no, toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no');
 		window.open(window.location.href, 'TDM', 'height=240,width=200,top=0,left=0,directories=no,titlebar=nostatus=no,toolbar=no,menubar=no,navigationbar=no,location=no,resizable=no,scrollbars=no');
-	}
-	else {
+	} else {
 		//openWebsite('http://' + c.host + ':'+ c.port)
 		openWebsite(window.location.href)
 	}
 	NoPopUp()
 }
 
-function ExtUI()
-{
-	ajax("E",ExtUICB)
+function ExtUI() {
+	ajax("E", ExtUICB)
 }
 
 function numberWithCommas(x) {
 	return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
 }
 
-function binarySearchSkillName(d, t, s , e)
-{
+function binarySearchSkillName(d, t, s , e) {
 	const m = Math.floor((s + e)/2);
 	var target = Number(t)
 	var id = Number(d[m].id)
@@ -393,26 +393,25 @@ function binarySearchSkillName(d, t, s , e)
   	if (target < id) return binarySearchSkillName(d,t,s,m);
 }
 
-function skillIdToName(id)
-{
-	if(_skillInfo.length == 0) return 'skill tsv missing'
+function skillIdToName(id) {
+	if (_skillInfo.length == 0) return 'skill tsv missing'
 	var sid = id.slice(1,id.length)
 	return binarySearchSkillName(_skillInfo, sid, 0, _skillInfo.length - 1)
 }
 
-function dpsStastic()
-{
+function dpsStastic() {
 	var s= []
 
 	// set skill name
-	for (var i in slog)
-	{
-		if(slog[i].isPet) slog[i]['name'] = slog[i].petName
-		else slog[i]['name'] = skillIdToName(slog[i].skillId)
+	for (var i in slog) {
+		if (slog[i].isPet) {
+			slog[i]['name'] = slog[i].petName
+		} else {
+			slog[i]['name'] = skillIdToName(slog[i].skillId)
+		}
 	}
 
-	for(var i in slog)
-	{
+	for (var i in slog) {
 		var t=slog[i]
 		var id = t.skillId
 		var name = t.name
@@ -421,10 +420,8 @@ function dpsStastic()
 
 		var found = false
 		// search skill id and insert data
-		for (var j in s)
-		{
-			if(s[j].name === name)
-			{
+		for (var j in s) {
+			if (s[j].name === name) {
 				s[j].wDamage = c ? s[j].wDamage : s[j].wDamage + damage
 				s[j].rDamage = c ? s[j].rDamage + damage : s[j].rDamage
 				s[j].tDamage = s[j].rDamage + s[j].wDamage
@@ -438,14 +435,14 @@ function dpsStastic()
 		}
 
 		// not found push a new entity
-		if(!found){
+		if (!found) {
 			var d = {
-				'name' : name,
-				'wDamage' : c ? 0 : damage,
-				'rDamage' : c ? damage : 0,
-				'tDamage' : damage,
-				'crit' : c ? 1 : 0,
-				'hitCount' : 1
+				'name': name,
+				'wDamage': c ? 0 : damage,
+				'rDamage': c ? damage : 0,
+				'tDamage': damage,
+				'crit': c ? 1 : 0,
+				'hitCount': 1
 			}
 
 			s.push(d)
@@ -458,95 +455,89 @@ function dpsStastic()
 		return b.tDamage - a.tDamage
 	})
 
-	var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="skillLog(\''+_name+'\',\''+_classId+'\')">Skill Log</button><br>'
+	var html='<button class="btn" onclick="refreshDPS()">返回</button><button class="btn" onclick="skillLog(\'' + _name + '\',\'' + _classId + '\')">技能日志</button><br>'
 
-	html += '<table class="stastics"><tr><th rowspan=2>Skill Name</th><th>White</th><th>Red</th><th>Total</th><th>Crit</th></tr>'
-	html += '<tr><th>Avrage</th><th>Avrage</th><th>Avrage</th><th>Red/Total</th></tr>'
+	html += '<table class="stastics"><tr><th rowspan=2>技能名称</th><th>白字</th><th>红字</th><th>合计</th><th>暴击</th></tr>'
+	html += '<tr><th>平均</th><th>平均</th><th>平均</th><th>红字/合计</th></tr>'
 	//console.log(s)
 	var avg=0
-	for(var i in s){
+	for (var i in s) {
 		//console.log(s[i].wDamage +' '+ s[i].rDamage)
 		var t = s[i].wDamage + s[i].rDamage
-		html+='<tr>'
-		html+='<td>' + s[i].name + '</td>'
+		html += '<tr>'
+		html += '<td>' + s[i].name + '</td>'
 		avg = 0
-		if(s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit))
-		html+='<td>' +s[i].wDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
+		if (s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit))
+		html += '<td>' +s[i].wDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
 		avg = 0
-		if(s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit))
-		html+='<td>' +s[i].rDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
+		if (s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit))
+		html += '<td>' +s[i].rDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
 		avg = 0
-		if(s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount))
-		html+='<td>' +s[i].tDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
-		html+='<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>'+s[i].crit+'/'+s[i].hitCount+'</td>'
-		html+='</tr>'
+		if (s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount))
+		html += '<td>' +s[i].tDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
+		html += '<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>' + s[i].crit + '/' + s[i].hitCount+'</td>'
+		html += '</tr>'
 	}
-	html+='</table>'
+	html += '</table>'
 	document.getElementById("content").innerHTML = html
 
 }
 
-function printStastics(value)
-{
+function printStastics(value) {
 	document.getElementById("content").innerHTML = html
 }
 
-function skillLogCB()
-{
+function skillLogCB() {
 	slog = []
 	slog = JSON.parse(this.responseText)
 	//console.log(this.responseText)
-	var html='<button class="btn" onclick="refreshDPS()">return to DPS</button><button class="btn" onclick="dpsStastic()">Stastic</button><br>'
-	html += '<table class="stastics"><tr><th>Time</th><th>Skill Name</th><th>Damage</th></tr>'
+	var html = '<button class="btn" onclick="refreshDPS()">返回</button><button class="btn" onclick="dpsStastic()">详细</button><br>'
+	html += '<table class="stastics"><tr><th>时间</th><th>技能名称</th><th>伤害</th></tr>'
 	//var backward = 0
 	slog.reverse()
-	for(var i in slog){
+	for (var i in slog) {
 		//backward = slog.length -1 - i
 
-		html+='<tr>'
-		html+='<td>' + (new Date(slog[i].Time)).toTimeString().slice(0,8)+ '</td>'
-		html+='<td>' + (slog[i].isPet? slog[i].petName : skillIdToName(slog[i].skillId)) + '</td>'
-		html+='<td>' + (slog[i].crit ? slog[i].damage.nFormatter(3).color('FF3000') : slog[i].damage.nFormatter(3)) + '</td>'
-		html+='</tr>'
+		html += '<tr>'
+		html += '<td>' + (new Date(slog[i].Time)).toTimeString().slice(0,8)+ '</td>'
+		html += '<td>' + (slog[i].isPet? slog[i].petName : skillIdToName(slog[i].skillId)) + '</td>'
+		html += '<td>' + (slog[i].crit ? slog[i].damage.nFormatter(3).color('FF3000') : slog[i].damage.nFormatter(3)) + '</td>'
+		html += '</tr>'
 		//console.log(slog[i].damage)
 	}
-	html+='</table>'
+	html += '</table>'
 	document.getElementById("content").innerHTML = html
 }
 
-function getSkillInfoCB()
-{
+function getSkillInfoCB() {
 	_skillInfo = JSON.parse(this.responseText)
 	//console.log(_skillInfo)
-	ajax("2L"+_name,skillLogCB)
+	ajax("2L" + _name, skillLogCB)
 }
 
-function skillLog(n,c)
-{
+function skillLog(n, c) {
 	_name = n
 	_classId = c
 	waitForThis = true
-	ajax(c+"S",getSkillInfoCB)
+	ajax(c + "S", getSkillInfoCB)
 }
 
-function classIdToName(id)
-{
-	if(id == 0) return 'Warrior'
-	if(id == 1) return 'Lancer'
-	if(id == 2) return 'Slayer'
-	if(id == 3) return 'Berserker'
-	if(id == 4) return 'Sorcerer'
-	if(id == 5) return 'Archer'
-	if(id == 6) return 'Priest'
-	if(id == 7) return 'Mystic'
-	if(id == 8) return 'Reaper'
-	if(id == 9) return 'Gunner'
-	if(id == 10) return 'Brawler'
-	if(id == 11) return 'Ninja'
-	if(id == 12) return 'Valkyrie'
+function classIdToName(id) {
+	if (id == 0) return 'Warrior'
+	if (id == 1) return 'Lancer'
+	if (id == 2) return 'Slayer'
+	if (id == 3) return 'Berserker'
+	if (id == 4) return 'Sorcerer'
+	if (id == 5) return 'Archer'
+	if (id == 6) return 'Priest'
+	if (id == 7) return 'Mystic'
+	if (id == 8) return 'Reaper'
+	if (id == 9) return 'Gunner'
+	if (id == 10) return 'Brawler'
+	if (id == 11) return 'Ninja'
+	if (id == 12) return 'Valkyrie'
 	return ''
 }
-
 
 function sortTable(tabeId) {
 	var table, rows, switching, i, x, y, shouldSwitch;
@@ -583,127 +574,114 @@ function sortTable(tabeId) {
 	}
 }
 
-function tableDPSFormat(data,tableId)
-{
+function tableDPSFormat(data,tableId) {
 	var dpsmsg = ''
 	var enragedBar = 0
 	var class_image=''
 
-	dpsmsg += '<table id="'+tableId+'">'
+	dpsmsg += '<table id="' + tableId + '">'
 
-	for(var i in data){
-		if(data[i].monsterBattleInfo) {
-			if(data[i].etimer > 0)
-			{
+	for (var i in data) {
+		if (data[i].monsterBattleInfo) {
+			if (data[i].etimer > 0) {
 				enragedBar = data[i].etimer * 100 / 36
 				enragedSound.volume = 0.500000
 				enragedSound.play()
-				dpsmsg += '<tr><th colspan="4" style="background: url(\'./icons/enraged_bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar +'% 10%;">'
-			}
-			else {
+				dpsmsg += '<tr><th colspan="4" style="background: url(\'./icons/enraged_bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar + '% 10%;">'
+			} else {
 				enragedSound.pause()
 				enragedBar = data[i].eCountdown * 10
-				dpsmsg += '<tr><th colspan="4" style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar +'% 10%;">'
+				dpsmsg += '<tr><th colspan="4" style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar + '% 10%;">'
 			}
 
 			dpsmsg += data[i].enraged
 			dpsmsg += '<br>' + data[i].monsterBattleInfo + '</th></tr>'
 			continue
 		}
-		if(data[i].command){
-			if(data[i].command === 'matching alarm') eventSound.play()
+		if (data[i].command) {
+			if (data[i].command === 'matching alarm') eventSound.play()
 			continue
 		}
 
-		var crit = data[i].crit  + '%'.color('E69F00')
-		if(data[i].class == 6 || data[i].class == 7) crit += ' ' + data[i].healCrit  + '%'.color('56B4E9')
+		var crit = data[i].crit  + '%'.color(crit_color)
+		if (data[i].class == 6 || data[i].class == 7) crit += ' ' + data[i].healCrit  + '%'.color(healCrit_color)
 
 
 		dpsmsg 	+='<tr><td> ' + (TDMSettings.hideNames? '****' : data[i].name)
-				+ '<img onclick="skillLog(\''+ data[i].name.stripHTML() +'\', '+data[i].class+')" src="./class-icons/'+classIdToName(data[i].class).toLowerCase()+'.png' +'" />'
+				+ '<img onclick="skillLog(\''+ data[i].name.stripHTML() +'\', '+data[i].class+')" src="./class-icons/' + classIdToName(data[i].class).toLowerCase() + '.png' + '" />'
 				+ '<td style="display:none;">' + data[i].dps + ' </td>'
-				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + data[i].dps.nFormatter(3) + ' </td>'
+				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: ' + data[i].percentage+'% 20%;">' + data[i].dps.nFormatter(3) + ' </td>'
 				//+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + data[i].dps + ' </td>'
 				+ '<td> ' + data[i].percentage  + '%'.color('E69F00') + ' </td>'
 				+ '<td> ' + crit  + ' </td></tr>'
-
-
 	}
 	dpsmsg += '</table>'
 	return dpsmsg
 }
 
-function refreshCB()
-{
+function refreshCB() {
 	_skillInfo = []
 	var res = JSON.parse(this.responseText)
 	//console.log(res)
-	if(res === '' ) return
-	var result = tableDPSFormat(res,"dpsTable")
-	if(result === previousDps) return
-	if(waitForThis == true) return
+	if (res === '' ) return
+	var result = tableDPSFormat(res, "dpsTable")
+	if (result === previousDps) return
+	if (waitForThis == true) return
 	document.getElementById("content").innerHTML = result + '<br>'
 	//sortTable("dpsTable")
 
 	previousDps = result
-
 }
 
-function refreshDPS()
-{
+function refreshDPS() {
 	previousDps = 'NEW'
 	waitForThis = false
-	ajax("1R",refreshCB)
-	var i = setInterval(function(){
-		if(waitForThis){
+	ajax("1R", refreshCB)
+	var i = setInterval(function() {
+		if (waitForThis) {
 			clearInterval(i);
 			return
 		}
-		ajax("1R",refreshCB)
+		ajax("1R", refreshCB)
 	}, 1000);
 }
 
-function setStyleCB()
-{
+function setStyleCB() {
 	document.getElementById("debug").innerHTML = this.responseText
 	var data = this.responseText.substring(1, this.responseText.length - 1)
 	var size = data.split(',')
-	if(typeof _tera_client_proxy_ !== 'undefined') {
+	if (typeof _tera_client_proxy_ !== 'undefined') {
 		_tera_client_proxy_.resize_to(Number(size[0]), Number(size[1]))
 	}
 }
 
-function readConfig()
-{
-	ajax("Z",setStyleCB)
+function readConfig() {
+	ajax("Z", setStyleCB)
 }
 
-function useBrowser(url)
-{
-	if(typeof _tera_client_proxy_ !== 'undefined') {
+function useBrowser(url) {
+	if (typeof _tera_client_proxy_ !== 'undefined') {
 		_tera_client_proxy_.resize_to(1024, 768)
 	}
-	window.location.href=url
+	window.location.href = url
 }
 
-function useBrowserHelp()
-{
+function useBrowserHelp() {
 	var locale = ''
-	if(typeof _tera_client_proxy_ !== 'undefined') {
+	if (typeof _tera_client_proxy_ !== 'undefined') {
 		locale = _tera_client_proxy_.get_locale()
 	}
-	//_tera_client_proxy_.alert(locale);
+	_tera_client_proxy_.alert(locale);
 	var url = ''
-	if(locale === 'ko') url = 'https://github.com/xmljson/TDM/blob/master/README_KR.md'
+	if (locale === 'ko') url = 'https://github.com/xmljson/TDM/blob/master/README_KR.md'
 	else url = 'https://github.com/xmljson/TDM/blob/master/README.md'
 	_tera_client_proxy_.open_web_direct(url)
 }
-function openWebsite(url)
-{
-	if(typeof _tera_client_proxy_ !== 'undefined') {
+
+function openWebsite(url) {
+	if (typeof _tera_client_proxy_ !== 'undefined') {
 		_tera_client_proxy_.open_web_direct(url)
-	}
-	else{
+	} else {
 		window.location.href=url
 	}
 }
@@ -718,42 +696,40 @@ function openTab(evt, tabName) {
     for (i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
-    if(tabName !== 'records') document.getElementById(tabName).style.display = "block";
-    if(evt != null)evt.currentTarget.className += " active";
+    if (tabName !== 'records') document.getElementById(tabName).style.display = "block";
+    if (evt != null)evt.currentTarget.className += " active";
 
-    if(tabName === 'wrapper') DPS()
-    if(tabName === 'records') {
+    if (tabName === 'wrapper') DPS()
+    if (tabName === 'records') {
 	    document.getElementById('wrapper').style.display = "block";
 	    Records()
     }
-    if(tabName === 'settings') Settings()
-    if(tabName === 'custom') Custom()
-    if(tabName === 'manager') Manager()
+    if (tabName === 'settings') Settings()
+    if (tabName === 'custom') Custom()
+    if (tabName === 'manager') Manager()
 }
 
 function nullClientProxy () {
-    this.set_title = function (t){
+    this.set_title = function (t) {
 	    document.title = t
     }
-    function alert(m) {alert(m)}
+    function alert(m) { alert(m) }
     this.get_locale = function() {}
-    this.open_web_direct = function (url){
+    this.open_web_direct = function (url) {
 	    window.location.href=url
     }
     this.close = 0;
 }
 
 window.addEventListener('error', function(e) {
-	if(typeof _tera_client_proxy_ !== 'undefined') {
+	if (typeof _tera_client_proxy_ !== 'undefined') {
 		_tera_client_proxy_.alert('Error: ' + e.message)
-	}
-	else {
+	} else {
 		alert('Error: ' + e.message)
 	}
 })
 
-function resizeDiv()
-{
+function resizeDiv() {
 	var width = window.innerWidth;
 	var height = window.innerHeight;
 
@@ -767,25 +743,22 @@ function resizeDiv()
 	document.getElementById('wrapper').style.display = "block";
 }
 
-window.addEventListener('resize', function(event){
+window.addEventListener('resize', function(event) {
   // do stuff here
 	resizeDiv()
 });
 
 window.onload = function() {
-
-	if(typeof _tera_client_proxy_ === 'undefined') {
-		//window.resizeTo(320, 250);
+	if (typeof _tera_client_proxy_ === 'undefined') {
+		//window.resizeTo(320, 240);
 		//document.body.style.zoom="200%"
 		resizeDiv()
-	}
-	else {
-		_tera_client_proxy_.resize_to(320, 250)
+	} else {
+		_tera_client_proxy_.resize_to(280, 240)
 		_tera_client_proxy_.set_title('Tera DPS Monitor')
 	}
 	Settings()
 	readConfig()
 	refreshDPS()
 	getVersion()
-
 }

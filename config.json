@@ -1,9 +1,14 @@
 {
     "enable": true,
+    "region": "TW",	
+	"popup": true,
+    "party_leaving_msg": "3Q",
     "notice": true,
     "notice_damage": 5000000,
-    "region": "NA",
     "bossOnly": true,
-    "party_leaving_msg": "tyfp~!",
+	"hideNames": false,
+	"rankSystem": true,
+	"allUsers": false,
+	"skillLog": true,
     "debug" : false
 }
