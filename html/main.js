@@ -455,9 +455,9 @@ function dpsStastic() {
 		return b.tDamage - a.tDamage
 	})
 
-	var html='<button class="btn" onclick="refreshDPS()">返回</button><button class="btn" onclick="skillLog(\'' + _name + '\',\'' + _classId + '\')">技能日志</button><br>'
+	var html='<button class="btn" onclick="refreshDPS()">返回</button>' + '    ' + '<button class="btn" onclick="skillLog(\'' + _name + '\',\'' + _classId + '\')">技能日志</button><br>'
 
-	html += '<table class="stastics"><tr><th rowspan=2>技能名称</th><th>白字</th><th>红字</th><th>合计</th><th>暴击</th></tr>'
+	html += '<table class="stastics"><tr><th rowspan=2>技能名称</th><th>白字</th><th>红字</th><th>合计</th><th>暴击率</th></tr>'
 	html += '<tr><th>平均</th><th>平均</th><th>平均</th><th>红/合</th></tr>'
 	//console.log(s)
 	var avg=0
@@ -491,7 +491,7 @@ function skillLogCB() {
 	slog = []
 	slog = JSON.parse(this.responseText)
 	//console.log(this.responseText)
-	var html = '<button class="btn" onclick="refreshDPS()">返回</button><button class="btn" onclick="dpsStastic()">详细</button><br>'
+	var html = '<button class="btn" onclick="refreshDPS()">返回</button>' + '    ' + '<button class="btn" onclick="dpsStastic()">详细信息</button><br>'
 	html += '<table class="stastics"><tr><th>时间</th><th>技能名称</th><th>伤害</th></tr>'
 	//var backward = 0
 	slog.reverse()
