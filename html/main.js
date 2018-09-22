@@ -458,7 +458,7 @@ function dpsStastic() {
 	var html='<button class="btn" onclick="refreshDPS()">返回</button><button class="btn" onclick="skillLog(\'' + _name + '\',\'' + _classId + '\')">技能日志</button><br>'
 
 	html += '<table class="stastics"><tr><th rowspan=2>技能名称</th><th>白字</th><th>红字</th><th>合计</th><th>暴击</th></tr>'
-	html += '<tr><th>平均</th><th>平均</th><th>平均</th><th>红字/合计</th></tr>'
+	html += '<tr><th>平均</th><th>平均</th><th>平均</th><th>红/合</th></tr>'
 	//console.log(s)
 	var avg=0
 	for (var i in s) {

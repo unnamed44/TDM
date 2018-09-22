@@ -696,7 +696,7 @@ function TDM(d) {
 					<th>平均</th>
 					<th>平均</th>
 					<th>平均</th>
-					<th>红字/合计</th>
+					<th>红/合</th>
 				</tr>`
 		// console.log(s)
 		var avg = 0

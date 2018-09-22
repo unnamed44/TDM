@@ -1,16 +1,16 @@
 'use strict'
 
-const WARN_DEPRECATED = true,
-	WARN_ONLY_ONCE = true
+const WARN_DEPRECATED = true
+const WARN_ONLY_ONCE = true
 
 const warnings = new Set()
 
 function warn() {
-	if(!WARN_DEPRECATED || WARN_ONLY_ONCE && warnings.size) return
+	if (!WARN_DEPRECATED || WARN_ONLY_ONCE && warnings.size) return
 
 	const src = Error().stack.split('\n')[3].slice(7)
 
-	if(!warnings.has(src)) {
+	if (!warnings.has(src)) {
 		warnings.add(src)
 		//console.warn(`DeprecationWarning: Long.JS is deprecated. Use BigInt equivalents instead.\n    at ${src}`)
 	}
