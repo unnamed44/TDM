@@ -235,12 +235,12 @@ function RecordTableDPSFormat(data, tableId) {
 			continue
 		}
 
-		dpsmsg 	+= '<tr><td> ' + (TDMSettings.hideNames ? '****' : data[i].name)
+		dpsmsg 	+= '<tr><td>' + (TDMSettings.hideNames ? '****' : data[i].name)
 				+ '<img onclick="recordedStastics(\''+ i +'\')" src="./class-icons/' + classIdToName(data[i].class).toLowerCase() + '.png' +'" />'
-				+ '<td style="display:none;">' + data[i].dps + ' </td>'
-				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: ' + data[i].percentage+'% 20%;">' + Number(data[i].dps).nFormatter(3) + '</td>'
-				+ '<td> ' + data[i].percentage  + '%'.color('E69F00') + ' </td>'
-				+ '<td> ' + data[i].crit + '%'.color(crit_color) + ' </td></tr>'
+				+ '<td style="display:none;">' + data[i].dps + '</td>'
+				+ '</td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: ' + data[i].percentage+'% 20%;">' + Number(data[i].dps).nFormatter(3) + '</td>'
+				+ '<td>' + data[i].percentage  + '%'.color('E69F00') + '</td>'
+				+ '<td>' + data[i].crit + '%'.color(crit_color) + '</td></tr>'
 	}
 	dpsmsg += '</table>'
 	return dpsmsg
@@ -455,27 +455,29 @@ function dpsStastic() {
 		return b.tDamage - a.tDamage
 	})
 
-	var html='<button class="btn" onclick="refreshDPS()">返回</button>' + '    ' + '<button class="btn" onclick="skillLog(\'' + _name + '\',\'' + _classId + '\')">技能日志</button><br>'
+	var html='<button class="btn" onclick="refreshDPS()">返回</button>' + ' ' + '<button class="btn" onclick="skillLog(\'' + _name + '\',\'' + _classId + '\')">技能日志</button><br>'
 
 	html += '<table class="stastics"><tr><th rowspan=2>技能名称</th><th>白字</th><th>红字</th><th>合计</th><th>暴击率</th></tr>'
 	html += '<tr><th>平均</th><th>平均</th><th>平均</th><th>红/合</th></tr>'
 	//console.log(s)
-	var avg=0
+	var avg = 0
 	for (var i in s) {
 		//console.log(s[i].wDamage +' '+ s[i].rDamage)
 		var t = s[i].wDamage + s[i].rDamage
 		html += '<tr>'
 		html += '<td>' + s[i].name + '</td>'
 		avg = 0
-		if (s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit))
-		html += '<td>' +s[i].wDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
+		if (s[i].hitCount - s[i].crit != 0) {
+			avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit))
+		}
+		html += '<td>' + s[i].wDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
 		avg = 0
 		if (s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit))
-		html += '<td>' +s[i].rDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
+		html += '<td>' + s[i].rDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
 		avg = 0
 		if (s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount))
-		html += '<td>' +s[i].tDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
-		html += '<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>' + s[i].crit + '/' + s[i].hitCount+'</td>'
+		html += '<td>' + s[i].tDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
+		html += '<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>' + s[i].crit + '/' + s[i].hitCount + '</td>'
 		html += '</tr>'
 	}
 	html += '</table>'
