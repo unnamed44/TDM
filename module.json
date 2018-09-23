@@ -1,7 +1,0 @@
-{
-	"disableAutoUpdate": false,
-	"options": {
-		"niceName": "TDM"
-	},
-	"servers": ["https://raw.githubusercontent.com/zc149352394/TDM/master/"]
-}
