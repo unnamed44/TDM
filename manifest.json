@@ -1,0 +1,42 @@
+{
+	"files": {
+		"html/index.html": "10b05fa35b3d9127b7a7de5e84e984e0545994a6396e5750e20698b6bcaa14f9",
+		"html/main.css": "0c98467368963c63355aaf955340c185f62cb0381869b3b3995be657a092861d",
+		"html/main.js": "a226977e5bf0bbc4f54ba1a5a29cef245ed0a6562cd45e53aac1d9dade5b6b12",
+		"index.js": "f5465f8b089c41176fe89142b20caeb59f154d0d348fd78157219ce883daa920",
+		"managerui.js": "39a1b22d7e577acd347b6a31cd2db962a1fcfb9a14b4f663ea0cff83b07153e1",
+		"monsterInfo.js": "ff8cf1aa5230de75cfa2a7fd2acae2607f46328957e58c15b85c2ea6704b3e39",
+		"npm_install.bat": "0bffcbee84d3448d428a780e6c8be8c72caa2d232f5b9173b4de7c0bec36be32",
+		"router/main.js": "88786f90b1bef1c0013db10df0213c3c88823d518ba5df1f9f82b47147874596",
+		"skillInfo.js": "cd37e5ecbd7320e817aa20a2aa56c990661e23388731fcfb79b78ac3ba8bc33f",
+		"ui.js": "93c235961b95586f2ed69bc9c7e965dae8927301d627d0eca47c27f347df21d1",
+		"ui_config.json": "357bcd2684a9d6c1e76d53e35c997a7026d13c74fd9977f3792800b31d9f0b47",
+		"update.js": "2102d59872352c999e28d49011996d0118bb8d05893293faa925c8992682b43a"
+	},
+	"defs": {
+		"C_CHAT": 1,
+		"C_LEAVE_PARTY": 1,
+		"C_REQUEST_USER_PAPERDOLL_INFO": 1,
+		"C_WHISPER": 1,
+		"S_ANSWER_INTERACTIVE": 2,
+		"S_BOSS_GAGE_INFO": 3,
+		"S_CHANGE_EVENT_MATCHING_STATE": 1,
+		"S_DEAD_LOCATION": 2,
+		"S_DESPAWN_NPC": 3,
+		"S_DESPAWN_USER": 3,
+		"S_DUNGEON_EVENT_MESSAGE": 1,
+		"S_EACH_SKILL_RESULT": [10,12],
+		"S_LEAVE_PARTY": 1,
+		"S_LEAVE_PARTY_MEMBER": 2,
+		"S_LOAD_TOPO": 3,
+		"S_LOGIN": 10,
+		"S_NPC_OCCUPIER_INFO": 1,
+		"S_NPC_STATUS": 1,
+		"S_NPC_TARGET_USER": 1,
+		"S_OPEN_AWESOMIUM_WEB_URL": 1,
+		"S_PARTY_MEMBER_LIST": 6,
+		"S_SPAWN_ME": 2,
+		"S_SPAWN_NPC": 8,
+		"S_SPAWN_USER": 12
+	}
+}

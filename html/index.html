@@ -1,0 +1,66 @@
+<html>
+<head>
+	<title> TDM </title>
+	<link rel="stylesheet" href="main.css"/>
+	<script src='./main.js'></script>
+</head>
+<body>
+	<div class="tab">
+		<button class="tablinks active" onMouseDown="clickSound.play()" onClick="openTab(event,'wrapper')">DPS</button>
+		<button class="tablinks" onMouseDown="clickSound.play()" onClick="openTab(event,'records')">记录</button>
+		<button class="tablinks" onMouseDown="clickSound.play()" onClick="openTab(event,'settings')">设置</button>
+		<button class="tablinks" onMouseDown="clickSound.play()" onClick="ExtUI()">浏览器</button>
+		<button class="tablinks" onMouseDown="clickSound.play()" onClick="Update()">更新</button>
+		<button class="tablinks" onMouseDown="clickSound.play()" onClick="NoPopUp()">隐藏</button>
+	</div>
+
+	<div id="wrapper" class="tabcontent">
+		<div id="content"></div>
+		<div id="skillLog"></div>
+
+		<button class=btn onMouseDown="clickSound.play()" onClick="ToParty()">发送到组队</button>
+		<button class=btn onMouseDown="clickSound.play()" onClick="ToGuild()">发送到公会</button>
+		<button class=btn onMouseDown="clickSound.play()" onClick="HideNames()">隐藏昵称</button>
+		<button class=btn onMouseDown="clickSound.play()" onClick="Whisper()">密语</button>
+		<input class=ipt type="text" size="1" id="name" value="">
+
+		<br>
+		<button class=btn onMouseDown="clickSound.play()" onClick="openTab(event,'manager')">模块管理器</button>
+		<button class=btn onMouseDown="clickSound.play()" onClick="openTab(event,'custom')">自定义命令</button>
+		<button class=btn onMouseDown="clickSound.play()" onClick="LeaveParty()">退出队伍</button>
+		<button class=btn onMouseDown="clickSound.play()" onClick="Reset()">重置</button>
+		<button class=btn onMouseDown="clickSound.play()" onClick="useBrowser('http://tera.dvcoa.com.au:3000')">排行榜</button>
+	</div>
+
+	<div id="custom" class="tabcontent"></div>
+	<div id="manager" class="tabcontent"></div>
+	<div id="settings" class="tabcontent">
+		<table>
+			<tr>
+				<td><button class=btn onMouseDown="clickSound.play()" onClick="Notice()">高伤害通知</button></td><td><p id="Notice"></p></td>
+				<td><button class=btn onMouseDown="clickSound.play()" onClick="NoticeDamageAdd()">设定值</button></td><td><p id="NoticeDamageAdd"></p></td>
+			</tr>
+			<tr>
+				<td><button class=btn onMouseDown="clickSound.play()" onClick="BossOnly()">只算BOSS</button></td><td><p id="BossOnly"></p></td>
+				<td><button class=btn onMouseDown="clickSound.play()" onClick="HideNames()">隐藏昵称</button></td><td><p id="HideNames"></p></td>
+			</tr>
+			<tr>
+				<td><button class=btn onMouseDown="clickSound.play()" onClick="SkillLog()">技能日志</button></td><td><p id="SkillLog"></p></td>
+				<td><button class=btn onMouseDown="clickSound.play()" onClick="RankSystem()">上传数据</button></td><td><p id="RankSystem"></p></td>
+			</tr>
+			<tr>
+				<td><button class=btn onMouseDown="clickSound.play()" onClick="Debug()">Debug</button></td><td><p id="Debug"></p></td>
+				<td><button class=btn onMouseDown="clickSound.play()" onClick="AllUsers()">全部DPS</button></td><td><p id="AllUsers"></p></td>
+			</tr>
+		</table>
+		<br>
+		<br>
+		<br>
+		<br>
+		<p id="version"></p>
+        <br>
+		<textarea id="debug" maxLength="2000" rows="14" cols="50" style="background-color: #2E3440;"></textarea>
+		<br>
+	</div>
+</body>
+</html>
