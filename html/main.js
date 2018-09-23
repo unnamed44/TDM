@@ -22,7 +22,7 @@ Number.prototype.nFormatter = function (digits) {
 	var space = ''
 	for (var j = 0;j < digits; j++) space += ' '
 	var ret = (this / si[i].value) + space
-	return ret.slice(0,digits+1).replace(rx, "$1") + si[i].symbol;
+	return ret.slice(0, digits + 1).replace(rx, "$1") + si[i].symbol;
 }
 
 var previousDps = ''
@@ -35,7 +35,15 @@ var _name = ''
 var	_classId = ''
 var _record = {}
 var _recordfilename = ''
-var enable_color = '56B4E9', disable_color = 'E69F00', crit_color = 'E69F00', healCrit_color = '56B4E9'
+var enable_color = '56B4E9',
+	disable_color = 'E69F00',
+
+	percentage_color = 'E69F00',
+	crit_color = 'E69F00',
+	healCrit_color = '56B4E9',
+
+	red_color = 'FF3000',
+	total_color = '56B4E9'
 
 var TDMSettings = {
 	"notice" : true,
@@ -44,8 +52,8 @@ var TDMSettings = {
 	"hideNames" : true,
 	"skillLog" : true,
 	"rankSystem" : true,
-	"debug" : true,
 	"allUsers" : false,
+	"debug" : false,
 	"partyLengh" : 0,
 	"NPCsLength" : 0
 }
@@ -239,7 +247,7 @@ function RecordTableDPSFormat(data, tableId) {
 				+ '<img onclick="recordedStastics(\''+ i +'\')" src="./class-icons/' + classIdToName(data[i].class).toLowerCase() + '.png' +'" />'
 				+ '<td style="display:none;">' + data[i].dps + '</td>'
 				+ '</td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: ' + data[i].percentage+'% 20%;">' + Number(data[i].dps).nFormatter(3) + '</td>'
-				+ '<td>' + data[i].percentage  + '%'.color('E69F00') + '</td>'
+				+ '<td>' + data[i].percentage  + '%'.color(percentage_color) + '</td>'
 				+ '<td>' + data[i].crit + '%'.color(crit_color) + '</td></tr>'
 	}
 	dpsmsg += '</table>'
@@ -311,7 +319,7 @@ function SettingsCB() {
 	TDMSettings = JSON.parse(this.responseText)
 	document.getElementById("NoticeDamageAdd").innerHTML = TDMSettings.noticeDamage ? TDMSettings.noticeDamage.toString().numberWithCommas().color(enable_color) : TDMSettings.noticeDamage.toString().numberWithCommas().strike().color(disable_color)
 	document.getElementById("Notice").innerHTML = TDMSettings.notice ? 'notice'.color(enable_color) : 'notice'.strike().color(disable_color)
-	document.getElementById("BossOnly").innerHTML = TDMSettings.bossOnly ? 'Boss Only'.color(enable_color) : 'Boss Only'.strike().color(disable_color)
+	document.getElementById("BossOnly").innerHTML = TDMSettings.bossOnly ? 'bossOnly'.color(enable_color) : 'bossOnly'.strike().color(disable_color)
 	document.getElementById("HideNames").innerHTML = TDMSettings.hideNames ? 'hideNames'.color(enable_color) : 'hideNames'.strike().color(disable_color)
 	document.getElementById("SkillLog").innerHTML = TDMSettings.skillLog ? 'skillLog'.color(enable_color) : 'skillLog'.strike().color(disable_color)
 	document.getElementById("RankSystem").innerHTML = TDMSettings.rankSystem ? 'rankSystem'.color(enable_color) : 'rankSystem'.strike().color(disable_color)
@@ -334,18 +342,18 @@ function DPS() {
 
 // Custom tab
 function excuteCCmd(evt, cmd) {
-	//document.getElementById("debug").innerHTML = cmd
+	// document.getElementById("debug").innerHTML = cmd
 	ajax("4C" + cmd, null)
 }
 
 function CustomCB() {
 	var data = JSON.parse(this.responseText)
 	var html = ''
-	//'<table><tr><td>'
+	// '<table><tr><td>'
 	for (var key in data) {
 		html += '<button class=btn onclick="excuteCCmd(event,\'' + key +'\')">' + data[key] + '</button><br>'
 	}
-	//document.getElementById("debug").innerHTML = html
+	// document.getElementById("debug").innerHTML = html
 	document.getElementById("custom").innerHTML = html
 }
 
@@ -363,13 +371,13 @@ function getVersion() {
 }
 
 function ExtUICB() {
-	//console.log(this.responseText)
+	// console.log(this.responseText)
 	var c = JSON.parse(this.responseText)
 	if (typeof _tera_client_proxy_ === 'undefined') {
-		//window.open(window.location.href, 'TDM', 'titlebar=no, toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no');
+		// window.open(window.location.href, 'TDM', 'titlebar=no, toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no');
 		window.open(window.location.href, 'TDM', 'height=240,width=200,top=0,left=0,directories=no,titlebar=nostatus=no,toolbar=no,menubar=no,navigationbar=no,location=no,resizable=no,scrollbars=no');
 	} else {
-		//openWebsite('http://' + c.host + ':'+ c.port)
+		// openWebsite('http://' + c.host + ':'+ c.port)
 		openWebsite(window.location.href)
 	}
 	NoPopUp()
@@ -389,8 +397,8 @@ function binarySearchSkillName(d, t, s , e) {
 	var id = Number(d[m].id)
 	if (target == id) return d[m].skillName;
 	if (e - 1 == s) return 'undefined'
-  	if (target > id) return binarySearchSkillName(d,t,m,e);
-  	if (target < id) return binarySearchSkillName(d,t,s,m);
+  	if (target > id) return binarySearchSkillName(d, t, m, e);
+  	if (target < id) return binarySearchSkillName(d, t, s, m);
 }
 
 function skillIdToName(id) {
@@ -417,7 +425,6 @@ function dpsStastic() {
 		var name = t.name
 		var damage = t.damage
 		var c = t.crit
-
 		var found = false
 		// search skill id and insert data
 		for (var j in s) {
@@ -427,13 +434,11 @@ function dpsStastic() {
 				s[j].tDamage = s[j].rDamage + s[j].wDamage
 				s[j].crit = c ? s[j].crit + 1 : s[j].crit,
 				s[j].hitCount = s[j].hitCount + 1
-
 				//console.log( s[j].wDamage + ' ' + s[j].wDamage)
 				found = true
 				break
 			}
 		}
-
 		// not found push a new entity
 		if (!found) {
 			var d = {
@@ -444,18 +449,18 @@ function dpsStastic() {
 				'crit': c ? 1 : 0,
 				'hitCount': 1
 			}
-
 			s.push(d)
 			//console.log('pushed ' + id)
 		}
 	}
 	//console.log(s)
 	// sort by total damage
-	s.sort(function(a,b) {
+	s.sort(function (a, b) {
 		return b.tDamage - a.tDamage
 	})
 
-	var html='<button class="btn" onclick="refreshDPS()">返回</button>' + ' ' + '<button class="btn" onclick="skillLog(\'' + _name + '\',\'' + _classId + '\')">技能日志</button><br>'
+	var html = '<button class="btn" onclick="refreshDPS()">返回</button>' + ' | '
+	html += '<button class="btn" onclick="skillLog(\'' + _name + '\', \'' + _classId + '\')">技能日志</button><br>'
 
 	html += '<table class="stastics"><tr><th rowspan=2>技能名称</th><th>白字</th><th>红字</th><th>合计</th><th>暴击率</th></tr>'
 	html += '<tr><th>平均</th><th>平均</th><th>平均</th><th>红/合</th></tr>'
@@ -463,21 +468,48 @@ function dpsStastic() {
 	var avg = 0
 	for (var i in s) {
 		//console.log(s[i].wDamage +' '+ s[i].rDamage)
+		// 技能名称
 		var t = s[i].wDamage + s[i].rDamage
 		html += '<tr>'
 		html += '<td>' + s[i].name + '</td>'
+		// 白字
 		avg = 0
 		if (s[i].hitCount - s[i].crit != 0) {
-			avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit))
+			avg = Math.floor(s[i].wDamage/(s[i].hitCount - s[i].crit))
 		}
-		html += '<td>' + s[i].wDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
+		html += '<td>' +
+					((s[i].wDamage == 0) ? '-' : s[i].wDamage.nFormatter(3)) +
+					'<br>' +
+					((avg == 0) ? '-' : avg.nFormatter(3)) +
+				'</td>'
+		// 红字
 		avg = 0
-		if (s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit))
-		html += '<td>' + s[i].rDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
+		if (s[i].crit != 0) {
+			avg = Math.floor(s[i].rDamage/(s[i].crit))
+		}
+		html += '<td>' +
+					((s[i].rDamage == 0) ? '-' : s[i].rDamage.nFormatter(3).color(red_color)) +
+					'<br>' +
+					((avg == 0) ? '-' : avg.nFormatter(3).color(red_color)) +
+				'</td>'
+		// 合计
 		avg = 0
-		if (s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount))
-		html += '<td>' + s[i].tDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
-		html += '<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>' + s[i].crit + '/' + s[i].hitCount + '</td>'
+		if (s[i].hitCount != 0) {
+			avg = Math.floor(s[i].tDamage/(s[i].hitCount))
+		}
+		html += '<td>' + s[i].tDamage.nFormatter(3).color(total_color) +
+					'<br>' +
+					avg.nFormatter(3).color(total_color) +
+				'</td>'
+		// 暴击率
+		html += '<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color(crit_color) +
+					'<br>' +
+					'<font color="#FF3000">' + s[i].crit + '</font>' +
+					'<font color="#E69F00">/</font>' +
+					'<font color="#56B4E9">' + s[i].hitCount + '</font>' +
+
+					// s[i].crit + '/' + s[i].hitCount +
+				'</td>'
 		html += '</tr>'
 	}
 	html += '</table>'
@@ -493,7 +525,9 @@ function skillLogCB() {
 	slog = []
 	slog = JSON.parse(this.responseText)
 	//console.log(this.responseText)
-	var html = '<button class="btn" onclick="refreshDPS()">返回</button>' + '    ' + '<button class="btn" onclick="dpsStastic()">详细信息</button><br>'
+	var html = '<button class="btn" onclick="refreshDPS()">返回</button>' + ' | '
+	html += '<button class="btn" onclick="dpsStastic()">详细信息</button><br>'
+
 	html += '<table class="stastics"><tr><th>时间</th><th>技能名称</th><th>伤害</th></tr>'
 	//var backward = 0
 	slog.reverse()
@@ -501,9 +535,9 @@ function skillLogCB() {
 		//backward = slog.length -1 - i
 
 		html += '<tr>'
-		html += '<td>' + (new Date(slog[i].Time)).toTimeString().slice(0,8)+ '</td>'
-		html += '<td>' + (slog[i].isPet? slog[i].petName : skillIdToName(slog[i].skillId)) + '</td>'
-		html += '<td>' + (slog[i].crit ? slog[i].damage.nFormatter(3).color('FF3000') : slog[i].damage.nFormatter(3)) + '</td>'
+		html += '<td>' + (new Date(slog[i].Time)).toTimeString().slice(0, 8) + '</td>'
+		html += '<td>' + (slog[i].isPet ? slog[i].petName : skillIdToName(slog[i].skillId)) + '</td>'
+		html += '<td>' + (slog[i].crit ? slog[i].damage.nFormatter(3).color(red_color) : slog[i].damage.nFormatter(3)) + '</td>'
 		html += '</tr>'
 		//console.log(slog[i].damage)
 	}
@@ -561,7 +595,7 @@ function sortTable(tabeId) {
 			x = rows[i].getElementsByTagName("TD")[1];
 			y = rows[i + 1].getElementsByTagName("TD")[1];
 			//check if the two rows should switch place:
-			if (Number(x.innerHTML.replace(',','')) < Number(y.innerHTML.replace(',',''))) {
+			if (Number(x.innerHTML.replace(',', '')) < Number(y.innerHTML.replace(',', ''))) {
 				//if so, mark as a switch and break the loop:
 				shouldSwitch = true;
 				break;
@@ -576,7 +610,7 @@ function sortTable(tabeId) {
 	}
 }
 
-function tableDPSFormat(data,tableId) {
+function tableDPSFormat(data, tableId) {
 	var dpsmsg = ''
 	var enragedBar = 0
 	var class_image=''
@@ -605,17 +639,18 @@ function tableDPSFormat(data,tableId) {
 			continue
 		}
 
-		var crit = data[i].crit  + '%'.color(crit_color)
-		if (data[i].class == 6 || data[i].class == 7) crit += ' ' + data[i].healCrit  + '%'.color(healCrit_color)
+		var crit = data[i].crit + '%'.color(crit_color)
+		if (data[i].class == 6 || data[i].class == 7) {
+			crit += ' ' + data[i].healCrit  + '%'.color(healCrit_color)
+		}
 
-
-		dpsmsg 	+='<tr><td> ' + (TDMSettings.hideNames? '****' : data[i].name)
-				+ '<img onclick="skillLog(\''+ data[i].name.stripHTML() +'\', '+data[i].class+')" src="./class-icons/' + classIdToName(data[i].class).toLowerCase() + '.png' + '" />'
-				+ '<td style="display:none;">' + data[i].dps + ' </td>'
-				+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: ' + data[i].percentage+'% 20%;">' + data[i].dps.nFormatter(3) + ' </td>'
-				//+ ' </td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: '+data[i].percentage+'% 20%;">' + data[i].dps + ' </td>'
-				+ '<td> ' + data[i].percentage  + '%'.color('E69F00') + ' </td>'
-				+ '<td> ' + crit  + ' </td></tr>'
+		dpsmsg 	+='<tr><td>' + (TDMSettings.hideNames ? '****' : data[i].name)
+				+ '<img onclick="skillLog(\'' + data[i].name.stripHTML() + '\', ' + data[i].class + ')" src="./class-icons/' + classIdToName(data[i].class).toLowerCase() + '.png' + '"/>'
+				+ '<td style="display:none;">' + data[i].dps + '</td>'
+				+ '</td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: ' + data[i].percentage +'% 20%;">' + data[i].dps.nFormatter(3) + '</td>'
+				// + '</td>' + '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: ' +data[i].percentage+'% 20%;">' + data[i].dps + '</td>'
+				+ '<td>' + data[i].percentage  + '%'.color(percentage_color) + '</td>'
+				+ '<td>' + crit  + '</td></tr>'
 	}
 	dpsmsg += '</table>'
 	return dpsmsg
@@ -624,13 +659,13 @@ function tableDPSFormat(data,tableId) {
 function refreshCB() {
 	_skillInfo = []
 	var res = JSON.parse(this.responseText)
-	//console.log(res)
+	// console.log(res)
 	if (res === '' ) return
 	var result = tableDPSFormat(res, "dpsTable")
 	if (result === previousDps) return
 	if (waitForThis == true) return
 	document.getElementById("content").innerHTML = result + '<br>'
-	//sortTable("dpsTable")
+	// sortTable("dpsTable")
 
 	previousDps = result
 }
@@ -639,7 +674,7 @@ function refreshDPS() {
 	previousDps = 'NEW'
 	waitForThis = false
 	ajax("1R", refreshCB)
-	var i = setInterval(function() {
+	var i = setInterval(function () {
 		if (waitForThis) {
 			clearInterval(i);
 			return
@@ -687,64 +722,65 @@ function openWebsite(url) {
 }
 
 function openTab(evt, tabName) {
-    var i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-    if (tabName !== 'records') document.getElementById(tabName).style.display = "block";
-    if (evt != null)evt.currentTarget.className += " active";
+	var i, tabcontent, tablinks;
+	tabcontent = document.getElementsByClassName("tabcontent");
+	for (i = 0; i < tabcontent.length; i++) {
+		tabcontent[i].style.display = "none";
+	}
+	tablinks = document.getElementsByClassName("tablinks");
+	for (i = 0; i < tablinks.length; i++) {
+		tablinks[i].className = tablinks[i].className.replace(" active", "");
+	}
+	if (tabName !== 'records') document.getElementById(tabName).style.display = "block";
+	if (evt != null) evt.currentTarget.className += " active";
 
-    if (tabName === 'wrapper') DPS()
-    if (tabName === 'records') {
-	    document.getElementById('wrapper').style.display = "block";
-	    Records()
-    }
-    if (tabName === 'settings') Settings()
-    if (tabName === 'custom') Custom()
-    if (tabName === 'manager') Manager()
+	if (tabName === 'wrapper') DPS()
+	if (tabName === 'records') {
+		document.getElementById('wrapper').style.display = "block";
+		Records()
+	}
+	if (tabName === 'settings') Settings()
+	if (tabName === 'custom') Custom()
+	if (tabName === 'manager') Manager()
 }
 
 function nullClientProxy () {
-    this.set_title = function (t) {
-	    document.title = t
-    }
-    function alert(m) { alert(m) }
-    this.get_locale = function() {}
-    this.open_web_direct = function (url) {
-	    window.location.href=url
-    }
-    this.close = 0;
-}
-
-window.addEventListener('error', function(e) {
-	if (typeof _tera_client_proxy_ !== 'undefined') {
-		_tera_client_proxy_.alert('Error: ' + e.message)
-	} else {
-		alert('Error: ' + e.message)
+	this.set_title = function (t) {
+		document.title = t
 	}
-})
+	function alert(m) { alert(m) }
+	this.get_locale = function() {}
+	this.open_web_direct = function (url) {
+		window.location.href = url
+	}
+	this.close = 0;
+}
 
 function resizeDiv() {
 	var width = window.innerWidth;
 	var height = window.innerHeight;
 
 	var divhight = 'height:' + (height - 55) + 'px'
-	document.getElementById('content').setAttribute("style",divhight);
+	document.getElementById('content').setAttribute("style", divhight);
+
 	var wrapperdivhight = 'height:' + height + 'px'
-	document.getElementById('wrapper').setAttribute("style",wrapperdivhight);
-	document.getElementById('settings').setAttribute("style",divhight);
-	document.getElementById('manager').setAttribute("style",divhight);
-	document.getElementById('custom').setAttribute("style",divhight);
+	document.getElementById('wrapper').setAttribute("style", wrapperdivhight);
+	document.getElementById('settings').setAttribute("style", divhight);
+	document.getElementById('manager').setAttribute("style", divhight);
+	document.getElementById('custom').setAttribute("style", divhight);
 	document.getElementById('wrapper').style.display = "block";
 }
 
-window.addEventListener('resize', function(event) {
-  // do stuff here
+window.addEventListener('error', function (e) {
+	if (typeof _tera_client_proxy_ !== 'undefined') {
+		_tera_client_proxy_.alert(e.message)
+	} else {
+		alert(e.message)
+	}
+})
+
+window.addEventListener('resize', function (event) {
+	// do stuff here
 	resizeDiv()
 });
 

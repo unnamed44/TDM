@@ -19,7 +19,7 @@ body {
 	border-collapse:collapse;
 	border: 1px solid;
 	vertical-align: center;
-	text-align: right;
+	text-align: center;
 }
 
 .skilllog th, .stastics th{
@@ -30,13 +30,14 @@ body {
 	border: 1px solid;
 	vertical-align: center;
 	padding : 4px;
+	text-align: center;
 }
 
 table ,td, tr{
 	border-collapse:collapse;
 	border: 1px solid;
 	vertical-align: center;
-	text-align: right;
+	text-align: center;
 	padding : 2;
 }
 
