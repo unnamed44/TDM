@@ -34,6 +34,7 @@ Tera DPS monitor.(TDM)
 
 4. 编辑 config.json 设置游戏地区 "region": TW
 ![DPS](http://imgsrc.baidu.com/forum/pic/item/4744e91e3a292df5ee570808b1315c6035a87346.jpg)
+
 ------------------------------
 
 ## 功能
