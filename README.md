@@ -14,8 +14,8 @@ Tera DPS monitor.(TDM)
 
 ## 安装环境
 
-- node.js  [here](https://nodejs.org/en/)
-- tera proxy
+- node.js  [官网下载](https://nodejs.org/en/download/current/)
+- tera proxy  [Caali版](https://github.com/hackerman-caali/tera-proxy)
 
 ------------------------------
 
