@@ -29,6 +29,8 @@ Tera DPS monitor.(TDM)
 
 3. 管理员权限运行 npm_install.bat (在TDM文件夹中)
 ![DPS](http://imgsrc.baidu.com/forum/pic/item/e92df051352ac65cc7bfc26ef6f2b21192138aa5.jpg)
+![DPS](http://imgsrc.baidu.com/forum/pic/item/6da37262f6246b60b38b1669e6f81a4c500fa256.jpg)
+![DPS](http://imgsrc.baidu.com/forum/pic/item/15f609395343fbf268e3023ebd7eca8064388f08.jpg)
 4. 编辑 config.json 设置游戏地区 "region": TW
 
 ------------------------------
