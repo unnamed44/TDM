@@ -32,7 +32,7 @@ Tera DPS monitor.(TDM)
 ![DPS](http://imgsrc.baidu.com/forum/pic/item/6da37262f6246b60b38b1669e6f81a4c500fa256.jpg)
 ![DPS](http://imgsrc.baidu.com/forum/pic/item/15f609395343fbf268e3023ebd7eca8064388f08.jpg)
 4. 编辑 config.json 设置游戏地区 "region": TW
-
+![DPS](http://imgsrc.baidu.com/forum/pic/item/4744e91e3a292df5ee570808b1315c6035a87346.jpg)
 ------------------------------
 
 ## 功能
