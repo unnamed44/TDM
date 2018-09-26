@@ -15,30 +15,62 @@ body {
 	color: #FFFFFF;
 }
 
-.skilllog, .stastics{
-	border-collapse:collapse;
-	border: 1px solid;
-	vertical-align: center;
+/* 居中 */
+.center, .titleClr td {
 	text-align: center;
 }
 
-.skilllog th, .stastics th{
-	background-color:#B7950B;
+/* 标题 */
+.titleClr td {
+	background-color: #B7950B;
 }
 
-.skilllog td, .skilllog th, .stastics td,.stastics th{
-	border: 1px solid;
-	vertical-align: center;
-	padding : 4px;
-	text-align: center;
+/* 名字 */
+.nameClr {
+
+}
+/* 白字 */
+.whiteClr {
+
+}
+/* 暴击 */
+.critClr {
+	background-color: #985054;
+}
+/* 合计 */
+.totalClr {
+	background-color: #D96830;
+}
+/* 暴率 */
+.perClr {
+	background-color: #269D81;
 }
 
-table ,td, tr{
-	border-collapse:collapse;
+/* 时间 */
+.timeClr {
+
+}
+/* 数据 */
+.dataClr {
+
+}
+
+/* 职业 */
+.classClr {
+
+}
+/* 秒伤 */
+.dpsClr {
+	background-color: #985054;
+}
+
+table, tr, td {
+	border-collapse: collapse;
 	border: 1px solid;
 	vertical-align: center;
-	text-align: center;
+	text-align: right;
 	padding : 2;
+	background-color: #264863;
 }
 
 div {
@@ -55,13 +87,13 @@ img {
 }
 
 .enraged {
-	content:url("./icons/enraged.png")
+	content: url("./icons/enraged.png")
 }
 
 .ipt {
 	padding: 0 3px;
-     border-radius: 3px;
-     margin: 1px;
+    border-radius: 3px;
+    margin: 1px;
 }
 
 /* Style the tab */
@@ -73,12 +105,12 @@ img {
 /* Style the buttons inside the tab */
 .tab button {
 	border-radius: 0px;
-     font-family: Arial;
-     color: #ffffff;
-     font-size: 10px;
-     background: #577080;
+    font-family: Arial;
+    color: #ffffff;
+    font-size: 10px;
+    background: #577080;
   	padding: 1px 10px 1px 10px;
-     text-decoration: none;
+    text-decoration: none;
 }
 
 /* Change background color of buttons on hover */

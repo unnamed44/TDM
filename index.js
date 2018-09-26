@@ -1,7 +1,5 @@
-/**
-* Created on 2018-09-23.
-*/
 "use strict"
+
 const Command = require('command')
 const fs = require('fs')
 const path = require('path')
@@ -13,13 +11,13 @@ String.prototype.stripHTML = function () { return this.replace(/<[^>]+>/g, '') }
 
 Number.prototype.nFormatter = function (digits) {
 	var si = [
-		{ value: 1, symbol: "" },
-		{ value: 1E3, symbol: "k" },
-		{ value: 1E6, symbol: "M" },
-		{ value: 1E9, symbol: "G" },
-		{ value: 1E12, symbol: "T" },
-		{ value: 1E15, symbol: "P" },
-		{ value: 1E18, symbol: "E" }
+		{ value: 1,		symbol: "" },
+		{ value: 1E3,	symbol: "K" },
+		{ value: 1E6,	symbol: "M" },
+		{ value: 1E9,	symbol: "G" },
+		{ value: 1E12,	symbol: "T" },
+		{ value: 1E15,	symbol: "P" },
+		{ value: 1E18,	symbol: "E" }
 	];
 	var i;
 	for (i = si.length - 1; i > 0; i--) {
@@ -29,9 +27,9 @@ Number.prototype.nFormatter = function (digits) {
 	}
 	var rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
 	var space = ''
-	for (var j = 0;j < digits; j++) space += ' '
+	for (var j = 0; j < digits; j++) space += ''
 	var ret = (this / si[i].value) + space
-	return ret.slice(0,digits+1).replace(rx, "$1") + si[i].symbol;
+	return ret.slice(0, digits + 1).replace(rx, "$1") + si[i].symbol;
 }
 
 function TDM(d) {
@@ -84,7 +82,9 @@ function TDM(d) {
 		recordFilename = ''
 
 	let enable_color = '56B4E9',
-		disable_color = 'E69F00'
+		disable_color = 'E69F00',
+		enraged_color = 'FF0000',
+		cname_color = '00FFFF'		
 
 	var update = new Update('version')
 	var skillInfo = new SkillInfo(region, update)
@@ -110,9 +110,9 @@ function TDM(d) {
 		var battleInfo = data.shift()
 		data.sort(function(a, b) { return b.totalDamage - a.totalDamage })
 		data.unshift(battleInfo)
-		var dpsmsg = ''
-		dpsmsg += battleInfo.monsterBattleInfo.stripHTML() + '\n'
-		dpsmsg += '昵称 | DPS | 总伤害 | 比例 | 暴击率(治疗) \n'
+		var dpsmsg = '==[目标]=========\n'
+		dpsmsg += '[' + battleInfo.monsterBattleInfo.stripHTML() + ']\n'
+		dpsmsg += '==[详细]========='
 		for (var i in data) {
 			// if(i == 0) continue
 			if (data[i].hasOwnProperty('enraged')) continue
@@ -122,16 +122,17 @@ function TDM(d) {
 				name = data[i].name
 			}
 			
-			var crit = data[i].crit  + '% '.color(enable_color)
+			var crit = data[i].crit  + '% '.color(disable_color)
 			if (data[i].class == 6 || data[i].class == 7) {
-				crit += ' ' + data[i].healCrit  + '% '.color(disable_color)
+				crit += ' (治疗暴率)' + data[i].healCrit  + '% '.color(enable_color)
 			}
-			
-			dpsmsg += name + ' | '										// 昵称
-			+ data[i].dps.nFormatter(3) + '/s | '						// DPS
-			+ data[i].totalDamage.nFormatter(3) + ' | '					// 伤害
-			+ data[i].percentage  + '%'.color(enable_color) + ' | '		// 比例
-			+ crit + '\n'												// 暴击率(治疗)
+			dpsmsg += '\n'
+			dpsmsg += '[昵称] '			+ name + '\n'												// 昵称
+			dpsmsg += '[DPS] '			+ data[i].dps.nFormatter(3) + '/s \n'						// DPS
+			dpsmsg += '[合计] '			+ data[i].totalDamage.nFormatter(3) + '\n'					// 合计
+			dpsmsg += '[比例] '			+ data[i].percentage  + '%'.color(enable_color) + '\n'		// 比例
+			dpsmsg += '[暴率] ' 		+ crit + '\n'												// 暴率(治疗)
+			dpsmsg += '==============='
 
 		}
 		return dpsmsg
@@ -210,7 +211,7 @@ function TDM(d) {
 			case "A":
 				notice_damage += 1000000
 				if (notice_damage > 20000000) notice_damage = 1000000
-					send('设定高伤害通知值 ' + notice_damage.toString().numberWithCommas().clr('56B4E9'))
+					send('设定高伤害通知值 ' + notice_damage.toString().numberWithCommas().clr(enable_color))
 				return res.status(200).json(notice_damage.toString())
 			case "B":
 				debug = !debug
@@ -236,7 +237,7 @@ function TDM(d) {
 				}
 			case "D":
 				notice_damage = req_value
-				send('设定高伤害通知值 ' + notice_damage.toString().numberWithCommas().clr('56B4E9'))
+				send('设定高伤害通知值 ' + notice_damage.toString().numberWithCommas().clr(enable_color))
 				return res.status(200).json(notice_damage.toString())
 			case "E":
 				return res.status(200).json(require('./ui_config.json'))
@@ -345,7 +346,7 @@ function TDM(d) {
 				var wname = req.params[0].substring(2, req.params[0].length)
 				if (wname === '') return res.status(200).json('ok')
 				if (recordFilename !== '') {
-					sendByEachLine(wname,getRecordFile(recordFilename))
+					sendByEachLine(wname, getRecordFile(recordFilename))
 					return res.status(200).json('ok')
 				} else {
 					var data = membersDps(currentbossId)
@@ -364,8 +365,8 @@ function TDM(d) {
 			case "Y":
 				return res.status(200).json(getSettings())
 			case "Z":
-				if (maxSize) return res.status(200).json('280, 700')
-				else return res.status(200).json('280, 240')
+				if (maxSize) return res.status(200).json('300, 700')
+				else return res.status(200).json('300, 240')
 			default:
 				return res.status(404).send("404")
 		}
@@ -446,7 +447,7 @@ function TDM(d) {
 
 		// remove : no battle, pet
 		if (NPCs[npcIndex].battlestarttime == 0 || NPCs[npcIndex].owner !== "0") {
-			NPCs.splice(npcIndex,1)
+			NPCs.splice(npcIndex, 1)
 			return
 		}
 
@@ -488,8 +489,7 @@ function TDM(d) {
 		}
 
 		if (isBoss(id) && Boss[id].hpPer <= 0 && dpsmsg !== '') {
-			// log('addSkillLog : ' + id)
-			addSkillLog(dpsmsg,id)
+			addSkillLog(dpsmsg, id)
 			dpsmsg[0].battleendtime = NPCs[npcIndex].battleendtime
 			saveDpsData(dpsmsg)
 			if (rankSystem) {
@@ -560,14 +560,14 @@ function TDM(d) {
 		if (Boss[gId].etimer > 0) {
 			// log(Boss[gId].etimer + ' HP: ' + Boss[gId].hpPer)
 			Boss[gId].enraged = true
-			Boss[gId].estatus = 'Boss愤怒'.color('FF0000') + ' ' + `${Boss[gId].etimer}`.color('FFFFFF') + ' 秒剩余'.color('FF0000')
+			Boss[gId].estatus = 'Boss愤怒'.color(enraged_color) + ' ' + `${Boss[gId].etimer}`.color('FFFFFF') + ' 秒剩余'.color(enraged_color)
 			Boss[gId].etimer--
 		} else {
 			clearInterval(counter)
 			Boss[gId].etimer = 0
 			Boss[gId].enraged = false
 			Boss[gId].nextEnrage = (Boss[gId].hpPer > 10) ? (Boss[gId].hpPer - 10) : 0
-			Boss[gId].estatus = '下次愤怒 ' + Boss[gId].nextEnrage.toString().color('FF0000') + '%'
+			Boss[gId].estatus = '下次愤怒 ' + Boss[gId].nextEnrage.toString().color(enraged_color) + '%'
 			if(Boss[gId].nextEnrage == 0) Boss[gId].estatus = ''
 			// log(Boss[gId].hpPer + ' cleared enraged timer by Timer')
 			// log('==========================================================')
@@ -621,8 +621,7 @@ function TDM(d) {
 		}
 
 		if (isBoss(id) && Boss[id].hpPer <= 0 && dpsmsg !== '') {
-			// log('addSkillLog : ' + id)
-			addSkillLog(dpsmsg,id)
+			addSkillLog(dpsmsg, id)
 			dpsmsg[0].battleendtime = NPCs[npcIndex].battleendtime
 			saveDpsData(dpsmsg)
 			// if(rankSystem) sendDPSData(dpsmsg)
@@ -694,19 +693,19 @@ function TDM(d) {
 		s.sort(function (a, b) {
 			return b.tDamage - a.tDamage
 		})
-		var html = `<table class="stastics">
-					<tr>
-						<th rowspan=2>技能名称</th>
-						<th>白字</th>
-						<th>红字</th>
-						<th>合计</th>
-						<th>暴击率</th>
+		var html = `<table>
+					<tr class="titleClr">
+						<td rowspan=2>详细数据2</td>
+						<td>白字</td>
+						<td>红字</td>
+						<td>合计</td>
+						<td>暴率</td>
 					</tr>`
-		html += `<tr>
-					<th>平均</th>
-					<th>平均</th>
-					<th>平均</th>
-					<th>红/合</th>
+		html += `<tr class="titleClr">
+					<td>平均</td>
+					<td>平均</td>
+					<td>平均</td>
+					<td>红/合</td>
 				</tr>`
 		// console.log(s)
 		var avg = 0
@@ -714,17 +713,23 @@ function TDM(d) {
 			// console.log(s[i].wDamage +' '+ s[i].rDamage)
 			var t = s[i].wDamage + s[i].rDamage
 			html += '<tr>'
-			html += '<td>' + s[i].name + '</td>'
+			html += '<td class="center">' + `${s[i].name}`.color(disable_color) + '</td>'
 			avg = 0
-			if (s[i].hitCount-s[i].crit != 0) avg = Math.floor(s[i].wDamage/(s[i].hitCount-s[i].crit))
+			if (s[i].hitCount - s[i].crit != 0) {
+				avg = Math.floor(s[i].wDamage/(s[i].hitCount - s[i].crit))
+			}
 			html += '<td>' + s[i].wDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
 			avg = 0
-			if (s[i].crit != 0) avg = Math.floor(s[i].rDamage/(s[i].crit))
-			html+='<td>' + s[i].rDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
+			if (s[i].crit != 0) {
+				avg = Math.floor(s[i].rDamage/(s[i].crit))
+			}
+			html+='<td class="critClr">' + s[i].rDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
 			avg = 0
-			if (s[i].hitCount != 0) avg = Math.floor(s[i].tDamage/(s[i].hitCount))
-			html += '<td>' + s[i].tDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
-			html += '<td>' + Math.floor(s[i].crit*100/s[i].hitCount) + '%'.color('E69F00') + '<br>' + s[i].crit + '/' + s[i].hitCount + '</td>'
+			if (s[i].hitCount != 0) {
+				avg = Math.floor(s[i].tDamage/(s[i].hitCount))
+			}
+			html += '<td class="totalClr">' + s[i].tDamage.nFormatter(3) + '<br>' + avg.nFormatter(3) + '</td>'
+			html += '<td class="perClr">' + Math.floor(s[i].crit*100/s[i].hitCount) + '%' + '<br>' + s[i].crit + '/' + s[i].hitCount + '</td>'
 			html += '</tr>'
 		}
 		html += '</table>'
@@ -1203,7 +1208,7 @@ function TDM(d) {
 			}
 			cname = party[i].name
 			if (party[i].gameId === me.gameId) {
-				cname = cname.color('00FF00')
+				cname = cname.color(cname_color)
 			}
 
 			// totalDamage = Long.fromString(party[i].Targets[targetId].damage)
@@ -1264,7 +1269,7 @@ function TDM(d) {
 			}
 			var _si = skillInfo.getSkillsJson(classIdToName(party[index].class))
 			// var _si = skillInfo.getPetsSkillsJson().concat(skillInfo.getSkillsJson(classIdToName(party[index].class)))
-			d[i]['stastics'] = dpsStastic(party[index].Targets[targetId].skillLog,_si)
+			d[i]['stastics'] = dpsStastic(party[index].Targets[targetId].skillLog, _si)
 			// log(d[i]['stastics'])
 		}
 	}
@@ -1392,7 +1397,7 @@ function TDM(d) {
 
 	function toChat(msg) {
 		if (!msg) return
-		send(msg.clr('FF0000'))		//红色
+		send(msg.clr('FF0000'))
 	}
 
 	function statusToChat(tag, val) {
@@ -1400,11 +1405,11 @@ function TDM(d) {
 	}
 
 	function send(msg) {
-		command.message([...arguments].join('\n  - '.color('FFFFFF')))		//白色
+		command.message([...arguments].join('\n  - '.color('FFFFFF')))
 	}
 
 	function sendExec(msg) {
-		command.exec([...arguments].join('\n  - '.color('FFFFFF')))		//白色
+		command.exec([...arguments].join('\n  - '.color('FFFFFF')))
 	}
 
 	function sLog(e) {

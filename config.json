@@ -1,14 +1,14 @@
 {
-	"enable": true,
-	"region": "TW",	
+    "enable": true,
+    "region": "TW",	
 	"popup": true,
-	"party_leaving_msg": "3Q",
-	"notice": true,
-	"notice_damage": 5000000,
-	"bossOnly": true,
+    "party_leaving_msg": "3Q",
+    "notice": true,
+    "notice_damage": 5000000,
+    "bossOnly": true,
 	"hideNames": false,
-	"skillLog": true,
-	"rankSystem": true,
+	"skillLog": false,
+	"rankSystem": false,
 	"allUsers": false,
-	"debug" : false
+    "debug" : false
 }
