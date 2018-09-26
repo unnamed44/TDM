@@ -239,7 +239,7 @@ function RecordTableDPSFormat(data, tableId) {
 			dpsmsg += '</tr>'
 
 			dpsmsg += '<tr class="titleClr">'
-				dpsmsg += '<td>玩家昵称2</td>'
+				dpsmsg += '<td>玩家昵称</td>'
 				dpsmsg += '<td>职业</td>'
 				dpsmsg += '<td>DPS</td>'
 
@@ -484,7 +484,7 @@ function dpsStastic() {
 
 	html += '<table>'
 		html += '<tr class="titleClr">'
-			html += '<td rowspan=2>详细数据1</td>'
+			html += '<td rowspan=2>详细数据</td>'
 
 			html += '<td>白字</td>'
 			html += '<td>红字</td>'
@@ -655,7 +655,7 @@ function tableDPSFormat(data, tableId) {
 			dpsmsg += '<br>' + data[i].monsterBattleInfo + '</th></tr>'
 
 			dpsmsg += '<tr class="titleClr">'
-				dpsmsg += '<td>玩家昵称1</td>'
+				dpsmsg += '<td>玩家昵称</td>'
 				dpsmsg += '<td>职业</td>'
 				dpsmsg += '<td>DPS</td>'
 

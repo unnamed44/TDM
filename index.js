@@ -560,7 +560,7 @@ function TDM(d) {
 		if (Boss[gId].etimer > 0) {
 			// log(Boss[gId].etimer + ' HP: ' + Boss[gId].hpPer)
 			Boss[gId].enraged = true
-			Boss[gId].estatus = 'Boss愤怒'.color(enraged_color) + ' ' + `${Boss[gId].etimer}`.color('FFFFFF') + ' 秒剩余'.color(enraged_color)
+			Boss[gId].estatus = 'Boss愤怒'.color(enraged_color) + ' ' + `${Boss[gId].etimer}`.color(cname_color) + ' 秒剩余'.color(enraged_color)
 			Boss[gId].etimer--
 		} else {
 			clearInterval(counter)
@@ -695,7 +695,7 @@ function TDM(d) {
 		})
 		var html = `<table>
 					<tr class="titleClr">
-						<td rowspan=2>详细数据2</td>
+						<td rowspan=2>详细数据</td>
 						<td>白字</td>
 						<td>红字</td>
 						<td>合计</td>
