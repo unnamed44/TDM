@@ -1,6 +1,20 @@
+原始作者 https://github.com/xmljson/TDM
+
 [![Donate](https://img.shields.io/badge/Donate-PayPal-ff69b4.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=C6BU555NMQJD6)
 
 ![DPS](https://image.ibb.co/mpSFny/dps.jpg)
+
+------------------------------
+
+![DPS](http://imgsrc.baidu.com/forum/pic/item/4d851e0928381f3076853ba9a4014c086f06f0ba.jpg)
+
+![DPS](http://imgsrc.baidu.com/forum/pic/item/e680df5d103853431c0631219e13b07ecb808815.jpg)
+
+![DPS](http://imgsrc.baidu.com/forum/pic/item/78ce1a4e78f0f736d367fa010755b319eac41344.jpg)
+
+![DPS](http://imgsrc.baidu.com/forum/pic/item/48fa56c3d5628535e94b64219def76c6a6ef63b6.jpg)
+
+![DPS](http://imgsrc.baidu.com/forum/pic/item/518cd6fd1e178a823ed1c9a0fb03738da877e869.jpg)
 
 ## 介绍:
 
@@ -14,8 +28,8 @@ Tera DPS monitor.(TDM)
 
 ## 安装环境
 
-- node.js  [here](https://nodejs.org/en/)
-- tera proxy
+- node.js  [官网下载](https://nodejs.org/en/download/current/)
+- tera proxy  [Caali版](https://github.com/hackerman-caali/tera-proxy)
 
 ------------------------------
 
@@ -29,7 +43,11 @@ Tera DPS monitor.(TDM)
 
 3. 管理员权限运行 npm_install.bat (在TDM文件夹中)
 
+![DPS](http://imgsrc.baidu.com/forum/pic/item/e92df051352ac65cc7bfc26ef6f2b21192138aa5.jpg)
+
 4. 编辑 config.json 设置游戏地区 "region": TW
+
+![DPS](http://imgsrc.baidu.com/forum/pic/item/4744e91e3a292df5ee570808b1315c6035a87346.jpg)
 
 ------------------------------
 
