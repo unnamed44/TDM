@@ -1,5 +1,7 @@
 {
 	"files": {
+		"LICENSE": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+		"README.md": "968077dc9624bb8523769b244a96a5054cc059d921cd4c475ee6f454d4bb25eb",
 		"html/audio/click.mp3": "6ca3c4a1e29e15c3c6e24f3660f2646aae842e534f8e1a664e86dd12294335eb",
 		"html/audio/enraged.mp3": "95aca95d5232caa5362637df20793c3fe40491158ccbe488dba3fbb299b1132a",
 		"html/audio/event.mp3": "43a8dc212fb7172f9409738a14c263b4efca4c6a4ac98e76aef11707ab6be88e",
@@ -23,7 +25,7 @@
 		"html/index.html": "1055570dd5e6f33c8c6d30f6f28b713baa8fe195d1446d4db626ad48b2475db3",
 		"html/main.css": "2028f4ae377bed68637ca83a855aede2e5195840a42dc5cf7669861635186be6",
 		"html/main.js": "1c90bd0eb9058850e63ed5b3772c181e43e0568e2280b772f762955a656f2523",
-		"index.js": "b3e61563ffafcdd93c2ce7edf54643f86d4358a1d1ae4188bb3fe46c24ea5157",
+		"index.js": "ce8b827709f6ef89714040ce09b45f5467d5048e52a2a5363809636d50d97b24",
 		"managerui.js": "39a1b22d7e577acd347b6a31cd2db962a1fcfb9a14b4f663ea0cff83b07153e1",
 		"module.json": "2ed08f88b57519405a32ed5156ded07a06b5e00467c182479afd8a8074be69ea",
 		"monsterInfo.js": "ff8cf1aa5230de75cfa2a7fd2acae2607f46328957e58c15b85c2ea6704b3e39",
@@ -46,7 +48,7 @@
 		"S_DESPAWN_NPC": 3,
 		"S_DESPAWN_USER": 3,
 		"S_DUNGEON_EVENT_MESSAGE": 1,
-		"S_EACH_SKILL_RESULT": [10,12],
+		"S_EACH_SKILL_RESULT": 12,
 		"S_LEAVE_PARTY": 1,
 		"S_LEAVE_PARTY_MEMBER": 2,
 		"S_LOAD_TOPO": 3,
@@ -55,9 +57,9 @@
 		"S_NPC_STATUS": 1,
 		"S_NPC_TARGET_USER": 1,
 		"S_OPEN_AWESOMIUM_WEB_URL": 1,
-		"S_PARTY_MEMBER_LIST": 6,
-		"S_SPAWN_ME": 2,
-		"S_SPAWN_NPC": 8,
-		"S_SPAWN_USER": 12
+		"S_PARTY_MEMBER_LIST": 7,
+		"S_SPAWN_ME": 3,
+		"S_SPAWN_NPC": 9,
+		"S_SPAWN_USER": 13
 	}
 }

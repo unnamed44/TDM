@@ -1280,10 +1280,8 @@ function TDM(d) {
 		msg = damage.nFormatter(3)
 		// log(skill + ':' + skill.slice(1, skill.length))
 		d.send('S_DUNGEON_EVENT_MESSAGE', 1, {
-			message: `<img src="img://skill__0__${me.templateId}__${skill.slice(1,skill.length-2)}00" width="40" height="40" />&nbsp;${msg}`,
-			unk1: 2, //70 : 2,
-			unk2: 0,
-			unk3: 0
+			type: 2, //70 : 2,
+			message: `<img src="img://skill__0__${me.templateId}__${skill.slice(1,skill.length-2)}00" width="40" height="40" />&nbsp;${msg}`
 		})
 		return msg
 	}
@@ -1461,28 +1459,28 @@ function TDM(d) {
 		log ((fromServer ? '<-' : '->') + ' ' + (d.base.protocolMap.code.get(code) || code))
 	}) */
 
-	d.hook('S_LOGIN',10, sLogin)
-	d.hook('S_SPAWN_ME',2, sSpawnMe)
-	d.hook('S_LOAD_TOPO',3, sLoadTopo)
+	d.hook('S_LOGIN', 10, sLogin)
+	d.hook('S_SPAWN_ME', 3, sSpawnMe)
+	d.hook('S_LOAD_TOPO', 3, sLoadTopo)
 	d.hook('S_ANSWER_INTERACTIVE', 2, sAnswerInteractive)
-	d.hook('S_BOSS_GAGE_INFO',3, sBossGageInfo)
-	d.hook('S_SPAWN_NPC',8,{order: 200}, sSpawnNpc)
-	d.hook('S_DESPAWN_NPC',3, sDespawnNpc)
-	d.hook('S_NPC_OCCUPIER_INFO',1, sNpcOccupierInfo)
-	d.hook('S_NPC_STATUS',1, sNpcStatus)
+	d.hook('S_BOSS_GAGE_INFO', 3, sBossGageInfo)
+	d.hook('S_SPAWN_NPC', 9, {order: 200}, sSpawnNpc)
+	d.hook('S_DESPAWN_NPC', 3, sDespawnNpc)
+	d.hook('S_NPC_OCCUPIER_INFO', 1, sNpcOccupierInfo)
+	d.hook('S_NPC_STATUS', 1, sNpcStatus)
 
-	d.hook('S_DEAD_LOCATION',2, sDeadLocation)
-	d.hook('S_LEAVE_PARTY',1, sLeaveparty)
-	d.hook('S_LEAVE_PARTY_MEMBER',2,sLeavePartyMember)
-	d.hook('S_PARTY_MEMBER_LIST',6,sPartyMemberList)
+	d.hook('S_DEAD_LOCATION', 2, sDeadLocation)
+	d.hook('S_LEAVE_PARTY', 1, sLeaveparty)
+	d.hook('S_LEAVE_PARTY_MEMBER', 2, sLeavePartyMember)
+	d.hook('S_PARTY_MEMBER_LIST', 7 , sPartyMemberList)
 	d.hook('S_DESPAWN_USER', 3, sDespawnUser)
-	d.hook('S_SPAWN_USER',12, sSpawnUser)
+	d.hook('S_SPAWN_USER', 13, sSpawnUser)
 
-	d.hook('S_NPC_TARGET_USER',1, sNpcTargetuser)
+	d.hook('S_NPC_TARGET_USER', 1, sNpcTargetuser)
 
-	d.hook('S_EACH_SKILL_RESULT', d.base.majorPatchVersion < 74 ? 10 : 12, {order: 200}, sEachSkillResult)
+	d.hook('S_EACH_SKILL_RESULT', 12, {order: 200}, sEachSkillResult)
 
-	d.hook('S_CHANGE_EVENT_MATCHING_STATE',1,sChangeEvetMatchingState)
+	d.hook('S_CHANGE_EVENT_MATCHING_STATE',1, sChangeEvetMatchingState)
 }
 
 module.exports = TDM
