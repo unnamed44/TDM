@@ -37,8 +37,9 @@ var _recordfilename = ''
 
 var enable_color = '56B4E9',
 	disable_color = 'E69F00',
-	green_color = '00FF21'
-	red_color = 'FF3000'
+	green_color = '00FF21',
+	red_color = 'FF3000',
+	maxDPS = 4E6
 
 var TDMSettings = {
 	"notice" : true,
@@ -228,7 +229,7 @@ function RecordTableDPSFormat(data, tableId) {
 			if (data[i].etimer > 0) {
 				enragedBar = data[i].etimer * 100 / 36
 				dpsmsg += '<tr>'
-					dpsmsg += '<th colspan="6" style="background: url(\'./icons/enraged_bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar + '% 10%;">'
+					dpsmsg += '<th colspan="6" style="background: url(\'./icons/enraged_bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar + '% 12%;">'
 			} else {
 				enragedBar = data[i].eCountdown * 10
 				dpsmsg += '<tr>'
@@ -278,7 +279,7 @@ function clickRecordsCB() {
 	_record = JSON.parse(this.responseText);
 	if (_record === '') return;
 	document.getElementById("content").innerHTML = RecordTableDPSFormat(_record, "recordTable");
-	// sortTable("recordTable");
+	sortTable("recordTable");
 }
 
 function clickRecordsFile(filename) {
@@ -318,9 +319,15 @@ function RecordsCB() {
 	var html = '<table>'
 	res.reverse()
 	for (var i in res) {
+		var viewNum = i
+		if (viewNum < 10) {
+			viewNum++;
+			viewNum = '0' + viewNum;
+		}
 		html += '<tr>'
-			html += '<td><button class="btn" onclick="clickRecordsFile(\'' + res[i]+'\')">项目</button></td>'
-			html += '<td>' + printDateInFormat(Number(res[i].split('.')[0])) + '</td>'
+			html += '<td><button class="btn" onclick="clickRecordsFile(\'' + res[i]+'\')">项目'+ viewNum +'</button></td>'
+//			html += '<td class="center">' + viewNum + '</td>'
+			html += '<td class="center">' + printDateInFormat(Number(res[i].split('.')[0])) + '</td>'
 			html += '<td><button class="btn" onclick="DeleteFile(\'' + res[i] + '\')">删除</button></td>'
 		html += '</tr>'
 	}
@@ -644,7 +651,7 @@ function tableDPSFormat(data, tableId) {
 				enragedSound.volume = 0.500000
 				enragedSound.play()
 				dpsmsg += '<tr>'
-					dpsmsg += '<th colspan="6" style="background: url(\'./icons/enraged_bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar + '% 10%;">'
+					dpsmsg += '<th colspan="6" style="background: url(\'./icons/enraged_bar.jpg\'); background-repeat: no-repeat; background-size: ' + enragedBar + '% 12%;">'
 			} else {
 				enragedSound.pause()
 				enragedBar = data[i].eCountdown * 10
@@ -677,12 +684,20 @@ function tableDPSFormat(data, tableId) {
 			crit = data[i].healCrit + '%'.color(enable_color)
 		}
 
+		var nowDPS = data[i].dps
+		if (nowDPS > maxDPS) {
+			nowDPS = data[i].dps.nFormatter(3)
+			nowDPS = nowDPS.color(red_color)
+		} else {
+			nowDPS = data[i].dps.nFormatter(3)
+		}
+
 		dpsmsg += '<tr>'
 			dpsmsg += '<td class="center">' + (TDMSettings.hideNames ? '****' : data[i].name) + '</td>'
 			dpsmsg += '<td class="center"><img onclick="skillLog(\'' + data[i].name.stripHTML() + '\', ' + data[i].class + ')" src="./class-icons/' + classIdToName(data[i].class).toLowerCase() + '.png' + '"/></td>'
 
 			dpsmsg += '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: ' + data[i].percentage +'% 20%;">'
-					+ data[i].dps.nFormatter(3) + '</td>'
+					+ nowDPS + '</td>'
 			
 			dpsmsg += '<td>' + data[i].totalDamage.nFormatter(3) + '</td>'
 			dpsmsg += '<td>' + crit  + '</td>'
@@ -703,7 +718,7 @@ function refreshCB() {
 	if (result === previousDps) return
 	if (waitForThis == true) return
 	document.getElementById("content").innerHTML = result + '<br>'
-	// sortTable("dpsTable")
+	sortTable("dpsTable")
 
 	previousDps = result
 }

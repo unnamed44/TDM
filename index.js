@@ -110,9 +110,8 @@ function TDM(d) {
 		var battleInfo = data.shift()
 		data.sort(function(a, b) { return b.totalDamage - a.totalDamage })
 		data.unshift(battleInfo)
-		var dpsmsg = '==[目标]=========\n'
-		dpsmsg += '[' + battleInfo.monsterBattleInfo.stripHTML() + ']\n'
-		dpsmsg += '==[详细]========='
+		var dpsmsg = '[' + battleInfo.monsterBattleInfo.stripHTML() + ']'
+
 		for (var i in data) {
 			// if(i == 0) continue
 			if (data[i].hasOwnProperty('enraged')) continue
@@ -127,12 +126,12 @@ function TDM(d) {
 				crit += ' (治疗暴率)' + data[i].healCrit  + '% '.color(enable_color)
 			}
 			dpsmsg += '\n'
-			dpsmsg += '[昵称] '			+ name + '\n'												// 昵称
-			dpsmsg += '[DPS] '			+ data[i].dps.nFormatter(3) + '/s \n'						// DPS
-			dpsmsg += '[合计] '			+ data[i].totalDamage.nFormatter(3) + '\n'					// 合计
-			dpsmsg += '[比例] '			+ data[i].percentage  + '%'.color(enable_color) + '\n'		// 比例
-			dpsmsg += '[暴率] ' 		+ crit + '\n'												// 暴率(治疗)
-			dpsmsg += '==============='
+			dpsmsg += '[昵称]\t\t'		+ name												// 昵称
+			dpsmsg += '[DPS]\t'			+ data[i].dps.nFormatter(3) + '/s'					// DPS
+//			dpsmsg += '[合计]\t'		+ data[i].totalDamage.nFormatter(3)					// 合计
+//			dpsmsg += '[比例]\t'		+ data[i].percentage  + '%'.color(enable_color)		// 比例
+			dpsmsg += '[暴率]\t' 		+ crit												// 暴率(治疗)
+//			dpsmsg += '==============='
 
 		}
 		return dpsmsg
@@ -1199,7 +1198,7 @@ function TDM(d) {
 		var cname
 		var dps = 0
 		var percentage = 0
-		var crit = 0,healCrit = 0
+		var crit = 0, healCrit = 0
 
 		for (var i in party) {
 			if (NPCs[npcIndex].totalPartyDamage == 0 || battleduration <= 0 || typeof party[i].Targets[targetId] === 'undefined') {
