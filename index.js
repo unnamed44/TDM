@@ -1279,7 +1279,7 @@ function TDM(d) {
 		var msg = ''
 		msg = damage.nFormatter(3)
 		// log(skill + ':' + skill.slice(1, skill.length))
-		d.send('S_DUNGEON_EVENT_MESSAGE', 1, {
+		d.send('S_DUNGEON_EVENT_MESSAGE', 2, {
 			type: 2, //70 : 2,
 			message: `<img src="img://skill__0__${me.templateId}__${skill.slice(1,skill.length-2)}00" width="40" height="40" />&nbsp;${msg}`
 		})
@@ -1480,7 +1480,7 @@ function TDM(d) {
 
 	d.hook('S_EACH_SKILL_RESULT', 12, {order: 200}, sEachSkillResult)
 
-	d.hook('S_CHANGE_EVENT_MATCHING_STATE',1, sChangeEvetMatchingState)
+	d.hook('S_CHANGE_EVENT_MATCHING_STATE', 2, sChangeEvetMatchingState)
 }
 
 module.exports = TDM
