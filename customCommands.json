@@ -1,6 +1,15 @@
 {
 	"sp ping": "SP 测网速",
-	"fps mode 1": "FPS 模式一",
+
+	"fps mode 0": "FPS 模式0",
+	"fps mode 1": "FPS 模式1",
+	"fps mode 2": "FPS 模式2",
+	"fps mode 3": "FPS 模式3",
+
 	"fps hide dps": "隐藏打手",
-	"fps show dps": "显示打手"
+	"fps show dps": "显示打手",
+
+	"fps hide tank": "隐藏坦克",
+	"fps show tank": "显示坦克"
+
 }

@@ -64,7 +64,7 @@ function Update() {
 				reject(err)
 			})
 
-			console.log('downloading...' + dest)
+			// console.log('downloading...' + dest)
 
 		});
 	}

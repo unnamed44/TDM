@@ -768,7 +768,7 @@ function TDM(d) {
 		if (currentbossId) {
 			for (var i in party) {
 				if (party[i].gameId === e.gameId.toString()) {
-					if(typeof party[i].Targets[currentbossId] !== 'undefined') {
+					if ( typeof party[i].Targets[currentbossId] !== 'undefined') {
 						party[i].Targets[currentbossId].dead++
 					} else {
 						// log(e)
@@ -1206,9 +1206,9 @@ function TDM(d) {
 				continue
 			}
 			cname = party[i].name
-			if (party[i].gameId === me.gameId) {
+/* 			if (party[i].gameId === me.gameId) {
 				cname = cname.color(cname_color)
-			}
+			} */
 
 			// totalDamage = Long.fromString(party[i].Targets[targetId].damage)
 			// dps = totalDamage.div(battledurationbysec).toString()
