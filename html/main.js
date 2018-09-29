@@ -320,8 +320,8 @@ function RecordsCB() {
 	res.reverse()
 	for (var i in res) {
 		var viewNum = i
-		if (viewNum < 10) {
-			viewNum++;
+		viewNum++;
+		if (viewNum < 10) {	
 			viewNum = '0' + viewNum;
 		}
 		html += '<tr>'
