@@ -126,12 +126,12 @@ function TDM(d) {
 				crit += ' (治疗暴率)' + data[i].healCrit  + '% '.color(enable_color)
 			}
 			dpsmsg += '\n'
-			dpsmsg += '[昵称]\t\t'		+ name												// 昵称
-			dpsmsg += '[DPS]\t'			+ data[i].dps.nFormatter(3) + '/s'					// DPS
-//			dpsmsg += '[合计]\t'		+ data[i].totalDamage.nFormatter(3)					// 合计
-//			dpsmsg += '[比例]\t'		+ data[i].percentage  + '%'.color(enable_color)		// 比例
-			dpsmsg += '[暴率]\t' 		+ crit												// 暴率(治疗)
-//			dpsmsg += '==============='
+			dpsmsg += '[昵称] '		+ name + '\t'												// 昵称
+			dpsmsg += '[DPS] '		+ data[i].dps.nFormatter(3) + '/s '							// DPS
+			//dpsmsg += '[合计] '		+ data[i].totalDamage.nFormatter(3) + ' '				// 合计
+			//dpsmsg += '[比例] '		+ data[i].percentage  + '%'.color(enable_color) + ' '	// 比例
+			dpsmsg += '[暴率] '		+ crit + ' '												// 暴率(治疗)
+			//dpsmsg += '==============='
 
 		}
 		return dpsmsg

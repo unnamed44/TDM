@@ -216,6 +216,11 @@ function recordedStastics(index) {
 }
 //记录表
 function RecordTableDPSFormat(data, tableId) {
+
+	data.sort(function (a, b) {
+		return b.totalDamage - a.totalDamage
+	})
+
 	var dpsmsg = ''
 	var enragedBar = 0
 	var class_image=''
