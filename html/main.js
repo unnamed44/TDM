@@ -40,7 +40,10 @@ var enable_color = '56B4E9',
 	green_color = '00FF21',
 	red_color = 'FF3000',
 	myName_color = '00FFFF',
-	maxDPS = 4E6
+
+	redDPS = 4E6,
+	yewDPS = 2E6,
+	greDPS = 1E6
 
 var TDMSettings = {
 	"notice" : true,
@@ -265,9 +268,15 @@ function RecordTableDPSFormat(data, tableId) {
 		}
 
 		var nowDPS = data[i].dps
-		if (nowDPS > maxDPS) {
+		if (nowDPS > redDPS) {
 			nowDPS = data[i].dps.nFormatter(3)
 			nowDPS = nowDPS.color(red_color)
+		} else if ((yewDPS < nowDPS) && (nowDPS <= redDPS)) {
+			nowDPS = data[i].dps.nFormatter(3)
+			nowDPS = nowDPS.color(disable_color)
+		} else if ((greDPS < nowDPS) && (nowDPS <= yewDPS)) {
+			nowDPS = data[i].dps.nFormatter(3)
+			nowDPS = nowDPS.color(green_color)
 		} else {
 			nowDPS = data[i].dps.nFormatter(3)
 		}
@@ -710,9 +719,15 @@ function tableDPSFormat(data, tableId) {
 		}
 
 		var nowDPS = data[i].dps
-		if (nowDPS > maxDPS) {
+		if (nowDPS > redDPS) {
 			nowDPS = data[i].dps.nFormatter(3)
 			nowDPS = nowDPS.color(red_color)
+		} else if ((yewDPS < nowDPS) && (nowDPS <= redDPS)) {
+			nowDPS = data[i].dps.nFormatter(3)
+			nowDPS = nowDPS.color(disable_color)
+		} else if ((greDPS < nowDPS) && (nowDPS <= yewDPS)) {
+			nowDPS = data[i].dps.nFormatter(3)
+			nowDPS = nowDPS.color(green_color)
 		} else {
 			nowDPS = data[i].dps.nFormatter(3)
 		}
