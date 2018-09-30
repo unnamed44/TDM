@@ -64,9 +64,9 @@ function TDM(d) {
 		notice_damage = config.notice_damage,
 		bossOnly = config.bossOnly,
 		hideNames = config.hideNames,
+		skillLog = config.skillLog,
 		rankSystem = config.rankSystem,
 		allUsers = config.allUsers,
-		skillLog = config.skillLog,
 		debug = config.debug
 
 	let me = {},
@@ -79,7 +79,8 @@ function TDM(d) {
 		currentbossId = '',
 		currentZone = 0,
 		maxSize = false,
-		recordFilename = ''
+		recordFilename = '',
+		myName = 'Anonymous'
 
 	let enable_color = '56B4E9',
 		disable_color = 'E69F00',
@@ -372,6 +373,7 @@ function TDM(d) {
 	}
 	// packet handle
 	function sLogin(e) {
+		myName = e.name.toString()
 		me = {
 			"gameId": e.gameId.toString(),
 			"serverId": e.serverId.toString(),
@@ -1124,8 +1126,8 @@ function TDM(d) {
 
 	function getSettings() {
 		var settings = {
-			"noticeDamage": notice_damage,
 			"notice": notice,
+			"noticeDamage": notice_damage,
 			"bossOnly": bossOnly,
 			"hideNames": hideNames,
 			"skillLog": skillLog,
@@ -1133,7 +1135,8 @@ function TDM(d) {
 			"allUsers": allUsers,
 			"debug": debug,
 			"partyLengh": party.length,
-			"NPCsLength": NPCs.length
+			"NPCsLength": NPCs.length,
+			"myName": myName
 		}
 		return settings
 	}

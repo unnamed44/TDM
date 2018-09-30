@@ -39,6 +39,7 @@ var enable_color = '56B4E9',
 	disable_color = 'E69F00',
 	green_color = '00FF21',
 	red_color = 'FF3000',
+	myName_color = '00FFFF',
 	maxDPS = 4E6
 
 var TDMSettings = {
@@ -51,7 +52,8 @@ var TDMSettings = {
 	"allUsers" : false,
 	"debug" : false,
 	"partyLengh" : 0,
-	"NPCsLength" : 0
+	"NPCsLength" : 0,
+	"myName": ''
 };
 
 var enragedSound = new Audio();
@@ -223,7 +225,7 @@ function RecordTableDPSFormat(data, tableId) {
 
 	var dpsmsg = ''
 	var enragedBar = 0
-	var class_image=''
+	var class_image = ''
 
 	//console.log(data)
 
@@ -257,20 +259,33 @@ function RecordTableDPSFormat(data, tableId) {
 			continue
 		}
 
-		var crit = data[i].crit + '%'.color(disable_color)
+		var nowName = data[i].name
+		if (TDMSettings.myName == nowName ) {
+			nowName = data[i].name.color(myName_color)
+		}
+
+		var nowDPS = data[i].dps
+		if (nowDPS > maxDPS) {
+			nowDPS = data[i].dps.nFormatter(3)
+			nowDPS = nowDPS.color(red_color)
+		} else {
+			nowDPS = data[i].dps.nFormatter(3)
+		}
+
+		var nowCrit = data[i].crit + '%'.color(disable_color)
 		if (data[i].class == 6 || data[i].class == 7) {
-			crit = data[i].healCrit + '%'.color(enable_color)
+			nowCrit = data[i].healCrit + '%'.color(enable_color)
 		}
 
 		dpsmsg += '<tr>'
-			dpsmsg += '<td class="center">' + (TDMSettings.hideNames ? '****' : data[i].name) + '</td>'
+			dpsmsg += '<td class="center">' + (TDMSettings.hideNames ? '****' : nowName) + '</td>'
 			dpsmsg += '<td class="center"><img onclick="recordedStastics(\''+ i +'\')" src="./class-icons/' + classIdToName(data[i].class).toLowerCase() + '.png' +'" /></td>'
 			
 			dpsmsg += '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: ' + data[i].percentage+'% 20%;">'
-						+ Number(data[i].dps).nFormatter(3) + '</td>'
+					+ nowDPS + '</td>'
 
 			dpsmsg += '<td>' + data[i].totalDamage.nFormatter(3) + '</td>'
-			dpsmsg += '<td>' + crit + '</td>'
+			dpsmsg += '<td>' + nowCrit + '</td>'
 			dpsmsg += '<td>' + data[i].percentage  + '%'.color(disable_color) + '</td>'
 		dpsmsg += '</tr>'
 	}
@@ -321,20 +336,25 @@ function printDateInFormat(m) {
 //历史表
 function RecordsCB() {
 	var res = JSON.parse(this.responseText);
+
 	var html = '<table>'
+
 	res.reverse()
+	
 	for (var i in res) {
 		var viewNum = i
 		viewNum++;
 		if (viewNum < 10) {	
 			viewNum = '0' + viewNum;
 		}
+
 		html += '<tr>'
 			html += '<td><button class="btn" onclick="clickRecordsFile(\'' + res[i]+'\')">项目'+ viewNum +'</button></td>'
-//			html += '<td class="center">' + viewNum + '</td>'
 			html += '<td class="center">' + printDateInFormat(Number(res[i].split('.')[0])) + '</td>'
+			//html += '<td class="center">' + monsterName + '</td>'
 			html += '<td><button class="btn" onclick="DeleteFile(\'' + res[i] + '\')">删除</button></td>'
 		html += '</tr>'
+
 	}
 	html += '</table><br>'
 	document.getElementById("content").innerHTML = html;
@@ -645,10 +665,10 @@ function sortTable(tabeId) {
 function tableDPSFormat(data, tableId) {
 	var dpsmsg = ''
 	var enragedBar = 0
-	var class_image=''
+	var class_image = ''
 
 	dpsmsg += '<table id="' + tableId + '">'
-
+	
 	for (var i in data) {
 		if (data[i].monsterBattleInfo) {
 			if (data[i].etimer > 0) {
@@ -684,9 +704,9 @@ function tableDPSFormat(data, tableId) {
 			continue
 		}
 
-		var crit = data[i].crit + '%'.color(disable_color)
-		if (data[i].class == 6 || data[i].class == 7) {
-			crit = data[i].healCrit + '%'.color(enable_color)
+		var nowName = data[i].name
+		if (TDMSettings.myName == nowName ) {
+			nowName = data[i].name.color(myName_color)
 		}
 
 		var nowDPS = data[i].dps
@@ -697,15 +717,20 @@ function tableDPSFormat(data, tableId) {
 			nowDPS = data[i].dps.nFormatter(3)
 		}
 
+		var nowCrit = data[i].crit + '%'.color(disable_color)
+		if (data[i].class == 6 || data[i].class == 7) {
+			nowCrit = data[i].healCrit + '%'.color(enable_color)
+		}
+
 		dpsmsg += '<tr>'
-			dpsmsg += '<td class="center">' + (TDMSettings.hideNames ? '****' : data[i].name) + '</td>'
+			dpsmsg += '<td class="center">' + (TDMSettings.hideNames ? '****' : nowName) + '</td>'
 			dpsmsg += '<td class="center"><img onclick="skillLog(\'' + data[i].name.stripHTML() + '\', ' + data[i].class + ')" src="./class-icons/' + classIdToName(data[i].class).toLowerCase() + '.png' + '"/></td>'
 
 			dpsmsg += '<td style="background: url(\'./icons/bar.jpg\'); background-repeat: no-repeat; background-size: ' + data[i].percentage +'% 20%;">'
 					+ nowDPS + '</td>'
 			
 			dpsmsg += '<td>' + data[i].totalDamage.nFormatter(3) + '</td>'
-			dpsmsg += '<td>' + crit  + '</td>'
+			dpsmsg += '<td>' + nowCrit  + '</td>'
 			dpsmsg += '<td>' + data[i].percentage  + '%'.color(disable_color) + '</td>'
 		dpsmsg += '</tr>'
 	}
