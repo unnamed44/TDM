@@ -1,13 +1,13 @@
 {
 	"name": "TDM",
-	"version": "1.6.1",
+	"version": "1.7.0",
 	"dependencies": {
 		"express": "^4.16.3",
 		"request": "^2.87.0"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/zc149352394/TDM.git"
+		"url": "git+https://github.com/zc149352394/TDM.git"
 	},
 	"author": "TDM",
 	"license": "GPL-3.0",
