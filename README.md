@@ -1,3 +1,9 @@
+因为新UI界面的关系 导致旧UI缩放比例!!
+
+进入游戏后按O 打开设置面板 无需任何修改 点击确认即可使TDM恢复正常比例!!
+
+------------------------------
+
 原始作者 https://github.com/xmljson/TDM
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-ff69b4.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=C6BU555NMQJD6)
